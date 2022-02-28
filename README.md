@@ -4,6 +4,22 @@ The core TTS models that power FakeYou.
 
 I'm in the progress of pulling these out of the service monorepo so we can iterate faster.
 
+How This Works
+--------------
+We have a Rust monolith that controls the user interface, account system, and all the database CRUD operations.
+It doesn't do any ML work itself or have any attached GPUs.
+
+There are a series of worker pods ("jobs") that pull from work queues and run inference, then upload the results.
+
+![](docs/diagrams/microservices.png)
+
+The jobs are written in Rust and either shell out to Python code or call an in-container Python server that attempts 
+to LRU cache models in memory.
+
+![](docs/diagrams/jobs1.png)
+
+![](docs/diagrams/jobs2.png)
+
 TODO
 ----
 
