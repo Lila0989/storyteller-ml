@@ -1,3 +1,4 @@
+*.pyc
 *.swo
 *.swp
 *secret*sh
@@ -13,3 +14,10 @@ production_database_secret_query.sh
 secrets.toml
 secrets.yaml
 target/
+
+# Models for testing
+future-todo/ControllableTalkNet/models
+tts/hifigan/hifisr
+
+# Other garbage to prune/remove
+tts/hifigan/LJSpeech-1.1/
