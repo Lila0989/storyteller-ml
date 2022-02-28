@@ -4,6 +4,14 @@ The core TTS models that power FakeYou.
 
 I'm in the progress of pulling these out of the service monorepo so we can iterate faster.
 
+**This code sucks and doesn't run yet**. 
+
+1. Please do not think this is indicative of the kind of code I work on or maintain. 
+   This was a hermetic module that the FakeYou service called out to, and I want to improve it now. 
+   The rest of the frontend and backend are in a good state.
+ 
+2. I'll spend some time getting this cleaned up and working before getting any help with it.
+
 How This Works
 --------------
 We have a Rust monolith that controls the user interface, account system, and all the database CRUD operations.
