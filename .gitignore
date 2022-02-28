@@ -1,0 +1,15 @@
+*.swo
+*.swp
+*secret*sh
+*~
+.env
+.env-secrets
+.idea/
+__pycache__/
+models/Wav2Lip/python/
+models/tacotron2/python/
+production_database_secret_connect.sh
+production_database_secret_query.sh
+secrets.toml
+secrets.yaml
+target/
