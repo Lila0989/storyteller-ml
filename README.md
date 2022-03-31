@@ -43,6 +43,11 @@ Core cleanup
   - [ ] Clean up requirements.txt and upgrade packages 
   - [ ] Clean up Dockerfile
 
+Docker image cleanup
+
+- [ ] Remove docker-base-images-nvidia-cuda-experimental
+- [ ] Remove inessential build pieces
+
 Make the models sound better
 
 - [ ] Arpabet
