@@ -1,0 +1,12 @@
+*secret*sh
+*~
+.env
+.env-secrets
+.git
+.idea/
+__pycache__/
+tts/models/Wav2Lip/python/
+tts/models/tacotron2/python/
+secrets.toml
+secrets.yaml
+target/
