@@ -1,16 +1,12 @@
 storyteller-ml
 ==============
-The core TTS models that power FakeYou.
+The ML models that power FakeYou and other Storyteller functions.
 
-I'm in the progress of pulling these out of the service monorepo so we can iterate faster.
+This repository is in a bit of a rough shape, but should be improving.
 
-**This code sucks and doesn't run yet**. 
+TTS models (Tacotron, HifiGan, WaveGlow, etc.) live under [`tts/`, and you can find documentation there](tts/). 
 
-1. Please do not think this is indicative of the kind of code I work on or maintain. 
-   This was a hermetic module that the FakeYou service called out to, and I want to improve it now. 
-   The rest of the frontend and backend are in a good state.
- 
-2. I'll spend some time getting this cleaned up and working before getting any help with it.
+We expect to add video, posture estimation, phoneme prediction, and other models soon.
 
 How This Works
 --------------
