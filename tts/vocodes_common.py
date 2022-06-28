@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('waveglow/')
 import shutil
 import json
@@ -28,6 +29,11 @@ import scipy
 import subprocess
 import magic
 import os
+
+from text.pipeline.english_pipeline_v1 import EnglishPipelineV1
+from text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
+from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
+from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 
 def print_gpu_info():
     print('========================================')
@@ -82,7 +88,27 @@ def load_hifigan_model(checkpoint_path, super_resolution = False):
     denoiser = HifiDenoiser(hifigan, mode="normal")
     return hifigan, h, denoiser
 
-def preprocess_text(text, raw_input=True):
+ENGLISH_PIPELINE_V1 = EnglishPipelineV1(EnglishPhonetization(CMUDict(DEFAULT_CMUDICT_PATH)))
+LEGACY_FAKEYOU_PIPELINE = LegacyFakeYouPipeline()
+
+def preprocess_text(raw_user_text: str):
+    integer_sequence = []
+
+    # TODO/NB: This word-based flag is for testing the rollout
+    if "this" in raw_user_text:
+        print("\n\n>>> ENGLISH V1\n\n")
+        integer_sequence = ENGLISH_PIPELINE_V1.user_input_to_sequence(raw_user_text)
+    else: 
+        print("\n\n>>> LEGACY\n\n")
+        integer_sequence = LEGACY_FAKEYOU_PIPELINE.user_input_to_sequence(raw_user_text)
+
+    with torch.no_grad():
+        # save VRAM by not including gradients
+        sequence = np.array(integer_sequence)[None, :]
+        sequence = torch.autograd.Variable(torch.from_numpy(sequence)).cuda().long()
+    return sequence
+
+def preprocess_text_old(text, raw_input=True):
     # TODO: Handle ARPAbet
     pre_sequence = ""
     for line in text.split("\n"):
@@ -96,6 +122,7 @@ def preprocess_text(text, raw_input=True):
             pass
         pre_sequence += line
 
+    print(pre_sequence)
     with torch.no_grad():
         # save VRAM by not including gradients
         sequence = np.array(text_to_sequence(pre_sequence, ['english_cleaners']))[None, :]
