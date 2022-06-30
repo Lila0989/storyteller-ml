@@ -20,7 +20,8 @@ class GraphemeSquence:
 
 def parse_grapheme_and_arpabet_sequence(input_text):
     """
-    Parse a string into an array of ArpabetSequence and GraphemeSequence so that each can be treated independently.
+    Parse a string into an array of ArpabetSequence and GraphemeSequence so that each 
+    subsequence can be treated independently.
     """
     sequence = []
 
