@@ -1,4 +1,3 @@
-
 class BaseNormalization:
 
     def normalize(self, raw_input_text: str) -> str:
