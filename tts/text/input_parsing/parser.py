@@ -5,25 +5,28 @@ treated independently.
 Inspired by and including code from original Tacotron2 by Keith Ito.
 """
 
+# pyright: strict
+
 import re
+from typing import List, Union
 
 # Regular expression matching text enclosed in curly braces:
 _curly_re = re.compile(r'(.*?)\{(.+?)\}(.*)')
 
 class ArpabetSequence:
-    def __init__(self, sequence):
+    def __init__(self, sequence: str):
         self.sequence = sequence
 
 class GraphemeSquence:
-    def __init__(self, sequence):
+    def __init__(self, sequence: str):
         self.sequence = sequence
 
-def parse_grapheme_and_arpabet_sequence(input_text):
+def parse_grapheme_and_arpabet_sequence(input_text: str) -> List[Union[ArpabetSequence, GraphemeSquence]]:
     """
-    Parse a string into an array of ArpabetSequence and GraphemeSequence so that each 
+    Parse a string into a list of ArpabetSequence and GraphemeSequence so that each 
     subsequence can be treated independently.
     """
-    sequence = []
+    sequence : List[Union[ArpabetSequence, GraphemeSquence]] = []
 
     # Check for curly braces and treat their contents as ARPAbet:
     while len(input_text):
