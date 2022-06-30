@@ -96,6 +96,7 @@ def preprocess_text(text, raw_input=True):
             pass
         pre_sequence += line
 
+    print(pre_sequence)
     with torch.no_grad():
         # save VRAM by not including gradients
         sequence = np.array(text_to_sequence(pre_sequence, ['english_cleaners']))[None, :]

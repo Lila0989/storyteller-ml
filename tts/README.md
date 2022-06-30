@@ -13,6 +13,13 @@ The following files are entrypoints and an essential part of FakeYou.com functio
    files).
 
 
+To Run Tests
+------------
+
+```
+pytest text/
+```
+
 Vocodes Server Parameters
 -------------------------
 
