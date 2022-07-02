@@ -20,3 +20,13 @@ class TestEnglishPhonetization:
         phonetization = EnglishPhonetization(phoneme_dictionary)
         output = phonetization.convert_to_phonemes("nonword is a test")
         assert output == ["nonword", "IH1 Z", "AH0", "T EH1 S T"]
+
+    def test_punctuation(self):
+        phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
+        phonetization = EnglishPhonetization(phoneme_dictionary)
+        output = phonetization.convert_to_phonemes("this...")
+        assert output == ["DH IH1 S", "..."]
+        output = phonetization.convert_to_phonemes("this!")
+        assert output == ["DH IH1 S", "!"]
+        output = phonetization.convert_to_phonemes("this?")
+        assert output == ["DH IH1 S", "?"]
