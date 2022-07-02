@@ -4,6 +4,8 @@ Contents of this file are mostly from https://github.com/keithito/tacotron
 
 import re
 
+# TODO: Don't use strings for arpabet phoneme representation, and share the memory.
+
 # Relative to TTS codebase root
 # This does not include any CMUDict extensions or alternatives (eg. for other languages).
 DEFAULT_CMUDICT_PATH = 'dictionaries/cmudict-0.7b'

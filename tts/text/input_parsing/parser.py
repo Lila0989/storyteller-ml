@@ -21,12 +21,14 @@ class GraphemeSquence:
     def __init__(self, sequence: str):
         self.sequence = sequence
 
-def parse_grapheme_and_arpabet_sequence(input_text: str) -> List[Union[ArpabetSequence, GraphemeSquence]]:
+ParsedSequence = List[Union[ArpabetSequence, GraphemeSquence]]
+
+def parse_grapheme_and_arpabet_sequence(input_text: str) -> ParsedSequence:
     """
     Parse a string into a list of ArpabetSequence and GraphemeSequence so that each 
     subsequence can be treated independently.
     """
-    sequence : List[Union[ArpabetSequence, GraphemeSquence]] = []
+    sequence : ParsedSequence = []
 
     # Check for curly braces and treat their contents as ARPAbet:
     while len(input_text):

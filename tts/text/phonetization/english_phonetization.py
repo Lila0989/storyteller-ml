@@ -7,7 +7,12 @@ class EnglishPhonetization(BasePhonetization):
     def __init__(self, phoneme_dictionary: CMUDict):
         super().__init__(phoneme_dictionary)
 
-    def convert_to_phonemes(self, grapheme_sequence: str) -> List[str]:
+    def try_convert_to_phonemes(self, grapheme_sequence: str) -> List[str]:
+        """
+        Attempt to enrich a grapheme sequence with phonemes where word lookup succeeds.
+        Grapheme symbols will be left in place.
+        The output list will need to be space-separated before inference.
+        """
         words = self._split_grapheme_sentence_to_words(grapheme_sequence)
         converted_words = []
 

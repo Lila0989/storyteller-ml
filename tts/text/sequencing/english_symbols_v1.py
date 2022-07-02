@@ -1,0 +1,38 @@
+"""Adapted from https://github.com/keithito/tacotron """
+
+'''
+Defines the set of symbols used in text input to the model.
+
+The default is a set of ASCII characters that works well for English or text that has been run through Unidecode. 
+For other data, you can modify _characters. See TRAINING_DATA.md for details.
+'''
+from tts.text.phonetization import cmudict
+from typing import List
+
+_pad        = '_'
+_punctuation = '!\'(),.:;? ' #NB: Includes space
+_special = '-'
+_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+
+# Prepend "@" to ARPAbet symbols to ensure uniqueness (some are the same as uppercase letters):
+_arpabet = ['@' + s for s in cmudict.valid_symbols]
+
+# Export all symbols:
+symbols = [_pad] + list(_special) + list(_punctuation) + list(_letters) + _arpabet
+
+# Mappings from symbol to numeric ID and vice versa:
+# The ordering **CANNOT** change.
+_symbol_to_id = {s: i for i, s in enumerate(symbols)}
+_id_to_symbol = {i: s for i, s in enumerate(symbols)}
+
+
+def symbols_to_sequence(symbols: str) -> List[int]:
+    return [_symbol_to_id[s] for s in symbols if _should_keep_symbol(s)]
+
+
+def arpabet_to_sequence(arpabet_string: str) -> List[int]:
+    return symbols_to_sequence(['@' + s for s in arpabet_string.split()])
+
+
+def _should_keep_symbol(s):
+    return s in _symbol_to_id and s is not '_' and s is not '~'
