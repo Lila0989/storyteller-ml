@@ -1,4 +1,4 @@
-from tts.text.normalization.BaseNormalization import BaseNormalization
+from tts.text.normalization.base_normalization import BaseNormalization
 from tts.text.normalization.common_cleaners import collapse_whitespace
 from tts.text.normalization.common_cleaners import convert_to_ascii
 from tts.text.normalization.common_cleaners import lowercase

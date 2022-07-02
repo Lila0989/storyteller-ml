@@ -1,4 +1,4 @@
-from text.normalization.BaseNormalization import BaseNormalization
+from tts.text.normalization.base_normalization import BaseNormalization
 
 class SpanishNormalization(BaseNormalization):
 
