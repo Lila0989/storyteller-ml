@@ -1,0 +1,15 @@
+
+import re
+from typing import List
+from tts.text.phonetization.cmudict import CMUDict
+
+# Regex taken from open source tacotron2 extensions
+_arpabet_split_re = re.compile(r'[^\s]*{.*?}[^\s]*|[\w]+|[^\w\s]+')
+
+class BasePhonetization:
+    def __init__(self, phoneme_dictionary: CMUDict):
+        self.phoneme_dictionary = phoneme_dictionary
+
+    def _split_grapheme_sentence_to_words(self, text_sequence: str) -> List[str]:
+        """Split a grapheme word sequence to individual grapheme words"""
+        return [word for word in _arpabet_split_re.findall(text_sequence)]
