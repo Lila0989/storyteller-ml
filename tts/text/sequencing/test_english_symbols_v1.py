@@ -17,3 +17,7 @@ class TestEnglishSymbols:
     def test_grapheme_word(self):
         output = symbols_to_sequence('test')
         assert output == [57, 42, 56, 57]
+
+    def test_grapheme_sentence(self):
+        output = symbols_to_sequence('this is a test.')
+        assert output == [57, 45, 46, 56, 11, 46, 56, 11, 38, 11, 57, 42, 56, 57, 7]
