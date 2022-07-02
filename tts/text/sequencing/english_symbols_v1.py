@@ -1,14 +1,23 @@
-"""Adapted from https://github.com/keithito/tacotron """
+"""
+Originally adapted from https://github.com/keithito/tacotron
 
-'''
-Defines the set of symbols used in text input to the model.
+This defines the set of symbols used in text input to the model.
 
-The default is a set of ASCII characters that works well for English or text that has been run through Unidecode. 
-For other data, you can modify _characters. See TRAINING_DATA.md for details.
-'''
+This is the set of character encodings that FakeYou and UberDuck models have
+been trained on. We freeze it here as "V1", because these may change in future
+notebooks.
+
+Original documentation: 
+    The default is a set of ASCII characters that works well for English or 
+    text that has been run through Unidecode. For other data, you can modify 
+    _characters. See TRAINING_DATA.md for details.
+"""
+
 from tts.text.phonetization import cmudict
 from typing import List
 
+# NB: DO NOT CHANGE THE ORDER OF SYMBOLS! 
+# Models are trained on and depend upon the order.
 _pad        = '_'
 _punctuation = '!\'(),.:;? ' #NB: Includes space
 _special = '-'
