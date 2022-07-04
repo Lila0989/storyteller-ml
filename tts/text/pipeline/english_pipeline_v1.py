@@ -1,5 +1,5 @@
 from typing import List
-from tts.text.input_parsing.parser import GraphemeSquence, ParsedSequence, parse_grapheme_and_arpabet_sequence
+from tts.text.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
 from tts.text.normalization.english_normalization import EnglishNormalization
 from tts.text.phonetization.cmudict import CMUDict
 from tts.text.phonetization.english_phonetization import EnglishPhonetization
@@ -16,27 +16,34 @@ class EnglishPipelineV1(BasePipeline):
         """Convert raw user input into a numerical sequence for ML inference."""
 
         parsed_sequence = parse_grapheme_and_arpabet_sequence(input_text)
-
         self._normalize_graphemes(parsed_sequence)
-        self._convert_phonemes(parsed_sequence)
+
+        parsed_sequence = self._convert_phonemes(parsed_sequence)
         
-
-        integer_sequence = []
-
-        return integer_sequence
+        return self._convert_to_integer_sequence(parsed_sequence)
 
     def _normalize_graphemes(self, parsed_sequence: ParsedSequence):
         for i in range(len(parsed_sequence)):
             subsequence = parsed_sequence[i]
-            if isinstance(subsequence, GraphemeSquence):
+            if isinstance(subsequence, GraphemeSequence):
                 normalized = _ENGLISH_NORMALIZER.normalize(subsequence.sequence)
-                parsed_sequence[i] = GraphemeSquence(normalized)
+                parsed_sequence[i] = GraphemeSequence(normalized)
 
 
-    def _convert_phonemes(self, parsed_sequence: ParsedSequence):
-        for i in range(len(parsed_sequence)):
-            subsequence = parsed_sequence[i]
-            if isinstance(subsequence, GraphemeSquence):
-                converted = _ENGLISH_PHONETIZER.try_convert_to_phonemes(subsequence.sequence)
-                converted = ' '.join(converted)
-                parsed_sequence[i] = GraphemeSquence(converted)
+    def _convert_phonemes(self, parsed_sequence: ParsedSequence) -> ParsedSequence:
+        # NB: We will likely break grapheme runs into multiple arpabet sequences, extending the 
+        # output list length.
+        updated_sequence = []
+
+        for subsequence in parsed_sequence:
+            if isinstance(subsequence, ArpabetSequence):
+                updated_sequence.append(subsequence)
+
+            elif isinstance(subsequence, GraphemeSequence):
+                converted_sequence = _ENGLISH_PHONETIZER.try_convert_to_phonemes(subsequence.sequence)
+                updated_sequence.extend(converted_sequence)
+
+        return updated_sequence
+
+    def _convert_to_integer_sequence(self, parsed_sequence: ParsedSequence) -> List[int]:
+        pass

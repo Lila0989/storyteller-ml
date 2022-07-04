@@ -17,11 +17,11 @@ class ArpabetSequence:
     def __init__(self, sequence: str):
         self.sequence = sequence
 
-class GraphemeSquence:
+class GraphemeSequence:
     def __init__(self, sequence: str):
         self.sequence = sequence
 
-ParsedSequence = List[Union[ArpabetSequence, GraphemeSquence]]
+ParsedSequence = List[Union[ArpabetSequence, GraphemeSequence]]
 
 def parse_grapheme_and_arpabet_sequence(input_text: str) -> ParsedSequence:
     """
@@ -35,7 +35,7 @@ def parse_grapheme_and_arpabet_sequence(input_text: str) -> ParsedSequence:
         input_text = input_text.strip()
         m = _curly_re.match(input_text)
         if not m:
-            sequence.append(GraphemeSquence(input_text))
+            sequence.append(GraphemeSequence(input_text))
             break
 
         before = m.group(1).strip()
@@ -43,7 +43,7 @@ def parse_grapheme_and_arpabet_sequence(input_text: str) -> ParsedSequence:
         after = m.group(3).strip()
 
         if before:
-            sequence.append(GraphemeSquence(before))
+            sequence.append(GraphemeSequence(before))
         if bracketed:
             sequence.append(ArpabetSequence(bracketed))
 
