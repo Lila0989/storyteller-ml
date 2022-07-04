@@ -1,13 +1,14 @@
 from typing import List
 from tts.text.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
 from tts.text.normalization.english_normalization import EnglishNormalization
-from tts.text.phonetization.cmudict import CMUDict
+from tts.text.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
 from tts.text.phonetization.english_phonetization import EnglishPhonetization
 from tts.text.pipeline.base_pipeline import BasePipeline
+from tts.text.sequencing.english_symbols_v1 import SPACE_INTEGER_ENCODING, arpabet_to_sequence, symbols_to_sequence
 
 _ENGLISH_NORMALIZER = EnglishNormalization()
 
-_ENGLISH_DICTIONARY = CMUDict()
+_ENGLISH_DICTIONARY = CMUDict(DEFAULT_CMUDICT_PATH)
 _ENGLISH_PHONETIZER = EnglishPhonetization(_ENGLISH_DICTIONARY)
 
 class EnglishPipelineV1(BasePipeline):
@@ -46,4 +47,23 @@ class EnglishPipelineV1(BasePipeline):
         return updated_sequence
 
     def _convert_to_integer_sequence(self, parsed_sequence: ParsedSequence) -> List[int]:
-        pass
+        integer_sequence = []
+        last_index = len(parsed_sequence) - 1
+
+        for i, subsequence in enumerate(parsed_sequence):
+            integer_subsequence = []
+
+            if isinstance(subsequence, ArpabetSequence):
+                integer_subsequence = arpabet_to_sequence(subsequence.sequence)
+            elif isinstance(subsequence, GraphemeSequence):
+                integer_subsequence = symbols_to_sequence(subsequence.sequence)
+                
+            if integer_subsequence:
+                integer_sequence.extend(integer_subsequence)
+
+                if i < last_index and integer_sequence[-1] != SPACE_INTEGER_ENCODING:
+                    # Separate words with single spaces if not already present.
+                    integer_sequence.append(SPACE_INTEGER_ENCODING)
+
+        return integer_sequence
+            

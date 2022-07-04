@@ -34,6 +34,9 @@ symbols = [_pad] + list(_special) + list(_punctuation) + list(_letters) + _arpab
 _symbol_to_id = {s: i for i, s in enumerate(symbols)}
 _id_to_symbol = {i: s for i, s in enumerate(symbols)}
 
+# Spaces can be injected when joining words.
+SPACE_INTEGER_ENCODING = _symbol_to_id[' ']
+
 
 def symbols_to_sequence(symbols: str) -> List[int]:
     return [_symbol_to_id[s] for s in symbols if _should_keep_symbol(s)]
