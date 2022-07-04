@@ -1,13 +1,11 @@
-from tts.text.pipeline_components.normalization.english_normalization import EnglishNormalization
+from tts.text.pipeline_components.normalization.english_normalization import normalize_english
 
 class TestEnglishNormalization:
 
     def test_whitespace_collapse(self):
-        normalizer = EnglishNormalization()
-        output = normalizer.normalize(" \t \n   normalized   \n \t ")
+        output = normalize_english(" \t \n   normalized   \n \t ")
         assert output == " normalized "
 
     def test_lowercase(self):
-        normalizer = EnglishNormalization()
-        output = normalizer.normalize("This is a test of Normalization.")
+        output = normalize_english("This is a test of Normalization.")
         assert output == "this is a test of normalization."

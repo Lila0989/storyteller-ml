@@ -1,12 +1,10 @@
 from typing import List
 from tts.text.pipeline.base_pipeline import BasePipeline
 from tts.text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
-from tts.text.pipeline_components.normalization.english_normalization import EnglishNormalization
+from tts.text.pipeline_components.normalization.english_normalization import normalize_english
 from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
 from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 from tts.text.pipeline_components.sequencing.english_symbols_v1 import SPACE_INTEGER_ENCODING, arpabet_to_sequence, symbols_to_sequence
-
-_ENGLISH_NORMALIZER = EnglishNormalization()
 
 _ENGLISH_DICTIONARY = CMUDict(DEFAULT_CMUDICT_PATH)
 _ENGLISH_PHONETIZER = EnglishPhonetization(_ENGLISH_DICTIONARY)
@@ -27,7 +25,7 @@ class EnglishPipelineV1(BasePipeline):
         for i in range(len(parsed_sequence)):
             subsequence = parsed_sequence[i]
             if isinstance(subsequence, GraphemeSequence):
-                normalized = _ENGLISH_NORMALIZER.normalize(subsequence.sequence)
+                normalized = normalize_english(subsequence.sequence)
                 parsed_sequence[i] = GraphemeSequence(normalized)
 
 
