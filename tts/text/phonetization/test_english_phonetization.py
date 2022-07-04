@@ -1,5 +1,7 @@
 from tts.text.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
 from tts.text.phonetization.english_phonetization import EnglishPhonetization
+from tts.text.input_parsing.parser import ArpabetSequence
+from tts.text.input_parsing.parser import GraphemeSequence
 
 class TestEnglishPhonetization:
 
@@ -13,20 +15,59 @@ class TestEnglishPhonetization:
         phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
         phonetization = EnglishPhonetization(phoneme_dictionary)
         output = phonetization.try_convert_to_phonemes("this is a test")
-        assert output == ["DH IH1 S", "IH1 Z", "AH0", "T EH1 S T"]
+        assert output == [
+            ArpabetSequence("DH IH1 S"), 
+            ArpabetSequence("IH1 Z"),
+            ArpabetSequence("AH0"), 
+            ArpabetSequence("T EH1 S T"),
+        ]
 
     def test_most_words_in_dictionary(self):
         phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
         phonetization = EnglishPhonetization(phoneme_dictionary)
         output = phonetization.try_convert_to_phonemes("nonword is a test")
-        assert output == ["nonword", "IH1 Z", "AH0", "T EH1 S T"]
+        assert output == [
+            GraphemeSequence("nonword"), 
+            ArpabetSequence("IH1 Z"), 
+            ArpabetSequence("AH0"), 
+            ArpabetSequence("T EH1 S T"),
+        ]
 
     def test_punctuation(self):
         phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
         phonetization = EnglishPhonetization(phoneme_dictionary)
         output = phonetization.try_convert_to_phonemes("this...")
-        assert output == ["DH IH1 S", "..."]
+        assert output == [
+            ArpabetSequence("DH IH1 S"), 
+            GraphemeSequence("..."),
+        ]
         output = phonetization.try_convert_to_phonemes("this!")
-        assert output == ["DH IH1 S", "!"]
+        assert output == [
+            ArpabetSequence("DH IH1 S"), 
+            GraphemeSequence("!"),
+        ]
         output = phonetization.try_convert_to_phonemes("this?")
-        assert output == ["DH IH1 S", "?"]
+        assert output == [
+            ArpabetSequence("DH IH1 S"), 
+            GraphemeSequence("?"),
+        ]
+
+    def test_extra_spaces(self):
+        phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
+        phonetization = EnglishPhonetization(phoneme_dictionary)
+        output = phonetization.try_convert_to_phonemes("    this    is    a     test   ")
+        assert output == [
+            ArpabetSequence("DH IH1 S"), 
+            ArpabetSequence("IH1 Z"),
+            ArpabetSequence("AH0"), 
+            ArpabetSequence("T EH1 S T"),
+        ]
+
+    def test_multi_non_word_extra_spaces(self):
+        phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
+        phonetization = EnglishPhonetization(phoneme_dictionary)
+        output = phonetization.try_convert_to_phonemes("    nonword    anothernonword   ")
+        assert output == [
+            GraphemeSequence("nonword"), 
+            GraphemeSequence("anothernonword"), 
+        ]

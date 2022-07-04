@@ -8,7 +8,7 @@ Inspired by and including code from original Tacotron2 by Keith Ito.
 # pyright: strict
 
 import re
-from typing import List, Union
+from typing import List, Union, Any
 
 # Regular expression matching text enclosed in curly braces:
 _curly_re = re.compile(r'(.*?)\{(.+?)\}(.*)')
@@ -16,10 +16,14 @@ _curly_re = re.compile(r'(.*?)\{(.+?)\}(.*)')
 class ArpabetSequence:
     def __init__(self, sequence: str):
         self.sequence = sequence
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, ArpabetSequence) and self.sequence == other.sequence
 
 class GraphemeSequence:
     def __init__(self, sequence: str):
         self.sequence = sequence
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, GraphemeSequence) and self.sequence == other.sequence
 
 ParsedSequence = List[Union[ArpabetSequence, GraphemeSequence]]
 
