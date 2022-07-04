@@ -1,10 +1,10 @@
 from typing import List
-from tts.text.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
-from tts.text.normalization.english_normalization import EnglishNormalization
-from tts.text.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
-from tts.text.phonetization.english_phonetization import EnglishPhonetization
 from tts.text.pipeline.base_pipeline import BasePipeline
-from tts.text.sequencing.english_symbols_v1 import SPACE_INTEGER_ENCODING, arpabet_to_sequence, symbols_to_sequence
+from tts.text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
+from tts.text.pipeline_components.normalization.english_normalization import EnglishNormalization
+from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
+from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
+from tts.text.pipeline_components.sequencing.english_symbols_v1 import SPACE_INTEGER_ENCODING, arpabet_to_sequence, symbols_to_sequence
 
 _ENGLISH_NORMALIZER = EnglishNormalization()
 

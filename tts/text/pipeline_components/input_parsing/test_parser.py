@@ -1,4 +1,4 @@
-from tts.text.input_parsing.parser import ArpabetSequence, GraphemeSequence, parse_grapheme_and_arpabet_sequence
+from tts.text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, parse_grapheme_and_arpabet_sequence
 
 class TestParser:
 

@@ -1,5 +1,5 @@
-from tts.text.phonetization.cmudict import CMUDict
-from tts.text.phonetization.cmudict import DEFAULT_CMUDICT_PATH
+from tts.text.pipeline_components.phonetization.cmudict import CMUDict
+from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH
 
 
 class TestCmuDict:

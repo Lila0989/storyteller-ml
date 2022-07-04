@@ -1,7 +1,7 @@
 from typing import List
-from tts.text.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence
-from tts.text.phonetization.base_phonetization import BasePhonetization
-from tts.text.phonetization.cmudict import CMUDict
+from tts.text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence
+from tts.text.pipeline_components.phonetization.base_phonetization import BasePhonetization
+from tts.text.pipeline_components.phonetization.cmudict import CMUDict
 
 class EnglishPhonetization(BasePhonetization):
 

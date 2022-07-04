@@ -1,4 +1,4 @@
-from tts.text.sequencing.english_symbols_v1 import arpabet_to_sequence, symbols_to_sequence
+from tts.text.pipeline_components.sequencing.english_symbols_v1 import arpabet_to_sequence, symbols_to_sequence
 
 class TestEnglishSymbols:
 

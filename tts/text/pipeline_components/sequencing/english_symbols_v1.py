@@ -13,7 +13,7 @@ Original documentation:
     _characters. See TRAINING_DATA.md for details.
 """
 
-from tts.text.phonetization import cmudict
+from tts.text.pipeline_components.phonetization import cmudict
 from typing import List
 
 # NB: DO NOT CHANGE THE ORDER OF SYMBOLS! 
