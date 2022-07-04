@@ -10,22 +10,34 @@ Inspired by and including code from original Tacotron2 by Keith Ito.
 import re
 from typing import List, Union, Any
 
+
 # Regular expression matching text enclosed in curly braces:
 _curly_re = re.compile(r'(.*?)\{(.+?)\}(.*)')
 
+
 class ArpabetSequence:
+    """
+    Denotes an Arpabet phoneme sequence corresponding to a single word.
+    """
     def __init__(self, sequence: str):
         self.sequence = sequence
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, ArpabetSequence) and self.sequence == other.sequence
 
+
 class GraphemeSequence:
+    """
+    Denotes any string of non-Arpabet text, which may include multiple words,
+    spacing, and punctuation characters.
+    """
     def __init__(self, sequence: str):
         self.sequence = sequence
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, GraphemeSequence) and self.sequence == other.sequence
 
+
 ParsedSequence = List[Union[ArpabetSequence, GraphemeSequence]]
+
 
 def parse_grapheme_and_arpabet_sequence(input_text: str) -> ParsedSequence:
     """
