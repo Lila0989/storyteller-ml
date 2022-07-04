@@ -10,6 +10,12 @@ _ENGLISH_DICTIONARY = CMUDict(DEFAULT_CMUDICT_PATH)
 _ENGLISH_PHONETIZER = EnglishPhonetization(_ENGLISH_DICTIONARY)
 
 class EnglishPipelineV1(BasePipeline):
+    """
+    This is a new text pipeline for FakeYou that will be introduced in July 2022.
+    It introduces Arpabet and individually upgradable components.
+    The code is not 1:1 with our notebooks, but we'll go to efforts to make sure that 
+    the model input expectations on both sides match one another.
+    """
 
     def user_input_to_sequence(self, input_text: str) -> List[int]:
         """Convert raw user input into a numerical sequence for ML inference."""

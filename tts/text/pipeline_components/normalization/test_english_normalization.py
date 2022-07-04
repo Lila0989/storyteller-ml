@@ -9,3 +9,11 @@ class TestEnglishNormalization:
     def test_lowercase(self):
         output = normalize_english("This is a test of Normalization.")
         assert output == "this is a test of normalization."
+
+    def test_numbers(self):
+        output = normalize_english("1,000")
+        assert output == "one thousand"
+
+    def test_abbreviations(self):
+        output = normalize_english("mr. ed")
+        assert output == "mister ed"
