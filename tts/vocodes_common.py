@@ -1,4 +1,9 @@
 import sys
+
+from tts.text.pipeline.english_pipeline_v1 import EnglishPipelineV1
+from tts.text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
+from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH
+from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 sys.path.append('waveglow/')
 import shutil
 import json
@@ -82,7 +87,27 @@ def load_hifigan_model(checkpoint_path, super_resolution = False):
     denoiser = HifiDenoiser(hifigan, mode="normal")
     return hifigan, h, denoiser
 
-def preprocess_text(text, raw_input=True):
+ENGLISH_PIPELINE_V1 = EnglishPipelineV1(EnglishPhonetization(DEFAULT_CMUDICT_PATH))
+LEGACY_FAKEYOU_PIPELINE = LegacyFakeYouPipeline()
+
+def preprocess_text(raw_user_text: str):
+    integer_sequence = []
+
+    # TODO/NB: This word-based flag is for testing the rollout
+    if "this" in raw_user_text:
+        print("\n\n>>> ENGLISH V1\n\n")
+        integer_sequence = ENGLISH_PIPELINE_V1.user_input_to_sequence(raw_user_text)
+    else: 
+        print("\n\n>>> LEGACY\n\n")
+        integer_sequence = LEGACY_FAKEYOU_PIPELINE.user_input_to_sequence(raw_user_text)
+
+    with torch.no_grad():
+        # save VRAM by not including gradients
+        sequence = np.array(integer_sequence)[None, :]
+        sequence = torch.autograd.Variable(torch.from_numpy(sequence)).cuda().long()
+    return sequence
+
+def preprocess_text_old(text, raw_input=True):
     # TODO: Handle ARPAbet
     pre_sequence = ""
     for line in text.split("\n"):
