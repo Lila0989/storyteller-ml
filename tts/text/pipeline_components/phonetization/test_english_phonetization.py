@@ -1,7 +1,7 @@
-from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
-from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
-from tts.text.pipeline_components.input_parsing.parser import ArpabetSequence
-from tts.text.pipeline_components.input_parsing.parser import GraphemeSequence
+from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
+from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
+from text.pipeline_components.input_parsing.parser import ArpabetSequence
+from text.pipeline_components.input_parsing.parser import GraphemeSequence
 
 class TestEnglishPhonetization:
 

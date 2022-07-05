@@ -1,6 +1,6 @@
-from tts.text.pipeline.english_pipeline_v1 import EnglishPipelineV1
-from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
-from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
+from text.pipeline.english_pipeline_v1 import EnglishPipelineV1
+from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
+from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 
 
 class TestEnglishPipelineV1:

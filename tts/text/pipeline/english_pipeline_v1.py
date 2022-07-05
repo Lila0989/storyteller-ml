@@ -1,11 +1,11 @@
 from typing import List
-from tts.text.pipeline.base_pipeline import BasePipeline
-from tts.text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
-from tts.text.pipeline_components.normalization.english_normalization import normalize_english
-from tts.text.pipeline_components.phonetization.base_phonetization import BasePhonetization
-from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
-from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
-from tts.text.pipeline_components.sequencing.english_symbols_v1 import SPACE_INTEGER_ENCODING, arpabet_to_sequence, symbols_to_sequence
+from text.pipeline.base_pipeline import BasePipeline
+from text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
+from text.pipeline_components.normalization.english_normalization import normalize_english
+from text.pipeline_components.phonetization.base_phonetization import BasePhonetization
+from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
+from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
+from text.pipeline_components.sequencing.english_symbols_v1 import SPACE_INTEGER_ENCODING, arpabet_to_sequence, symbols_to_sequence
 
 class EnglishPipelineV1(BasePipeline):
     """

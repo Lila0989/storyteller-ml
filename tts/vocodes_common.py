@@ -1,9 +1,5 @@
 import sys
 
-from tts.text.pipeline.english_pipeline_v1 import EnglishPipelineV1
-from tts.text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
-from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH
-from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 sys.path.append('waveglow/')
 import shutil
 import json
@@ -33,6 +29,11 @@ import scipy
 import subprocess
 import magic
 import os
+
+from text.pipeline.english_pipeline_v1 import EnglishPipelineV1
+from text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
+from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH
+from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 
 def print_gpu_info():
     print('========================================')

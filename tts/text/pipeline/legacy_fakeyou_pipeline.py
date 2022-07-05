@@ -1,9 +1,9 @@
 import re
 from typing import List
-from tts.text.pipeline.base_pipeline import BasePipeline
-from tts.text.pipeline_components.normalization.common_cleaners import collapse_whitespace, convert_to_ascii, lowercase
-from tts.text.pipeline_components.normalization.english_cleaners import expand_abbreviations, expand_numbers
-from tts.text.pipeline_components.sequencing.english_symbols_v1 import arpabet_to_sequence, symbols_to_sequence
+from text.pipeline.base_pipeline import BasePipeline
+from text.pipeline_components.normalization.common_cleaners import collapse_whitespace, convert_to_ascii, lowercase
+from text.pipeline_components.normalization.english_cleaners import expand_abbreviations, expand_numbers
+from text.pipeline_components.sequencing.english_symbols_v1 import arpabet_to_sequence, symbols_to_sequence
 
 # Regular expression matching text enclosed in curly braces:
 _curly_re = re.compile(r'(.*?)\{(.+?)\}(.*)')

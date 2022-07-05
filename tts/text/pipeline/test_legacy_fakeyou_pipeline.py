@@ -1,5 +1,5 @@
 
-from tts.text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
+from text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
 
 
 class TestLegacyFakeYouPipeline():

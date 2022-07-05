@@ -1,7 +1,7 @@
 
 import re
 from typing import List
-from tts.text.pipeline_components.phonetization.cmudict import CMUDict
+from text.pipeline_components.phonetization.cmudict import CMUDict
 
 # Regex taken from open source tacotron2 extensions
 _arpabet_split_re = re.compile(r'[^\s]*{.*?}[^\s]*|[\w]+|[^\w\s]+')

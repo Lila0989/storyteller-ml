@@ -1,6 +1,6 @@
-from tts.text.pipeline_components.normalization.common_cleaners import collapse_whitespace
-from tts.text.pipeline_components.normalization.common_cleaners import convert_to_ascii
-from tts.text.pipeline_components.normalization.common_cleaners import lowercase
+from text.pipeline_components.normalization.common_cleaners import collapse_whitespace
+from text.pipeline_components.normalization.common_cleaners import convert_to_ascii
+from text.pipeline_components.normalization.common_cleaners import lowercase
 
 def normalize_spanish(raw_input_text: str) -> str:
     text = convert_to_ascii(raw_input_text)

@@ -1,4 +1,4 @@
-from tts.text.pipeline_components.normalization.english_normalization import normalize_english
+from text.pipeline_components.normalization.english_normalization import normalize_english
 
 class TestEnglishNormalization:
 
