@@ -23,6 +23,8 @@ class ArpabetSequence:
         self.sequence = sequence
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, ArpabetSequence) and self.sequence == other.sequence
+    def __repr__(self):
+        return f"<ArpabetSequence: {self.sequence}>"
 
 
 class GraphemeSequence:
@@ -34,6 +36,8 @@ class GraphemeSequence:
         self.sequence = sequence
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, GraphemeSequence) and self.sequence == other.sequence
+    def __repr__(self):
+        return f"<GraphemeSequence: {self.sequence}>"
 
 
 ParsedSequence = List[Union[ArpabetSequence, GraphemeSequence]]

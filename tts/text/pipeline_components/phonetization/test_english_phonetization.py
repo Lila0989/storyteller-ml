@@ -33,6 +33,27 @@ class TestEnglishPhonetization:
             ArpabetSequence("T EH1 S T"),
         ]
 
+    def test_words_with_apostrophe(self):
+        phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
+        phonetization = EnglishPhonetization(phoneme_dictionary)
+        output = phonetization.try_convert_to_phonemes("I'm can't you're we're ain't")
+        assert output == [
+            ArpabetSequence("AY1 M"), 
+            ArpabetSequence("K AE1 N T"), 
+            ArpabetSequence("Y UH1 R"),
+            ArpabetSequence("W IY1 R"),
+            ArpabetSequence("EY1 N T"),
+        ]
+
+    def test_words_with_hyphenation(self):
+        phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
+        phonetization = EnglishPhonetization(phoneme_dictionary)
+        output = phonetization.try_convert_to_phonemes("avant-garde bake-off")
+        assert output == [
+            ArpabetSequence("AH0 V AA1 N T G AA1 R D"), 
+            ArpabetSequence("B EY1 K AO1 F"), 
+        ]
+
     def test_punctuation(self):
         phoneme_dictionary = CMUDict(DEFAULT_CMUDICT_PATH)
         phonetization = EnglishPhonetization(phoneme_dictionary)

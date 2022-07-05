@@ -4,7 +4,11 @@ from typing import List
 from text.pipeline_components.phonetization.cmudict import CMUDict
 
 # Regex taken from open source tacotron2 extensions
-_arpabet_split_re = re.compile(r'[^\s]*{.*?}[^\s]*|[\w]+|[^\w\s]+')
+# NB: This was broken and couldn't handle apostrophes
+#_arpabet_split_re = re.compile(r'[^\s]*{.*?}[^\s]*|[\w]+|[^\w\s]+')
+
+# Modified regex to not split apostrophe (eg. "you're", "I'm", etc.) or hyphenation (eg "avant-garde")
+_arpabet_split_re = re.compile(r'[^\s]*{.*?}[^\s]*|[\w]+\'[\w]+|[\w]+\-[\w]+|[\w]+|[^\w\s]+')
 
 class BasePhonetization:
     def __init__(self, phoneme_dictionary: CMUDict):

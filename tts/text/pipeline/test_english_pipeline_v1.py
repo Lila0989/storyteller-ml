@@ -58,3 +58,8 @@ class TestEnglishPipelineV1:
             11, # Space
             2, # Exclamation mark
         ]
+
+    def test_apostrophe_word(self):
+        pipeline = self.build_pipeline_instance()
+        output = pipeline.user_input_to_sequence("you're") 
+        assert output == [145, 137, 130] # YOU'RE  Y UH1 R   ~   145  137  130
