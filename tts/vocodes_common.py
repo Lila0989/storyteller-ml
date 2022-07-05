@@ -32,7 +32,7 @@ import os
 
 from text.pipeline.english_pipeline_v1 import EnglishPipelineV1
 from text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
-from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH
+from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
 from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 
 def print_gpu_info():
@@ -88,7 +88,7 @@ def load_hifigan_model(checkpoint_path, super_resolution = False):
     denoiser = HifiDenoiser(hifigan, mode="normal")
     return hifigan, h, denoiser
 
-ENGLISH_PIPELINE_V1 = EnglishPipelineV1(EnglishPhonetization(DEFAULT_CMUDICT_PATH))
+ENGLISH_PIPELINE_V1 = EnglishPipelineV1(EnglishPhonetization(CMUDict(DEFAULT_CMUDICT_PATH)))
 LEGACY_FAKEYOU_PIPELINE = LegacyFakeYouPipeline()
 
 def preprocess_text(raw_user_text: str):
