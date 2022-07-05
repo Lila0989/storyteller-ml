@@ -1,25 +1,33 @@
 from tts.text.pipeline.english_pipeline_v1 import EnglishPipelineV1
+from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
+from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 
 
 class TestEnglishPipelineV1:
 
+    def build_pipeline_instance(self):
+        # NB: CMUDict used in production may differ
+        cmudict = CMUDict(DEFAULT_CMUDICT_PATH)
+        phonetization = EnglishPhonetization(cmudict)
+        return EnglishPipelineV1(phonetization)
+
     def test_no_input(self):
-        pipeline = EnglishPipelineV1()
+        pipeline = self.build_pipeline_instance()
         output = pipeline.user_input_to_sequence("")
         assert output == []
 
     def test_whitespace(self):
-        pipeline = EnglishPipelineV1()
+        pipeline = self.build_pipeline_instance()
         output = pipeline.user_input_to_sequence("   \n    \t ")
         assert output == []
 
     def test_single_word(self):
-        pipeline = EnglishPipelineV1()
+        pipeline = self.build_pipeline_instance()
         output = pipeline.user_input_to_sequence("hello")
         assert output == [106, 73, 117, 123] # NB: Arpabet encoded
 
     def test_two_words(self):
-        pipeline = EnglishPipelineV1()
+        pipeline = self.build_pipeline_instance()
         output = pipeline.user_input_to_sequence("hello hello")
         assert output == [
             106, 73, 117, 123, # NB: Arpabet encoded
@@ -28,7 +36,7 @@ class TestEnglishPipelineV1:
         ]
 
     def test_two_words_with_arpabet_segment(self):
-        pipeline = EnglishPipelineV1()
+        pipeline = self.build_pipeline_instance()
         output = pipeline.user_input_to_sequence("hello {HH AH0 L OW1}")
         assert output == [
             106, 73, 117, 123, # NB: Arpabet encoded
@@ -37,7 +45,7 @@ class TestEnglishPipelineV1:
         ]
 
     def test_words_and_punctuation(self):
-        pipeline = EnglishPipelineV1()
+        pipeline = self.build_pipeline_instance()
         output = pipeline.user_input_to_sequence("hello friends, welcome!")
         assert output == [
             106, 73, 117, 123, # NB: Arpabet encoded

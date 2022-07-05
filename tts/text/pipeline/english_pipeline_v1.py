@@ -2,12 +2,10 @@ from typing import List
 from tts.text.pipeline.base_pipeline import BasePipeline
 from tts.text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
 from tts.text.pipeline_components.normalization.english_normalization import normalize_english
+from tts.text.pipeline_components.phonetization.base_phonetization import BasePhonetization
 from tts.text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
 from tts.text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 from tts.text.pipeline_components.sequencing.english_symbols_v1 import SPACE_INTEGER_ENCODING, arpabet_to_sequence, symbols_to_sequence
-
-_ENGLISH_DICTIONARY = CMUDict(DEFAULT_CMUDICT_PATH)
-_ENGLISH_PHONETIZER = EnglishPhonetization(_ENGLISH_DICTIONARY)
 
 class EnglishPipelineV1(BasePipeline):
     """
@@ -16,6 +14,9 @@ class EnglishPipelineV1(BasePipeline):
     The code is not 1:1 with our notebooks, but we'll go to efforts to make sure that 
     the model input expectations on both sides match one another.
     """
+
+    def __init__(self, phonetization: BasePhonetization):
+        self.phonetization = phonetization
 
     def user_input_to_sequence(self, input_text: str) -> List[int]:
         """Convert raw user input into a numerical sequence for ML inference."""
@@ -45,7 +46,7 @@ class EnglishPipelineV1(BasePipeline):
                 updated_sequence.append(subsequence)
 
             elif isinstance(subsequence, GraphemeSequence):
-                converted_sequence = _ENGLISH_PHONETIZER.try_convert_to_phonemes(subsequence.sequence)
+                converted_sequence = self.phonetization.try_convert_to_phonemes(subsequence.sequence)
                 updated_sequence.extend(converted_sequence)
 
         return updated_sequence
