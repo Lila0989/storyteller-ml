@@ -16,6 +16,4 @@ class BasePhonetization:
 
     def _split_grapheme_sentence_to_words(self, text_sequence: str) -> List[str]:
         """Split a grapheme word sequence to individual grapheme words"""
-        temp = [word for word in _arpabet_split_re.findall(text_sequence)]
-        print (f"Before: {text_sequence} After: {temp}")
-        return temp
+        return [word for word in _arpabet_split_re.findall(text_sequence)]
