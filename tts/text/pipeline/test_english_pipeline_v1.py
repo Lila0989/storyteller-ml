@@ -27,6 +27,15 @@ class TestEnglishPipelineV1:
             106, 73, 117, 123, # Arpabet encoded
         ]
 
+    def test_two_words_with_arpabet_segment(self):
+        pipeline = EnglishPipelineV1()
+        output = pipeline.user_input_to_sequence("hello {HH AH0 L OW1}")
+        assert output == [
+            106, 73, 117, 123, # NB: Arpabet encoded
+            11, # Space
+            106, 73, 117, 123, # Manually arpabet encoded
+        ]
+
     def test_words_and_punctuation(self):
         pipeline = EnglishPipelineV1()
         output = pipeline.user_input_to_sequence("hello friends, welcome!")
