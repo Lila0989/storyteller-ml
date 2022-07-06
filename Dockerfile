@@ -143,6 +143,26 @@ LABEL org.opencontainers.image.url='https://github.com/storytold/tts-core'
 LABEL org.opencontainers.image.documentation='https://github.com/storytold/tts-core'
 LABEL org.opencontainers.image.source='https://github.com/storytold/tts-core'
 
+
+# NB(echelon,2022-07-06): The following fix for revoked keys was copied from "storyteller-rust".
+#  These dockerfiles are in such bad shape that they all need to be revisited and pared down to 
+#  only the essentials.
+#
+# NB(echelon,2022-05-31): NVIDIA revoked some of their keys.
+# A better long term fix is to remove these dependencies outright and not have ML deps in this repo.
+# https://developer.nvidia.com/blog/updating-the-cuda-linux-gpg-repository-key/
+# https://forums.developer.nvidia.com/t/invalid-public-key-for-cuda-apt-repository/212901/11
+RUN apt-key del 7fa2af80
+
+# NB: Fix for 'E: Conflicting values set for option Signed-By regarding source'
+# NB: We need to remove all sources
+RUN rm $(find /etc/apt | grep cuda)
+
+#RUN wget https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-keyring_1.0-1_all.deb
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb
+RUN dpkg -i cuda-keyring_1.0-1_all.deb
+
+
 # NB: Comment this out for non-debug images
 # TODO: Figure out how this is done elsewhere with just the static binaries
 # Others: `mysql-client`
