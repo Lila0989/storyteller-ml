@@ -91,15 +91,15 @@ def load_hifigan_model(checkpoint_path, super_resolution = False):
 ENGLISH_PIPELINE_V1 = EnglishPipelineV1(EnglishPhonetization(CMUDict(DEFAULT_CMUDICT_PATH)))
 LEGACY_FAKEYOU_PIPELINE = LegacyFakeYouPipeline()
 
-def preprocess_text(raw_user_text: str):
+def preprocess_text(raw_user_text: str, text_pipeline_type: str):
     integer_sequence = []
 
-    # TODO/NB: This word-based flag is for testing the rollout
-    if "this" in raw_user_text:
-        print("\n\n>>> ENGLISH V1\n\n")
+    if text_pipeline_type == 'legacy_fakeyou':
+        integer_sequence = LEGACY_FAKEYOU_PIPELINE.user_input_to_sequence(raw_user_text)
+    elif text_pipeline_type == 'english_v1':
         integer_sequence = ENGLISH_PIPELINE_V1.user_input_to_sequence(raw_user_text)
     else: 
-        print("\n\n>>> LEGACY\n\n")
+        # TODO: Fall back to the newest pipeline once server code has been deployed.
         integer_sequence = LEGACY_FAKEYOU_PIPELINE.user_input_to_sequence(raw_user_text)
 
     with torch.no_grad():
@@ -264,6 +264,7 @@ class TacotronWaveglowPipeline:
     def infer(self, args):
         assert('synthesizer_checkpoint_path' in args)
         assert('vocoder_type' in args)
+        assert('text_pipeline_type' in args)
         assert('raw_text' in args)
         assert('output_audio_filename' in args)
         assert('output_spectrogram_filename' in args)
@@ -271,7 +272,7 @@ class TacotronWaveglowPipeline:
 
         print('Raw text: {}'.format(args['raw_text']))
 
-        sequence = preprocess_text(args['raw_text'])
+        sequence = preprocess_text(args['raw_text'], args['text_pipeline_type'])
 
         tacotron = self.tacotron_model_cache[args['synthesizer_checkpoint_path']]
 
