@@ -250,6 +250,7 @@ class ApiHandler():
             'raw_text': inference_text,
             'synthesizer_checkpoint_path': synthesizer_checkpoint_path,
             'vocoder_type': vocoder_type,
+            'text_pipeline_type': text_pipeline_type,
             'output_audio_filename': output_audio_filename,
             'output_spectrogram_filename': output_spectrogram_filename,
             'output_metadata_filename': output_metadata_filename,
