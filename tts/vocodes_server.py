@@ -210,6 +210,7 @@ class ApiHandler():
 
         # Request parameters
         synthesizer_checkpoint_path = raw_data.get('synthesizer_checkpoint_path')
+        text_pipeline_type = raw_data.get('text_pipeline_type')
         vocoder_type = raw_data.get('vocoder_type')
         waveglow_vocoder_checkpoint_path = raw_data.get('waveglow_vocoder_checkpoint_path')
         hifigan_vocoder_checkpoint_path = raw_data.get('hifigan_vocoder_checkpoint_path')
@@ -224,6 +225,7 @@ class ApiHandler():
             raw_data.get('maybe_clear_synthesizer_checkpoint_path')
 
         print('synthesizer_checkpoint_path: {}'.format(synthesizer_checkpoint_path))
+        print('text_pipeline_type: {}'.format(text_pipeline_type))
         print('vocoder_type: {}'.format(vocoder_type))
         print('waveglow_vocoder_checkpoint_path: {}'.format(waveglow_vocoder_checkpoint_path))
         print('hifigan_vocoder_checkpoint_path: {}'.format(hifigan_vocoder_checkpoint_path))
