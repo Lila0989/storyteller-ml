@@ -10,7 +10,7 @@
 
 set -euxo pipefail
 
-define -r WORKER_INDEX="$1"
+declare -r WORKER_INDEX="$1"
 
 # A dual 3090 can run eight jobs across two GPUs.
 case "${WORKER_INDEX}" in
