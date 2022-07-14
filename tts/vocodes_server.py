@@ -30,6 +30,8 @@ from vocodes_common import load_tacotron_model
 from vocodes_common import load_waveglow_model
 from vocodes_common import load_hifigan_model
 
+from logger import LOGGER
+
 print("TensorFlow version: {}".format(tf.version.VERSION))
 
 print_gpu_info()
@@ -204,9 +206,17 @@ class IndexHandler():
         response.content_type = 'text/html'
         response.body = INDEX_HTML
 
+class StatusHandler():
+    def on_get(self, request, response):
+        LOGGER.info("/_status endpoint requested.")
+        response.content_type = 'application/json'
+        response.body = '{"status": "ok"}'
+
 class ApiHandler():
     def on_post(self, request, response):
         raw_data = json.load(request.bounded_stream)
+
+        LOGGER.info(f"TTS Request: {raw_data}")
 
         # Request parameters
         synthesizer_checkpoint_path = raw_data.get('synthesizer_checkpoint_path')
@@ -256,6 +266,8 @@ class ApiHandler():
             'output_metadata_filename': output_metadata_filename,
         }
 
+        LOGGER.info(f"running inference with args: {inference_args}")
+
         pipeline.infer(inference_args)
 
 def main():
@@ -265,9 +277,10 @@ def main():
 
     api = falcon.API(middleware=[MultipartMiddleware()])
     api.add_route('/', IndexHandler())
+    api.add_route('/_status', StatusHandler())
     api.add_route('/infer', ApiHandler())
 
-    print('Serving on 0.0.0.0:%d' % args.port)
+    LOGGER.info(f"Starting server on 0.0.0.0:{args.port}")
     simple_server.make_server('0.0.0.0', args.port, api).serve_forever()
 
 if __name__ == '__main__':

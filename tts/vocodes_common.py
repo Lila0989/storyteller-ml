@@ -35,6 +35,8 @@ from text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
 from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
 from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
 
+from logger import LOGGER
+
 def print_gpu_info():
     print('========================================')
     print('Python interpreter', sys.executable)
@@ -57,7 +59,7 @@ def load_tacotron_model(checkpoint_path):
     hparams.max_decoder_steps = 1000 # How long the audio will be before it cuts off (1000 is about 11 seconds)
     hparams.gate_threshold = 0.1 # Model must be 90% sure the clip is over before ending generation (the higher this number is, the more likely that the AI will keep generating until it reaches the Max Decoder Steps)
     model = Tacotron2(hparams)
-    print('Loading synthesizer at path: {}'.format(checkpoint_path))
+    LOGGER.info('Loading synthesizer at path: {}'.format(checkpoint_path))
     model.load_state_dict(torch.load(checkpoint_path)['state_dict'])
     _ = model.cuda().eval().half()
     # NB(bt, 2021-05-31): Trying to get everything on the same device
@@ -122,7 +124,6 @@ def preprocess_text_old(text, raw_input=True):
             pass
         pre_sequence += line
 
-    print(pre_sequence)
     with torch.no_grad():
         # save VRAM by not including gradients
         sequence = np.array(text_to_sequence(pre_sequence, ['english_cleaners']))[None, :]
@@ -213,10 +214,10 @@ class TacotronWaveglowPipeline:
 
     def maybe_load_hifigan(self, checkpoint_path):
         if self.hifigan_filename == checkpoint_path:
-            print('Hifi-gan model already loaded into memory: {}'.format(checkpoint_path))
+            LOGGER.info('Hifi-gan model already loaded into memory: {}'.format(checkpoint_path))
             return
-        print('Dumping previous Hifi-gan model from memory: {}'.format(self.hifigan_filename))
-        print('Loading Hifi-gan model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Dumping previous Hifi-gan model from memory: {}'.format(self.hifigan_filename))
+        LOGGER.info('Loading Hifi-gan model into memory: {}'.format(checkpoint_path), flush=True)
         hifigan, h, denoiser = load_hifigan_model(checkpoint_path, False)
         self.hifigan = hifigan
         self.hifigan_denoiser = denoiser
@@ -225,10 +226,10 @@ class TacotronWaveglowPipeline:
 
     def maybe_load_hifigan_super_resolution(self, checkpoint_path):
         if self.hifigan_super_resolution_filename == checkpoint_path:
-            print('Hifi-gan (SuperRes) model already loaded into memory: {}'.format(checkpoint_path))
+            LOGGER.info('Hifi-gan (SuperRes) model already loaded into memory: {}'.format(checkpoint_path))
             return
-        print('Dumping previous Hifi-gan (SuperRes) model from memory: {}'.format(self.hifigan_super_resolution_filename))
-        print('Loading Hifi-gan (SuperRes) model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Dumping previous Hifi-gan (SuperRes) model from memory: {}'.format(self.hifigan_super_resolution_filename))
+        LOGGER.info('Loading Hifi-gan (SuperRes) model into memory: {}'.format(checkpoint_path), flush=True)
         hifigan, h, denoiser = load_hifigan_model(checkpoint_path, True)
         self.hifigan_super_resolution = hifigan
         self.hifigan_super_resolution_denoiser = denoiser
@@ -237,28 +238,28 @@ class TacotronWaveglowPipeline:
 
     def maybe_load_waveglow_model(self, checkpoint_path):
         if self.waveglow_filename == checkpoint_path:
-            print('Waveglow model already loaded into memory: {}'.format(checkpoint_path))
+            LOGGER.info('Waveglow model already loaded into memory: {}'.format(checkpoint_path))
             return
-        print('Dumping previous waveglow model from memory: {}'.format(self.waveglow_filename))
-        print('Loading waveglow model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Dumping previous waveglow model from memory: {}'.format(self.waveglow_filename))
+        LOGGER.info('Loading waveglow model into memory: {}'.format(checkpoint_path), flush=True)
         self.waveglow = load_waveglow_model(checkpoint_path)
         self.waveglow_filename = checkpoint_path
 
     def maybe_load_tacotron_model_to_cache(self, checkpoint_path):
         if checkpoint_path in self.tacotron_model_cache:
-            print('Tacotron model already loaded into memory: {}'.format(checkpoint_path))
+            LOGGER.info('Tacotron model already loaded into memory: {}'.format(checkpoint_path))
             return
-        print('Loading tacotron model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Loading tacotron model into memory: {}'.format(checkpoint_path), flush=True)
         model = load_tacotron_model(checkpoint_path)
         self.tacotron_model_cache[checkpoint_path] = model
-        print('Now {} synthesizer models in memory'.format(len(self.tacotron_model_cache)))
+        LOGGER.info('Now {} synthesizer models in memory'.format(len(self.tacotron_model_cache)))
 
     def uncache_tacotron_model(self, checkpoint_path):
-        print('Currently {} synthesizer models in memory'.format(
+        LOGGER.info('Currently {} synthesizer models in memory'.format(
             len(self.tacotron_model_cache)))
-        print('Clearing synthesizer from memory: {}'.format(checkpoint_path))
+        LOGGER.info('Clearing synthesizer from memory: {}'.format(checkpoint_path))
         self.tacotron_model_cache.pop(checkpoint_path, None)
-        print('Now reduced to {} synthesizer models in memory'.format(
+        LOGGER.info('Now reduced to {} synthesizer models in memory'.format(
             len(self.tacotron_model_cache)))
 
     def infer(self, args):
@@ -270,11 +271,13 @@ class TacotronWaveglowPipeline:
         assert('output_spectrogram_filename' in args)
         assert('output_metadata_filename' in args)
 
-        print('Raw text: {}'.format(args['raw_text']))
+        LOGGER.info(f"raw inference text: {args['raw_text']}")
 
         sequence = preprocess_text(args['raw_text'], args['text_pipeline_type'])
 
         tacotron = self.tacotron_model_cache[args['synthesizer_checkpoint_path']]
+
+        LOGGER.info("running inference...")
 
         with torch.no_grad():
             mel_outputs, mel_outputs_postnet, _, alignments = tacotron.inference(sequence)
@@ -286,23 +289,23 @@ class TacotronWaveglowPipeline:
         else:
             raise Exception('Wrong vocoder type: {}'.format(args['vocoder_type']))
 
-        print('Saving spectrogram as JSON...')
+        LOGGER.info('Saving spectrogram as JSON...')
         save_spectorgram_json_file(mel_outputs_postnet, args['output_spectrogram_filename'])
 
-        print('Generating metadata file...')
+        LOGGER.info('Generating metadata file...')
         generate_metadata_file(args['output_audio_filename'], args['output_metadata_filename'])
 
     def vocode_waveglow(self, args, mel_outputs_postnet):
-        print('Running waveglow...')
+        LOGGER.info('Running waveglow...')
         with torch.no_grad():
             sigma = 0.8
             audio = self.waveglow.infer(mel_outputs_postnet, sigma=sigma)
 
-        print('Encoding and saving audio...')
+        LOGGER.info('Encoding and saving audio...')
         save_wav_audio_file(audio, args['output_audio_filename'])
 
     def vocode_hifigan_superres(self, args, mel_outputs_postnet):
-        print('Running hifigan...')
+        LOGGER.info('Running hifigan...')
         with torch.no_grad():
             y_g_hat = self.hifigan(mel_outputs_postnet.float())
 
@@ -327,7 +330,7 @@ class TacotronWaveglowPipeline:
             wave_out = wave.astype(np.int16)
 
             # HiFi-GAN super-resolution
-            print('Running hifigan super resolution...')
+            LOGGER.info('Running hifigan super resolution...')
             wave = wave / MAX_WAV_VALUE
             wave = torch.FloatTensor(wave).to(torch.device("cuda"))
             new_mel = mel_spectrogram(
@@ -359,7 +362,7 @@ class TacotronWaveglowPipeline:
             sr_mix = wave_out + y_padded
             sr_mix = sr_mix / normalize
 
-            print('Encoding and saving audio...')
+            LOGGER.info('Encoding and saving audio...')
             rate = self.hifigan_super_resolution_h.sampling_rate
             output_audio = sr_mix.astype(np.int16)
             write_wav(args['output_audio_filename'], rate, output_audio)
