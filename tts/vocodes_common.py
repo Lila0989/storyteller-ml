@@ -217,7 +217,8 @@ class TacotronWaveglowPipeline:
             LOGGER.info('Hifi-gan model already loaded into memory: {}'.format(checkpoint_path))
             return
         LOGGER.info('Dumping previous Hifi-gan model from memory: {}'.format(self.hifigan_filename))
-        LOGGER.info('Loading Hifi-gan model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Loading Hifi-gan model into memory: {}'.format(checkpoint_path))
+        LOGGER.flush()
         hifigan, h, denoiser = load_hifigan_model(checkpoint_path, False)
         self.hifigan = hifigan
         self.hifigan_denoiser = denoiser
@@ -229,7 +230,8 @@ class TacotronWaveglowPipeline:
             LOGGER.info('Hifi-gan (SuperRes) model already loaded into memory: {}'.format(checkpoint_path))
             return
         LOGGER.info('Dumping previous Hifi-gan (SuperRes) model from memory: {}'.format(self.hifigan_super_resolution_filename))
-        LOGGER.info('Loading Hifi-gan (SuperRes) model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Loading Hifi-gan (SuperRes) model into memory: {}'.format(checkpoint_path))
+        LOGGER.flush()
         hifigan, h, denoiser = load_hifigan_model(checkpoint_path, True)
         self.hifigan_super_resolution = hifigan
         self.hifigan_super_resolution_denoiser = denoiser
@@ -241,7 +243,8 @@ class TacotronWaveglowPipeline:
             LOGGER.info('Waveglow model already loaded into memory: {}'.format(checkpoint_path))
             return
         LOGGER.info('Dumping previous waveglow model from memory: {}'.format(self.waveglow_filename))
-        LOGGER.info('Loading waveglow model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Loading waveglow model into memory: {}'.format(checkpoint_path))
+        LOGGER.flush()
         self.waveglow = load_waveglow_model(checkpoint_path)
         self.waveglow_filename = checkpoint_path
 
@@ -249,7 +252,8 @@ class TacotronWaveglowPipeline:
         if checkpoint_path in self.tacotron_model_cache:
             LOGGER.info('Tacotron model already loaded into memory: {}'.format(checkpoint_path))
             return
-        LOGGER.info('Loading tacotron model into memory: {}'.format(checkpoint_path), flush=True)
+        LOGGER.info('Loading tacotron model into memory: {}'.format(checkpoint_path))
+        LOGGER.flush()
         model = load_tacotron_model(checkpoint_path)
         self.tacotron_model_cache[checkpoint_path] = model
         LOGGER.info('Now {} synthesizer models in memory'.format(len(self.tacotron_model_cache)))
