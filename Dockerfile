@@ -126,7 +126,7 @@ RUN python3.6 -m venv python
 RUN . python/bin/activate \
   && pip install --upgrade pip setuptools \
   && pip install -r requirements-tacotron-python36.txt \
-  && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+  && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113 \
   && deactivate
 
 
