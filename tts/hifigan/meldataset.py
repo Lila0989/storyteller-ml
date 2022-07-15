@@ -47,10 +47,13 @@ hann_window = {}
 
 
 def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin, fmax, center=False):
-    if torch.min(y) < -1.:
-        print('min value is ', torch.min(y))
-    if torch.max(y) > 1.:
-        print('max value is ', torch.max(y))
+    # NB(bt,2022-07-14): There was previous debugging being done here. 
+    #  Going over the normalization range may have been causing issues? 
+    #  It periodically appears in the logs. In any case, it isn't helpful
+    #if torch.min(y) < -1.:
+    #    print('min value is ', torch.min(y))
+    #if torch.max(y) > 1.:
+    #    print('max value is ', torch.max(y))
 
     global mel_basis, hann_window
     if fmax not in mel_basis:

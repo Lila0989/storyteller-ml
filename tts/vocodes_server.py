@@ -237,19 +237,6 @@ class ApiHandler():
         maybe_clear_synthesizer_checkpoint_path = \
             raw_data.get('maybe_clear_synthesizer_checkpoint_path')
 
-        print('synthesizer_checkpoint_path: {}'.format(synthesizer_checkpoint_path))
-        print('text_pipeline_type: {}'.format(text_pipeline_type))
-        print('vocoder_type: {}'.format(vocoder_type))
-        print('waveglow_vocoder_checkpoint_path: {}'.format(waveglow_vocoder_checkpoint_path))
-        print('hifigan_vocoder_checkpoint_path: {}'.format(hifigan_vocoder_checkpoint_path))
-        print('hifigan_superres_vocoder_checkpoint_path: {}'.format(hifigan_superres_vocoder_checkpoint_path))
-        print('inference_text: {}'.format(inference_text))
-        print('output_audio_filename: {}'.format(output_audio_filename))
-        print('output_spectrogram_filename: {}'.format(output_spectrogram_filename))
-        print('output_metadata_filename: {}'.format(output_metadata_filename))
-        print('maybe_clear_synthesizer_checkpoint_path: {}'.format(
-            maybe_clear_synthesizer_checkpoint_path))
-
         pipeline.maybe_load_waveglow_model(waveglow_vocoder_checkpoint_path)
         pipeline.maybe_load_hifigan(hifigan_vocoder_checkpoint_path)
         pipeline.maybe_load_hifigan_super_resolution(hifigan_superres_vocoder_checkpoint_path)
