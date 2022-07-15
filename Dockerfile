@@ -126,6 +126,7 @@ RUN python3.6 -m venv python
 RUN . python/bin/activate \
   && pip install --upgrade pip setuptools \
   && pip install -r requirements-tacotron-python36.txt \
+  && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
   && deactivate
 
 
@@ -184,4 +185,4 @@ RUN pip3 install gdown
 
 # NB(echelon,2022-07-14): Run a newer version of pytorch which will support RTX3090.
 #  Fixes bug, "NVIDIA GeForce RTX 3080 with CUDA capability sm_86 is not compatible with the current PyTorch installation."
-RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+#RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
