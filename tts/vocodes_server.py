@@ -210,7 +210,10 @@ class StatusHandler():
     def on_get(self, request, response):
         LOGGER.info("/_status endpoint requested.")
         response.content_type = 'application/json'
-        response.body = '{"status": "ok"}'
+        # FakeYou / Storyteller universal health checking semantics:
+        # success (bool) - calling the endpoint worked (no middle man proxy, etc.)
+        # is_healthy (bool) - dependencies are ok
+        response.body = '{"success": true, "is_healthy": true}'
 
 class ApiHandler():
     def on_post(self, request, response):
