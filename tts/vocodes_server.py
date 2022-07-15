@@ -260,6 +260,8 @@ class ApiHandler():
 
         pipeline.infer(inference_args)
 
+        LOGGER.info(f"Request complete.")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8000)
