@@ -7,6 +7,7 @@
 __pycache__/
 tts/models/Wav2Lip/python/
 tts/models/tacotron2/python/
+tts/python/
 secrets.toml
 secrets.yaml
 target/

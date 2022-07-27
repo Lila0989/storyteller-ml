@@ -60,3 +60,8 @@ pycparser==2.20
 # For unit tests and static type checking
 pyright==0.0.13.post0
 pytest==7.0.1
+
+# Text pipeline
+num2words==0.5.10
+phonemizer==3.2.1
+
