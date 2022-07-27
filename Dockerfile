@@ -175,7 +175,7 @@ RUN apt-get update \
         wget
 
 # ESpeak for new text pipeline
-RUN apt-get install libespeak-ng1
+RUN apt-get install -y libespeak-ng1
 
 RUN python3 --version
 #RUN python3.7 -m venv python
