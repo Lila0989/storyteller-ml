@@ -31,6 +31,7 @@ import magic
 import os
 
 from text.pipeline.english_pipeline_v1 import EnglishPipelineV1
+from text.pipeline.espeak_pipeline import EspeakPipeline
 from text.pipeline.legacy_fakeyou_pipeline import LegacyFakeYouPipeline
 from text.pipeline_components.phonetization.cmudict import DEFAULT_CMUDICT_PATH, CMUDict
 from text.pipeline_components.phonetization.english_phonetization import EnglishPhonetization
@@ -90,6 +91,11 @@ def load_hifigan_model(checkpoint_path, super_resolution = False):
     denoiser = HifiDenoiser(hifigan, mode="normal")
     return hifigan, h, denoiser
 
+# Modern pipelines
+SPANISH_ESPEAK_PIPELINE = EspeakPipeline(lang='es')
+ENGLISH_ESPEAK_PIPELINE = EspeakPipeline(lang='en')
+
+# Legacy pipelines
 ENGLISH_PIPELINE_V1 = EnglishPipelineV1(EnglishPhonetization(CMUDict(DEFAULT_CMUDICT_PATH)))
 LEGACY_FAKEYOU_PIPELINE = LegacyFakeYouPipeline()
 
@@ -100,6 +106,8 @@ def preprocess_text(raw_user_text: str, text_pipeline_type: str):
         integer_sequence = LEGACY_FAKEYOU_PIPELINE.user_input_to_sequence(raw_user_text)
     elif text_pipeline_type == 'english_v1':
         integer_sequence = ENGLISH_PIPELINE_V1.user_input_to_sequence(raw_user_text)
+    elif text_pipeline_type == 'spanish_v2':
+        integer_sequence = SPANISH_ESPEAK_PIPELINE.user_input_to_sequence(raw_user_text)
     else: 
         # TODO: Fall back to the newest pipeline once server code has been deployed.
         integer_sequence = LEGACY_FAKEYOU_PIPELINE.user_input_to_sequence(raw_user_text)

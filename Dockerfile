@@ -170,9 +170,12 @@ RUN dpkg -i cuda-keyring_1.0-1_all.deb
 RUN apt-get update \
     && apt-get install -y \
         curl \
-        python3-pip \
         python3 \
+        python3-pip \
         wget
+
+# ESpeak for new text pipeline
+RUN apt-get install libespeak-ng1
 
 RUN python3 --version
 #RUN python3.7 -m venv python
