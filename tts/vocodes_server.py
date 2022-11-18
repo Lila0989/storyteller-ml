@@ -25,10 +25,11 @@ from falcon_multipart.middleware import MultipartMiddleware
 from wsgiref import simple_server
 
 from vocodes_common import TacotronWaveglowPipeline
-from vocodes_common import print_gpu_info
+from vocodes_common import load_hifigan_model
 from vocodes_common import load_tacotron_model
 from vocodes_common import load_waveglow_model
-from vocodes_common import load_hifigan_model
+from vocodes_common import parse_int_or_default
+from vocodes_common import print_gpu_info
 
 from logger import LOGGER
 
@@ -221,6 +222,8 @@ class ApiHandler():
 
         LOGGER.info(f"TTS Request: {raw_data}")
 
+        # ========== RUST SERVICE ARGUMENTS ==========
+
         # Request parameters
         synthesizer_checkpoint_path = raw_data.get('synthesizer_checkpoint_path')
         text_pipeline_type = raw_data.get('text_pipeline_type')
@@ -233,9 +236,14 @@ class ApiHandler():
         output_spectrogram_filename = raw_data.get('output_spectrogram_filename')
         output_metadata_filename = raw_data.get('output_metadata_filename')
 
+        # Temporarily optional request parameters
+        maybe_max_decoder_steps = raw_data.get('max_decoder_steps')
+
         # Optional request parameters
         maybe_clear_synthesizer_checkpoint_path = \
             raw_data.get('maybe_clear_synthesizer_checkpoint_path')
+
+        # ========== INFERENCE ==========
 
         pipeline.maybe_load_waveglow_model(waveglow_vocoder_checkpoint_path)
         pipeline.maybe_load_hifigan(hifigan_vocoder_checkpoint_path)
@@ -246,6 +254,9 @@ class ApiHandler():
 
         pipeline.maybe_load_tacotron_model_to_cache(synthesizer_checkpoint_path)
 
+        # NB: 1000 is the default and is roughly 12 seconds.
+        max_decoder_steps = parse_int_or_default(maybe_max_decoder_steps, 1000) 
+
         inference_args = {
             'raw_text': inference_text,
             'synthesizer_checkpoint_path': synthesizer_checkpoint_path,
@@ -254,6 +265,7 @@ class ApiHandler():
             'output_audio_filename': output_audio_filename,
             'output_spectrogram_filename': output_spectrogram_filename,
             'output_metadata_filename': output_metadata_filename,
+            'max_decoder_steps': max_decoder_steps,
         }
 
         LOGGER.info(f"running inference with args: {inference_args}")

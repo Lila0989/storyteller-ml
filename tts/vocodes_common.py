@@ -99,6 +99,14 @@ ENGLISH_ESPEAK_PIPELINE = EspeakPipeline(lang='en')
 ENGLISH_PIPELINE_V1 = EnglishPipelineV1(EnglishPhonetization(CMUDict(DEFAULT_CMUDICT_PATH)))
 LEGACY_FAKEYOU_PIPELINE = LegacyFakeYouPipeline()
 
+def parse_int_or_default(maybe_int, default_int):
+    if maybe_int:
+        try:
+            return int(maybe_int)
+        except:
+            pass
+    return default_int
+
 def preprocess_text(raw_user_text: str, text_pipeline_type: str):
     integer_sequence = []
 
@@ -278,12 +286,15 @@ class TacotronWaveglowPipeline:
         assert('output_audio_filename' in args)
         assert('output_spectrogram_filename' in args)
         assert('output_metadata_filename' in args)
+        assert('max_decoder_steps' in args)
 
         LOGGER.info(f"raw inference text: {args['raw_text']}")
 
         sequence = preprocess_text(args['raw_text'], args['text_pipeline_type'])
 
         tacotron = self.tacotron_model_cache[args['synthesizer_checkpoint_path']]
+
+        tacotron.fakeyou_set_max_decoder_steps(args['max_decoder_steps'])
 
         LOGGER.info("running inference...")
 

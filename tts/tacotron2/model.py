@@ -469,6 +469,9 @@ class Tacotron2(nn.Module):
         self.encoder = Encoder(hparams)
         self.decoder = Decoder(hparams)
         self.postnet = Postnet(hparams)
+        
+    def fakeyou_set_max_decoder_steps(self, max_decoder_steps):
+        self.decoder.max_decoder_steps = max_decoder_steps
 
     def parse_batch(self, batch):
         text_padded, input_lengths, mel_padded, gate_padded, \

@@ -1,19 +1,31 @@
-*.pyc
-*.swo
-*.swp
+# Dot env (and secrets!)
 *secret*sh
-*~
 .env
 .env-secrets
-.idea/
-__pycache__/
-models/Wav2Lip/python/
-models/tacotron2/python/
 production_database_secret_connect.sh
 production_database_secret_query.sh
 secrets.toml
 secrets.yaml
+
+# Vim cruft
+*.swo
+*.swp
+*~
+
+# Python cruft
+*.pyc
+__pycache__/
+
+# Virtual environments
+models/Wav2Lip/python/
+models/tacotron2/python/
+tts/python/
+
+# Rust build
 target/
+
+# IntelliJ
+.idea/
 
 # Models for testing
 future-todo/ControllableTalkNet/models
@@ -21,3 +33,4 @@ tts/hifigan/hifisr
 
 # Other garbage to prune/remove
 tts/hifigan/LJSpeech-1.1/
+

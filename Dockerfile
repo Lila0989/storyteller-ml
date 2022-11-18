@@ -1,6 +1,91 @@
 # ==================== Python Build Base ====================
 
-FROM ghcr.io/storytold/docker-base-images-nvidia-cuda-experimental:080f96bc7087 as pybuild-base
+# Experimental NVidia CUDA 
+#  - ubuntu 20.04
+#  - nvidia-384
+#  - multiple python versions (3.6, 3.8)
+#  THIS IS NOT VERIFIED TO WORK YET (2021-05-30)
+
+#FROM nvidia/cuda:10.1-devel-ubuntu18.04 as pybuild-base
+FROM nvidia/cuda:11.3.0-devel-ubuntu20.04 as pybuild-base
+
+# tzdata install hangs without presetting the time zone
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# NB(2021-05-30): This is the image that Tacotron 2's Dockerfile specifies.
+# I have not tried this, but it might be necessary.
+#FROM pytorch/pytorch:nightly-devel-cuda10.0-cudnn7
+#ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
+
+# NB: https://github.com/NVIDIA/nvidia-docker/issues/864#issuecomment-439848887
+# NB: We do not install ffmpeg, since the version is 3.8.* series and we need 4.2.*
+#
+# NB(2021-05-30): We need to install `cython3` for building modern Tacotron 2
+# dependencies (ie. protoc) on old Ubuntu
+# RUN apt-get update \
+#     && apt-get install -y \
+RUN apt-get update
+#RUN apt-cache search python3.8
+
+# NB: Here we install nvidia drivers
+# NB: Avoid keyboard prompt
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        nvidia-384 \
+        --no-install-recommends
+
+# Notes on packages:
+#  * software-properties-common - needed for `apt-add-repository`
+#  * pciutils - needed for `lspci | grep -i nvidia`
+RUN apt-get install -y \
+        build-essential \
+        curl \
+        cython3 \
+        ffmpeg \
+        g++-7 \
+        gcc-7 \
+        git \
+        htop \
+        imagemagick \
+        libc++-7-dev \
+        libffi-dev \
+        libgcc-7-dev \
+        libmagic1 \
+        libsm6 \
+        libsndfile1 \
+        libssl-dev \
+        libxext6 \
+        libxrender-dev \
+        netcat \
+        pciutils \
+        pkg-config \
+        python-dev \
+        python3-pip \
+        python3.8 \
+        python3.8-dev \
+        python3.8-venv\
+        redis-tools \
+        silversearcher-ag \
+        software-properties-common \
+        sox \
+        tmux \
+        unzip \
+        vim \
+        wget
+
+# Wav2Lip needs Python3.6
+# NB: we install python3-virtualenv as `python3.6 -m venv` won't work anymore
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update
+RUN apt-get install -y \
+        python3.6 \
+        python3.6-dev \
+        python3.6-venv
+
+RUN python3.6 --version
+RUN python3.8 --version
+
+#FROM ghcr.io/storytold/docker-base-images-nvidia-cuda-experimental:080f96bc7087 as pybuild-base
 
 ## Authenticating with GHCR locally:
 ## https://docs.github.com/en/packages/working-with-a-github-packages-registry/migrating-to-the-container-registry-from-the-docker-registry
@@ -117,7 +202,10 @@ FROM pybuild-base as pybuild-requirements
 
 WORKDIR /
 
-COPY ./tts ./models/tts
+RUN mkdir -p /models/tts
+
+COPY ./tts/requirements-tacotron-python36.txt ./models/tts
+
 WORKDIR models/tts
 
 # NB: Not sure if we need Python3.6 for Tacotron2, but Python3.8 gave me trouble.
@@ -129,11 +217,10 @@ RUN . python/bin/activate \
   && pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113 \
   && deactivate
 
-
-
 # Final image
 #  FROM ubuntu:xenial
-FROM pybuild-requirements as final
+#FROM pybuild-requirements as final
+
 WORKDIR /
 
 #COPY scripts/ ./scripts
@@ -189,3 +276,6 @@ RUN pip3 install gdown
 # NB(echelon,2022-07-14): Run a newer version of pytorch which will support RTX3090.
 #  Fixes bug, "NVIDIA GeForce RTX 3080 with CUDA capability sm_86 is not compatible with the current PyTorch installation."
 #RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+
+
+COPY ./tts ./models/tts
