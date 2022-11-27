@@ -230,6 +230,7 @@ LABEL org.opencontainers.image.authors='bt@brand.io, echelon@gmail.com'
 LABEL org.opencontainers.image.url='https://github.com/storytold/tts-core'
 LABEL org.opencontainers.image.documentation='https://github.com/storytold/tts-core'
 LABEL org.opencontainers.image.source='https://github.com/storytold/tts-core'
+LABEL org.opencontainers.image.description='Storyteller ML model monorepo: TTS, etc.'
 
 
 # NB(echelon,2022-07-06): The following fix for revoked keys was copied from "storyteller-rust".
@@ -277,5 +278,9 @@ RUN pip3 install gdown
 #  Fixes bug, "NVIDIA GeForce RTX 3080 with CUDA capability sm_86 is not compatible with the current PyTorch installation."
 #RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
 
+# Mostly for local development:
+COPY ./start_tts_server.sh /
 
+# TTS model code:
 COPY ./tts ./models/tts
+
