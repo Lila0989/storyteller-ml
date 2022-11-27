@@ -9,6 +9,14 @@
 #FROM nvidia/cuda:10.1-devel-ubuntu18.04 as pybuild-base
 FROM nvidia/cuda:11.3.0-devel-ubuntu20.04 as pybuild-base
 
+# See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
+LABEL org.opencontainers.image.title='Storyteller ML'
+LABEL org.opencontainers.image.authors='bt@brand.io, echelon@gmail.com'
+LABEL org.opencontainers.image.description='Storyteller ML model monorepo: TTS, etc.'
+LABEL org.opencontainers.image.documentation='https://github.com/storytold/tts-core'
+LABEL org.opencontainers.image.source='https://github.com/storytold/tts-core'
+LABEL org.opencontainers.image.url='https://github.com/storytold/tts-core'
+
 # tzdata install hangs without presetting the time zone
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -224,14 +232,6 @@ RUN . python/bin/activate \
 WORKDIR /
 
 #COPY scripts/ ./scripts
-
-# See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
-LABEL org.opencontainers.image.authors='bt@brand.io, echelon@gmail.com'
-LABEL org.opencontainers.image.url='https://github.com/storytold/tts-core'
-LABEL org.opencontainers.image.documentation='https://github.com/storytold/tts-core'
-LABEL org.opencontainers.image.source='https://github.com/storytold/tts-core'
-LABEL org.opencontainers.image.description='Storyteller ML model monorepo: TTS, etc.'
-
 
 # NB(echelon,2022-07-06): The following fix for revoked keys was copied from "storyteller-rust".
 #  These dockerfiles are in such bad shape that they all need to be revisited and pared down to 
