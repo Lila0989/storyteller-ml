@@ -1,145 +1,157 @@
 #!/usr/bin/env python
 
-import IPython.display as display
-import torch, torchaudio
-import torch.nn as nn
-import sys  
-import soundfile as sf
+# import os, sys, argparse
+# from pathlib import Path
+# import torch
+# import torch.distributed as dist
+# 
+# sys.path.append("./acoustic-model/")
+# from train import train
+# 
+# checkpoint_save_path = "/content/drive/MyDrive/tts/softvc-checkpoints/jeff_v2/acoustic" #@param {type: "string"}
+# _checkpoint_save_path = Path(checkpoint_save_path)
+# if _checkpoint_save_path.exists() == False:
+#     os.mkdir(_checkpoint_save_path)
+# 
+# resume_path = "/content/checkpoint/hubert-soft-0321fd7e.pt" #@param {type: "string"}
+# 
+# world_size = torch.cuda.device_count()
+# 
+# 
+# class DictObj:
+#   def __init__(self, in_dict:dict):
+#     assert isinstance(in_dict, dict)
+#     for key, val in in_dict.items():
+#       if isinstance(val, (list, tuple)):
+#         setattr(self, key, [DictObj(x) if isinstance(x, dict) else x for x in val])
+#       else:
+#         setattr(self, key, DictObj(val) if isinstance(val, dict) else val)
+# 
+# args=DictObj({"checkpoint_dir": _checkpoint_save_path, "dataset_dir": Path("/content/dataset"), "resume":Path(resume_path), "discrete": False})
+# try:
+#   dist.destroy_process_group()
+# except:
+#   pass
+# train(0, world_size, args)
+# 
 
-from time import time
-import torch.jit
-sys.path.insert(0, './hubert/hubert')
-from model import HubertSoft
 
-sys.path.insert(0, './acoustic-model/')
-from acoustic.model import AcousticModel
+#@title Load the models 
+#@markdown leave hifigan blank to use defaults
+import sys
+import torch
+from typing import Dict, Any
+from collections import OrderedDict
+from torch.nn.modules.utils import consume_prefix_in_state_dict_if_present
 
-# ===============================
+def modify_model(state_dict: Dict[str,Any]):
+    new_state_dict = OrderedDict()
+    for k in state_dict['acoustic-model'].keys():
+        value = state_dict['acoustic-model'][k]
+        name = k[7:] # remove `module.` because they used ddp training to save
+        new_state_dict[name] = value
+    return new_state_dict
 
+#sys.path.append("/content/acoustic-model/")
+sys.path.append("./acoustic-model/")
+from acoustic import AcousticModel
 
-#@title select input wav
-#file_name = "/content/drive/MyDrive/VCModels/Source/brandon1.wav"#@param { type: "string"}
-file_name = "samples/source/easy/brandon1.wav"
+hubert = torch.hub.load("bshall/hubert:main", "hubert_soft").cuda()
 
-source, sr = torchaudio.load(f"{file_name}")
-source = torchaudio.functional.resample(source, sr, 16000)
-source = source.unsqueeze(0).cuda()
-print(f"Wav Shape and Type {source.shape} {source.dtype}")
-if source.shape[1] == 2: # remove channel
-    source = torch.mean(source, dim=0).unsqueeze(0)
-    print(f"Removing Channel to mono Wav Shape and Type {source.shape} {source.dtype}")
-
-display.Audio(source.squeeze().cpu(), rate=16000)
-
-
-# ===============================
-
-import datetime
-from utils_acoustic import AcousticModelScripted
-from utils_hubert import modify_model
-
-hubert_soft = torch.hub.load("bshall/hubert:main", "hubert_soft").cuda()
-hubert_soft.eval()
-
-script_acoustic = True #@param {type: "boolean"}
-print(script_acoustic)
+#check_point_path = '/content/drive/MyDrive/tts/softvc-checkpoints/tay/acoustic/taylor_swift-acoustic.pt' #@param {type:"string"}
+check_point_path = '/home/bt/models/voice-conversion/trump-acoustic.pt' #@param {type:"string"}
 
 # Load the acoustic model (either hubert_soft or hubert_discrete) 
-#input_acoustic_model_file = "/content/drive/MyDrive/VCModels/Padme/model-24000.pt" #@param {type: "string"}
-input_acoustic_model_file = "/home/bt/models/voice-conversion/trump-acoustic.pt"
-acoustic_dict = torch.load(input_acoustic_model_file) # this used ddp ## REPLACE THIS! <-- !
-if script_acoustic == True:
-    acoustic = AcousticModelScripted().cuda()
-else:
-    acoustic = AcousticModel().cuda()
-
+acoustic_dict = torch.load(check_point_path) # this used ddp
+acoustic = AcousticModel().cuda()
 acoustic.eval()
-
-new_state_dict = modify_model(state_dict=acoustic_dict)
-acoustic.load_state_dict(new_state_dict)
 
 import importlib.util
 import sys
 
-spec = importlib.util.spec_from_file_location("hifigan.utils", "/content/hifigan/hifigan/utils.py")
+#spec = importlib.util.spec_from_file_location("hifigan.utils", "/content/hifigan/hifigan/utils.py")
+spec = importlib.util.spec_from_file_location("hifigan.utils", "./hifigan/hifigan/utils.py")
 u = importlib.util.module_from_spec(spec)
 sys.modules["hifigan.utils"] = u
 spec.loader.exec_module(u)
 
-spec = importlib.util.spec_from_file_location("hifigan.generator", "/content/hifigan/hifigan/generator.py")
+#spec = importlib.util.spec_from_file_location("hifigan.generator", "/content/hifigan/hifigan/generator.py")
+spec = importlib.util.spec_from_file_location("hifigan.generator", "./hifigan/hifigan/generator.py")
 g = importlib.util.module_from_spec(spec)
 sys.modules["hifigan.generator"] = g
 spec.loader.exec_module(g)
 
 new_state_dict = modify_model(state_dict=acoustic_dict)
 acoustic.load_state_dict(new_state_dict)
-input_hifigan_checkpoint_path = "/content/drive/MyDrive/VCModels/Hifigan/Padme.pt" #@param {type: "string"}
-if input_hifigan_checkpoint_path:
-  checkpoint = torch.load(input_hifigan_checkpoint_path)["generator"]["model"]
+#hifigan_checkpoint_path = "/content/drive/MyDrive/tts/softvc-checkpoints/tay/hifigan/taylor_swift-hifigan.pt" #@param {type: "string"}
+hifigan_checkpoint_path = "/home/bt/models/voice-conversion/trump-hifigan.pt" #@param {type: "string"}
+if hifigan_checkpoint_path:
+  checkpoint = torch.load(hifigan_checkpoint_path)["generator"]["model"]
   hifigan = g.HifiganGenerator()
   consume_prefix_in_state_dict_if_present(checkpoint, "module.")
   hifigan.load_state_dict(checkpoint)
   hifigan.remove_weight_norm()
+  hifigan.eval()
+ 
 else:
   hifigan = torch.hub.load("bshall/hifigan:main", "hifigan_hubert_soft")
-
 hifigan.cuda()
-hifigan.eval()
 
-#utils.remove_weight_norm(hubert_soft.positional_embedding.conv)
+
+# ===========================================
+
+
+#@title This code selects the source file
+import IPython.display as display
+import torch, torchaudio
+import sys  
+sys.path.insert(0, './acoustic-model/acoustic/')
+from model import AcousticModel
+import soundfile as sf
+#from google.colab import files
+from time import time
+sys.path.append("/content/hifigan/")
+from hifigan.generator import HifiganGenerator
+from hifigan.generator import consume_prefix_in_state_dict_if_present
+#uploaded = files.upload()
+#file_name = "/content/drive/MyDrive/20220914110418-9dd00c7845-godzilla_mdxKaraoke_vocals.[mvsep.com].wav" #@param {type: "string"}
+file_name = "./samples/source/easy/brandon1.wav"
+
+#for name in uploaded.keys():
+    #file_name = name    
+source, sr = torchaudio.load(f"{file_name}")
+source = torchaudio.functional.resample(source, sr, 16000)
+source = torch.mean(source, dim=0).unsqueeze(0)
+source = source.unsqueeze(0).cuda()
+display.Audio(source.squeeze().cpu(), rate=16000)
+
+
+# ===========================================
+
+#@title Run the inference and display the result
 # Convert to the target speaker
-units = None
-mel = None 
-
-unit_start_time = 0.0
-unit_end_time = 0.0
-
-acoustic_start_time = 0.0
-acoustic_end_time = 0.0 
-
-hifi_start_time = 0.0
-hifi_end_time = 0.0
-
 with torch.inference_mode():
-    unit_start_time = datetime.datetime.now()
-    units = hubert_soft.units(source)
-    print(f"Units and Type {units.shape} {units.dtype}")
-    unit_end_time = datetime.datetime.now()
+    # Extract speech units
+    start = time()
+    units = hubert.units(source)
+    end = time()
+    # Generate target spectrogram
+    print(f"time for feature embedding:{end-start}")
 
-    hubert_soft_script = torch.jit.trace_module(hubert_soft,{"units":source})
-    torch.jit.save(hubert_soft_script, 'hubert_soft.jit')
-
-    print(f"Unit Generation Time {(unit_end_time - unit_start_time).total_seconds() * 1000}")
-
-    print("Hubert Soft Exported")
-
-    acoustic_start_time = datetime.datetime.now()
+    start = time()
     mel = acoustic.generate(units).transpose(1, 2)
-    print(f"Mel and Type {mel.shape} {mel.dtype}")
-    acoustic_end_time = datetime.datetime.now()
-    print(f"Acoustic Time {(acoustic_end_time - acoustic_start_time).total_seconds() * 1000}")
-    if script_acoustic == True:
-        output_acoustic_scripted = '/content/drive/MyDrive/VCModels/FinishedModels/Padme.recast' #@param {type: "string"}
-        print("Exporting Scripted")
-        acoustic_model_script = torch.jit.script(acoustic)
-        torch.jit.save(acoustic_model_script, output_acoustic_scripted)
-    else:
-        print("Exporting Traced")
-        acoustic_model_script = torch.jit.trace_module(acoustic,{"generate":units})
-        output_acoustic_traced = '' #@param {type: "string"}
-        torch.jit.save(acoustic_model_script, output_acoustic_traced)
-
-    print("Acoustic Model Exported")
-    hifi_start_time = datetime.datetime.now()
-
+    end = time()
+    print(f"time for inference:{end-start}")
+    # Generate audio waveform
+    start = time()
     target = hifigan(mel)
-    print(f"Wavform and Type {target.shape} {target.dtype}")
-    hifi_end_time = datetime.datetime.now()
-    print(f"MEL {target.shape}")
-    print(f"Hifi Gan Time {(hifi_end_time - hifi_start_time).total_seconds() * 1000}")
+    end = time()
+    print(f"time for wavform {end-start}")
 
-    hifi_gan_script = torch.jit.trace_module(hifigan,{"forward":mel})
-    output_hifigan_jit = '/content/drive/MyDrive/VCModels/FinishedModels/Padme-hifigan-jit.pt' #@param {type: "string"}
-    torch.jit.save(hifi_gan_script, output_hifigan_jit)
-    print("Hifi Gan Model Exported")
+display.Audio(target.squeeze().cpu(), rate=16000)
 
+# ===========================================
+
+#@title Save the output to file
+filename = "output.wav" #@param{type: "string"}
+sf.write(filename, target.squeeze().cpu(), samplerate=16000)
