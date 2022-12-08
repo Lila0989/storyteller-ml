@@ -20,6 +20,7 @@ __pycache__/
 models/Wav2Lip/python/
 models/tacotron2/python/
 tts/python/
+voice_conversion/softvc/python/
 
 # Rust build
 target/
@@ -34,3 +35,5 @@ tts/hifigan/hifisr
 # Other garbage to prune/remove
 tts/hifigan/LJSpeech-1.1/
 
+# Output files
+output.wav
