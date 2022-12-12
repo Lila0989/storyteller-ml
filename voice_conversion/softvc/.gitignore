@@ -11,5 +11,6 @@ __pycache__/
 
 # Default output files
 output.wav
+temp.wav
 metadata.json
 

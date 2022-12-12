@@ -34,7 +34,9 @@ parser.add_argument('--acoustic_model_filename', type=str, required=True)
 parser.add_argument('--hifigan_model_filename', type=str, required=True)
 parser.add_argument('--source_audio_filename', type=str, required=True)
 parser.add_argument('--output_audio_filename', type=str, default='output.wav')
+parser.add_argument('--temporary_audio_filename', type=str, default='temp.wav') # used for truncation, etc.
 parser.add_argument('--output_metadata_filename', type=str, default='metadata.json')
+parser.add_argument('--truncate_seconds', type=int, default=-1) # -1 is "do not truncate", 0 is invalid
 args = parser.parse_args()
 
 print('\n'.join(f'[arg] {k} = {v}' for k, v in vars(args).items()))
@@ -123,6 +125,23 @@ def do_voice_conversion(hubert, acoustic, hifigan, audio_source):
 
 # ===========================================
 
+def truncate_source_audio(audio_source_filename, output_filename, seconds):
+    # Run ffmpeg's ffprobe
+    command = [
+        "ffmpeg",
+        "-i",  
+        audio_source_filename,
+        "-t", 
+        str(seconds),
+        "-c",
+        "copy",
+        output_filename,
+    ]
+
+    pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out, err = pipe.communicate()
+
+
 def save_output_audio(audio_data, output_audio_filename):
   soundfile.write(args.output_audio_filename, audio_data.squeeze().cpu(), samplerate=16000)
 
@@ -157,12 +176,18 @@ def save_metadata(audio_filename, output_metadata_filename):
     with open(output_metadata_filename, 'w') as json_file:
         json.dump(metadata, json_file)
 
+intermediate_audio_filename = args.source_audio_filename
+
+if args.truncate_seconds not in [-1, 0]:
+    intermediate_audio_filename = args.temporary_audio_filename
+    truncate_source_audio(args.source_audio_filename, intermediate_audio_filename, args.truncate_seconds)
+
 hubert = torch.hub.load("bshall/hubert:main", "hubert_soft").cuda()
 
 acoustic = load_acoustic_model(args.acoustic_model_filename)
 hifigan = load_hifigan_model(args.hifigan_model_filename)
 
-source_audio = load_wav_data(args.source_audio_filename)
+source_audio = load_wav_data(intermediate_audio_filename)
 target_audio = do_voice_conversion(hubert, acoustic, hifigan, source_audio)
 
 save_output_audio(target_audio, args.output_audio_filename)
