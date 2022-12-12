@@ -8,3 +8,8 @@ __pycache__/
 *.swo
 *.swp
 *~
+
+# Default output files
+output.wav
+metadata.json
+

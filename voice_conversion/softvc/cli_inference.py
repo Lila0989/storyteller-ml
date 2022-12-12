@@ -3,7 +3,11 @@
 import IPython.display as display
 import argparse
 import importlib.util
-import soundfile as sf
+import json
+import magic
+import os
+import soundfile
+import subprocess
 import sys
 import sys  
 import torch
@@ -29,7 +33,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--acoustic_model_filename', type=str, required=True)
 parser.add_argument('--hifigan_model_filename', type=str, required=True)
 parser.add_argument('--source_audio_filename', type=str, required=True)
-parser.add_argument('--output_audio_filename', type=str, required=True)
+parser.add_argument('--output_audio_filename', type=str, default='output.wav')
+parser.add_argument('--output_metadata_filename', type=str, default='metadata.json')
 args = parser.parse_args()
 
 print('\n'.join(f'[arg] {k} = {v}' for k, v in vars(args).items()))
@@ -115,7 +120,42 @@ def do_voice_conversion(hubert, acoustic, hifigan, audio_source):
         end = time()
         print(f"time for wavform {end-start}")
         return target
+
 # ===========================================
+
+def save_output_audio(audio_data, output_audio_filename):
+  soundfile.write(args.output_audio_filename, audio_data.squeeze().cpu(), samplerate=16000)
+
+def save_metadata(audio_filename, output_metadata_filename):
+    # Run ffmpeg's ffprobe
+    command = [
+        "ffprobe",
+        "-loglevel",  "quiet",
+        "-print_format", "json",
+        "-show_format",
+        "-show_streams",
+        audio_filename
+    ]
+
+    pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out, err = pipe.communicate()
+    ffmpeg_metadata = json.loads(out)
+
+    # Collect metadata
+    print(ffmpeg_metadata)
+    mime_type = magic.from_file(audio_filename, mime=True)
+    file_size_bytes = os.path.getsize(audio_filename)
+
+    duration_millis = int(float(ffmpeg_metadata['format']['duration']) * 1000)
+
+    metadata = {
+        'duration_millis': duration_millis,
+        'mimetype': mime_type,
+        'file_size_bytes': file_size_bytes,
+    }
+
+    with open(output_metadata_filename, 'w') as json_file:
+        json.dump(metadata, json_file)
 
 hubert = torch.hub.load("bshall/hubert:main", "hubert_soft").cuda()
 
@@ -125,4 +165,6 @@ hifigan = load_hifigan_model(args.hifigan_model_filename)
 source_audio = load_wav_data(args.source_audio_filename)
 target_audio = do_voice_conversion(hubert, acoustic, hifigan, source_audio)
 
-sf.write(args.output_audio_filename, target_audio.squeeze().cpu(), samplerate=16000)
+save_output_audio(target_audio, args.output_audio_filename)
+save_metadata(args.output_audio_filename, args.output_metadata_filename)
+
