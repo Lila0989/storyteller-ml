@@ -12,6 +12,7 @@ import sys
 import sys  
 import torch
 import torchaudio
+
 from collections import OrderedDict
 from time import time
 from torch.nn.modules.utils import consume_prefix_in_state_dict_if_present
@@ -27,7 +28,11 @@ sys.path.append("./hifigan/")
 from hifigan.generator import HifiganGenerator
 from hifigan.generator import consume_prefix_in_state_dict_if_present
 
+from gpu_utils import print_gpu_info
+
 # ===========================================
+
+print_gpu_info()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--acoustic_model_filename', type=str, required=True)
@@ -129,6 +134,7 @@ def truncate_source_audio(audio_source_filename, output_filename, seconds):
     # Run ffmpeg's ffprobe
     command = [
         "ffmpeg",
+        "-y", # Force file overwrite
         "-i",  
         audio_source_filename,
         "-t", 
@@ -138,6 +144,7 @@ def truncate_source_audio(audio_source_filename, output_filename, seconds):
         output_filename,
     ]
 
+    print(f"Truncating source audio to {seconds} seconds", flush=True)
     pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out, err = pipe.communicate()
 
