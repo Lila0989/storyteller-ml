@@ -13,6 +13,10 @@ import sys
 import torch
 import torchaudio
 
+from gpu_utils import print_gpu_info
+
+print_gpu_info()
+
 from collections import OrderedDict
 from time import time
 from torch.nn.modules.utils import consume_prefix_in_state_dict_if_present
@@ -28,11 +32,8 @@ sys.path.append("./hifigan/")
 from hifigan.generator import HifiganGenerator
 from hifigan.generator import consume_prefix_in_state_dict_if_present
 
-from gpu_utils import print_gpu_info
 
 # ===========================================
-
-print_gpu_info()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--acoustic_model_filename', type=str, required=True)
