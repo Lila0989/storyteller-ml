@@ -17,6 +17,10 @@ from hifigan.env import AttrDict
 from hifigan.models import Generator
 from hifigan.denoiser import Denoiser as HifiDenoiser
 
+from utils import print_title
+
+print_title('Check Hifigan Model (Tacotron)')
+
 parser = argparse.ArgumentParser(description='Check that the HiFi-GAN model is valid')
 
 parser.add_argument('--checkpoint_path', type=str, help='path the hifigan model', required=True)

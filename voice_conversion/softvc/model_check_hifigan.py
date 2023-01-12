@@ -19,6 +19,10 @@ sys.path.append("./hifigan/")
 from hifigan.generator import HifiganGenerator
 from hifigan.generator import consume_prefix_in_state_dict_if_present
 
+from utils import print_title
+
+print_title('Check Hifigan Model (SoftVC)')
+
 from gpu_utils import print_gpu_info
 
 print_gpu_info()
@@ -69,4 +73,3 @@ metadata = {
 
 with open(args.output_metadata_filename, 'w') as json_file:
     json.dump(metadata, json_file)
-    
