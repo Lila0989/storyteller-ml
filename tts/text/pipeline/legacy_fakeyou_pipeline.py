@@ -3,6 +3,7 @@ from typing import List
 from text.pipeline.base_pipeline import BasePipeline
 from text.pipeline_components.normalization.common_cleaners import collapse_whitespace, convert_to_ascii, lowercase
 from text.pipeline_components.normalization.english_cleaners import expand_abbreviations, expand_numbers
+from text.pipeline_components.normalization.strip_and_add_ending_period import strip_and_add_ending_period
 from text.pipeline_components.sequencing.english_symbols_v1 import arpabet_to_sequence, symbols_to_sequence
 
 # Regular expression matching text enclosed in curly braces:
@@ -15,6 +16,8 @@ class LegacyFakeYouPipeline(BasePipeline):
     leverage CMUDict to look up arpabet even when models were known to
     be trained with arpabet support. (It did support curly braces for 
     manual arpabet inclusion.)
+
+    NB: Updated 2023-01-12 to force addition of ending periods to prevent "strokes".
     """
 
     def user_input_to_sequence(self, input_text: str) -> List[int]:
@@ -23,6 +26,9 @@ class LegacyFakeYouPipeline(BasePipeline):
         return self._text_to_sequence(pre_sequence, ['english_cleaners'])
 
     def _preprocess_text(self, input_text: str, is_raw_input: bool = True) -> str:
+        # Force addition of an ending period to prevent "strokes"
+        input_text = strip_and_add_ending_period(input_text)
+
         pre_sequence = ""
         for line in input_text.split("\n"):
             if len(line) < 1:

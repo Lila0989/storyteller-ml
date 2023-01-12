@@ -2,6 +2,7 @@ from typing import List
 from text.pipeline.base_pipeline import BasePipeline
 from text.pipeline_components.input_parsing.parser import ArpabetSequence, GraphemeSequence, ParsedSequence, parse_grapheme_and_arpabet_sequence
 from text.pipeline_components.normalization.espeak_normalization import normalize
+from text.pipeline_components.normalization.strip_and_add_ending_period import strip_and_add_ending_period
 from text.pipeline_components.phonetization.espeak_phonemization import EspeakPhonetization
 from text.pipeline_components.sequencing.espeak_symbols import Symbols
 
@@ -11,6 +12,8 @@ class EspeakPipeline(BasePipeline):
     It introduces Arpabet and individually upgradable components.
     The code is not 1:1 with our notebooks, but we'll go to efforts to make sure that 
     the model input expectations on both sides match one another.
+
+    NB: Updated 2023-01-12 to force addition of ending periods to prevent "strokes".
     """
 
     def __init__(self, lang='en'):
@@ -25,6 +28,9 @@ class EspeakPipeline(BasePipeline):
 
     def user_input_to_sequence(self, input_text: str) -> List[int]:
         """Convert raw user input into a numerical sequence for ML inference."""
+
+        # Force addition of an ending period to prevent "strokes"
+        input_text = strip_and_add_ending_period(input_text)
 
         parsed_sequence = parse_grapheme_and_arpabet_sequence(input_text)
         self._normalize_graphemes(parsed_sequence)
