@@ -8,6 +8,17 @@ TTS models (Tacotron, HifiGan, WaveGlow, etc.) live under [`tts/`, and you can f
 
 We expect to add video, posture estimation, phoneme prediction, and other models soon.
 
+Run Dockerized in Development
+-----------------------------
+
+### TTS
+
+```bash
+
+docker build .
+docker run --rm --gpus all -it -p 8000:8000 --mount type=bind,source=/tmp,target=/tmp --entrypoint ./start_tts_server.sh [image name]
+```
+
 How This Works
 --------------
 We have a Rust monolith that controls the user interface, account system, and all the database CRUD operations.
