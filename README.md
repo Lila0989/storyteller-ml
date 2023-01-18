@@ -16,7 +16,10 @@ Run Dockerized in Development
 ```bash
 
 docker build .
-docker run --rm --gpus all -it -p 8000:8000 --mount type=bind,source=/tmp,target=/tmp --entrypoint ./start_tts_server.sh [image name]
+docker run --rm --gpus all -it \
+  -p 8000:8000 \
+  --mount type=bind,source=/tmp,target=/tmp \
+  --entrypoint ./start_tts_server.sh [image name]
 ```
 
 How This Works

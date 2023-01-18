@@ -19,4 +19,3 @@ def strip_and_add_ending_period(input_text: str) -> str:
     if not ends_with_period: 
         input_text += PERIOD
     return input_text
-    
