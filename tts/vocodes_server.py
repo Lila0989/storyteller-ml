@@ -24,7 +24,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 #from preprocess import *
 from wsgiref import simple_server
 
-from vocodes_common import TacotronWaveglowPipeline
+from vocodes_common import FakeYouTt2Pipeline
 from vocodes_common import load_hifigan_model
 from vocodes_common import load_tacotron_model
 from vocodes_common import load_waveglow_model
@@ -200,7 +200,7 @@ INDEX_HTML = '''
 
 #tacotron = load_tacotron_model('/home/bt/models/tacotron2/tacotron2_uberduck_Noire.pt')
 #waveglow = load_waveglow_model('/home/bt/models/waveglow/waveglow_256channels_universal_v5.pt')
-pipeline = TacotronWaveglowPipeline()
+pipeline = FakeYouTt2Pipeline()
 
 class IndexHandler():
     def on_get(self, request, response):
@@ -227,6 +227,8 @@ class ApiHandler():
         # Request parameters
         synthesizer_checkpoint_path = raw_data.get('synthesizer_checkpoint_path')
         text_pipeline_type = raw_data.get('text_pipeline_type')
+        use_default_mel_multiply_factor = raw_data.get('use_default_mel_multiply_factor')
+        maybe_custom_mel_multiply_factor = raw_data.get('maybe_custom_mel_multiply_factor')
         vocoder_type = raw_data.get('vocoder_type')
         waveglow_vocoder_checkpoint_path = raw_data.get('waveglow_vocoder_checkpoint_path')
         hifigan_vocoder_checkpoint_path = raw_data.get('hifigan_vocoder_checkpoint_path')
@@ -259,6 +261,8 @@ class ApiHandler():
 
         inference_args = {
             'raw_text': inference_text,
+            'use_default_mel_multiply_factor': use_default_mel_multiply_factor,
+            'maybe_custom_mel_multiply_factor': maybe_custom_mel_multiply_factor,
             'synthesizer_checkpoint_path': synthesizer_checkpoint_path,
             'vocoder_type': vocoder_type,
             'text_pipeline_type': text_pipeline_type,

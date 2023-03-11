@@ -38,6 +38,11 @@ from text.pipeline_components.phonetization.english_phonetization import English
 
 from logger import LOGGER
 
+# Multiplying the mel output postnet by a constant factor scales it before vocoding,
+# often resulting in "better" (less tinny) sound.
+# This value was determined by Ozzy via experimentation.
+DEFAULT_MEL_MULTIPLIER = 1.4
+
 def print_gpu_info():
     print('========================================')
     print('Python interpreter', sys.executable)
@@ -211,7 +216,7 @@ def generate_metadata_file(output_audio_filename, output_metadata_filename):
         json.dump(metadata, json_file)
 
 
-class TacotronWaveglowPipeline:
+class FakeYouTt2Pipeline:
 
     def __init__(self):
         # Cache of "path" => loaded model
@@ -281,6 +286,8 @@ class TacotronWaveglowPipeline:
     def infer(self, args):
         assert('synthesizer_checkpoint_path' in args)
         assert('vocoder_type' in args)
+        assert('use_default_mel_multiply_factor' in args)
+        assert('maybe_custom_mel_multiply_factor' in args)
         assert('text_pipeline_type' in args)
         assert('raw_text' in args)
         assert('output_audio_filename' in args)
@@ -300,6 +307,20 @@ class TacotronWaveglowPipeline:
 
         with torch.no_grad():
             mel_outputs, mel_outputs_postnet, _, alignments = tacotron.inference(sequence)
+        
+        # Multiply the mel outputs for "better" sound.
+        use_multiplier = False
+        mel_multiplier = DEFAULT_MEL_MULTIPLIER
+
+        if args['maybe_custom_mel_multiply_factor']:
+            use_multiplier = True
+            mel_multiplier = float(args['maybe_custom_mel_multiply_factor'])
+        elif args['use_default_mel_multiply_factor']:
+            use_multiplier = True
+
+        if use_multiplier:
+            LOGGER.info(f'Scaling audio by {mel_multiplier}')
+            mel_outputs_postnet = mel_outputs_postnet * mel_multiplier
 
         if args['vocoder_type'] == 'hifigan-superres':
             self.vocode_hifigan_superres(args, mel_outputs_postnet)
@@ -362,6 +383,7 @@ class TacotronWaveglowPipeline:
                 self.hifigan_super_resolution_h.fmin,
                 self.hifigan_super_resolution_h.fmax,
             )
+
             y_g_hat2 = self.hifigan_super_resolution(new_mel)
             audio2 = y_g_hat2.squeeze()
             audio2 = audio2 * MAX_WAV_VALUE

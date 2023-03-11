@@ -24,7 +24,7 @@ from falcon_multipart.middleware import MultipartMiddleware
 #from preprocess import *
 from wsgiref import simple_server
 
-from vocodes_common_talknet import TacotronWaveglowPipeline
+from vocodes_common_talknet import FakeYouTt2Pipeline
 from vocodes_common_talknet import print_gpu_info
 from vocodes_common_talknet import load_tacotron_model
 from vocodes_common_talknet import load_waveglow_model
@@ -197,7 +197,7 @@ INDEX_HTML = '''
 
 #tacotron = load_tacotron_model('/home/bt/models/tacotron2/tacotron2_uberduck_Noire.pt')
 #waveglow = load_waveglow_model('/home/bt/models/waveglow/waveglow_256channels_universal_v5.pt')
-pipeline = TacotronWaveglowPipeline()
+pipeline = FakeYouTt2Pipeline()
 
 class IndexHandler():
     def on_get(self, request, response):
