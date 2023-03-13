@@ -16,10 +16,11 @@ secrets.yaml
 *.pyc
 __pycache__/
 
-# Virtual environments
+# Python virtual environments (named "python")
 models/Wav2Lip/python/
 models/tacotron2/python/
 tts/python/
+tts/tacotron2_v1_early_fakeyou/python/
 voice_conversion/softvc/python/
 
 # Rust build
@@ -31,9 +32,11 @@ target/
 # Models for testing
 future-todo/ControllableTalkNet/models
 tts/hifigan/hifisr
+tts/tacotron2_v1_early_fakeyou/hifigan/hifisr
 
 # Other garbage to prune/remove
 tts/hifigan/LJSpeech-1.1/
+tts/tacotron2_v1_early_fakeyou/hifigan/LJSpeech-1.1/
 
 # Output files
 output.wav
