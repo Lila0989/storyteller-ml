@@ -212,7 +212,7 @@ WORKDIR /
 
 RUN mkdir -p /models/tts
 
-COPY ./tts/requirements-tacotron-python36.txt ./models/tts
+COPY ./requirements-tacotron-python36.txt ./models/tts
 
 WORKDIR models/tts
 
@@ -282,5 +282,5 @@ RUN pip3 install gdown
 COPY ./start_tts_server.sh /
 
 # TTS model code:
-COPY ./tts ./models/tts
+COPY ./ ./models/tts
 
