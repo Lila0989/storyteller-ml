@@ -2,7 +2,7 @@
 # https://github.com/actions/starter-workflows/ci/docker-publish.yml
 # If using base images, don't forget to add READ access, eg. from a package settings page like:
 # https://github.com/orgs/storytold/packages/container/docker-base-images-rust-ssl/settings/actions_access
-name: Publish Docker Container to GHCR
+name: Build Tacotron2 v1 (early FakeYou) Docker Image
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ on:
       #- $default-branch
       - master
 env:
-  IMAGE_NAME: tts-core
+  IMAGE_NAME: tacotron2-v1
 
 jobs:
   # Push image to GitHub Packages.
@@ -34,7 +34,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }} 
 
       - name: Build image
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+        run: cd tts/tacotron2_v1_early_fakeyou/ && docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Push image to GitHub Container Registry
         run: |
