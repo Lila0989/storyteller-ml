@@ -224,7 +224,49 @@ def infer_one_sample(targets, predictions, vocoder, mel_stats, model_config, pre
              if multi_speaker and args.mode == "single" else "{}.wav".format(basename)),
         sampling_rate, wav_predictions[0])
 
+def infer_one_sample_s(targets, predictions, vocoder, mel_stats, model_config, preprocess_config, path, args):
 
+    normalize = preprocess_config["preprocessing"]["mel"]["normalize"]
+    n_frames_per_step = model_config["decoder"]["n_frames_per_step"]
+    multi_speaker = model_config["multi_speaker"]
+    mel_predictions = predictions[1]
+    if normalize:
+        mel_predictions = Audio.tools.mel_denormalize(predictions[1], *mel_stats)
+
+    basename = targets[0][0]
+    src_len = targets[4][0].item()
+    mel_len = mel_predictions[0].shape[0]
+    reduced_mel_len = mel_len // n_frames_per_step
+    mel_prediction = mel_predictions[0].detach().transpose(0, 1)
+    attention = predictions[3][0, :reduced_mel_len, :src_len].detach().transpose(0, 1) # [seq_len, mel_len]
+
+    fig = plot_mel(
+        [
+            mel_prediction.cpu().numpy(),
+            attention.cpu().numpy(),
+        ],
+        ["Synthetized Spectrogram", "Decoder Alignment"],
+        attention=True,
+    )
+    plt.savefig(os.path.join(
+        path, "{}_{}.png".format(basename, args.speaker_id)\
+             if multi_speaker and args.mode == "single" else "{}.png".format(basename)))
+    plt.close()
+
+    from .model import vocoder_infer
+
+    lengths = mel_len * preprocess_config["preprocessing"]["stft"]["hop_length"]
+    wav_predictions = vocoder_infer(
+        mel_predictions.transpose(1, 2), vocoder, model_config, preprocess_config, lengths=[lengths]
+    )
+
+    sampling_rate = preprocess_config["preprocessing"]["audio"]["sampling_rate"]
+    wavfile.write(os.path.join(
+        path, "{}_{}.wav".format(basename, args.speaker_id)\
+             if multi_speaker and args.mode == "single" else "{}.wav".format(basename)),
+        sampling_rate, wav_predictions[0])
+        
+        
 def plot_mel(data, titles, attention=False):
     fig, axes = plt.subplots(len(data), 1, squeeze=False)
     if titles is None:

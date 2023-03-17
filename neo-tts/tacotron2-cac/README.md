@@ -80,6 +80,14 @@ Use
 tensorboard --logdir output/log
 ```
 
+# Inference
+Use
+```
+python3 infer_arpa.py --mode single --dataset SingleSpk22 --checkpoint tacotron2.pth --out-path MyAud --text "there are no faces"
+```
+Or check `inference.ipynb` for more lean, hands-on notebook version
+
+
 to serve TensorBoard on your localhost.
 <!-- The loss curves, synthesized mel-spectrograms, and audios are shown.
 
