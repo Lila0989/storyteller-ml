@@ -11,11 +11,24 @@ from torch.utils.data import DataLoader
 # from pypinyin import pinyin, Style
 
 from utils.model import get_model, get_vocoder
-from utils.tools import get_configs_of, to_device, infer_one_sample #, read_lexicon
+from utils.tools import get_configs_of, to_device, infer_one_sample_s #, read_lexicon
 from dataset import TextDataset
 from text import text_to_sequence, sequence_to_text
+from text.cleaners import to_arpa
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from model import Tacotron2
+
+def get_tac2(configs, device):
+    (preprocess_config, model_config, train_config) = configs
+
+    model = Tacotron2(preprocess_config, model_config, train_config).to(device)
+
+    model.eval()
+    model.requires_grad_ = False
+    return model
+
+
 
 
 def preprocess_english(text, preprocess_config):
@@ -36,14 +49,14 @@ def synthesize(model, args, configs, mel_stats, vocoder, batchs):
         with torch.no_grad():
             # Forward
             output = model.inference(*batch[2:4], *batch[5:7])
-            infer_one_sample(
+            infer_one_sample_s(
                 batch,
                 output,
                 vocoder,
                 mel_stats,
                 model_config,
                 preprocess_config,
-                train_config["path"]["result_path"],
+                args.out_path,
                 args,
             )
 
@@ -51,7 +64,6 @@ def synthesize(model, args, configs, mel_stats, vocoder, batchs):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, required=True)
     parser.add_argument(
         "--mode",
         type=str,
@@ -83,6 +95,18 @@ if __name__ == "__main__":
         required=True,
         help="name of dataset",
     )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        required=True,
+        help="Path to model file.",
+    )
+    parser.add_argument(
+        "--out-path",
+        type=str,
+        required=True,
+        help="Path to store files",
+    )
     args = parser.parse_args()
 
     # Check source texts
@@ -94,16 +118,17 @@ if __name__ == "__main__":
     # Read Config
     preprocess_config, model_config, train_config = get_configs_of(args.dataset)
     configs = (preprocess_config, model_config, train_config)
-    with open(
-            os.path.join(preprocess_config["path"]["preprocessed_path"], "stats.json")
-    ) as f:
-        stats = json.load(f)
-        mel_stats = stats["mel"]
+    stats = None
+    mel_stats = None
+
     os.makedirs(
-        os.path.join(train_config["path"]["result_path"], str(args.restore_step)), exist_ok=True)
+        args.out_path, exist_ok=True)
 
     # Get model
-    model = get_model(args, configs, device, train=False)
+    model = get_tac2(configs, device)
+    ckpt = torch.load(args.checkpoint)
+    model.load_state_dict(ckpt["model"])
+
 
     # Load vocoder
     vocoder = get_vocoder(model_config, device)
@@ -121,21 +146,26 @@ if __name__ == "__main__":
         ids = raw_texts = [args.text[:100]]
 
         # Speaker Info
-        load_spker_embed = model_config["multi_speaker"] \
-            and preprocess_config["preprocessing"]["speaker_embedder"] != 'none'
-        with open(os.path.join(preprocess_config["path"]["preprocessed_path"], "speakers.json")) as f:
-            speaker_map = json.load(f)
-        speakers = np.array([speaker_map[args.speaker_id]]) if model_config["multi_speaker"] else np.array([0]) # single speaker is allocated 0
-        spker_embed = np.load(os.path.join(
-            preprocess_config["path"]["preprocessed_path"],
-            "spker_embed",
-            "{}-spker_embed.npy".format(args.speaker_id),
-        )) if load_spker_embed else None
+        is_multi_speaker = model_config["multi_speaker"]
 
-        if preprocess_config["preprocessing"]["text"]["language"] == "en":
-            texts = np.array([preprocess_english(args.text, preprocess_config)])
+        if is_multi_speaker:
+            load_spker_embed = model_config["multi_speaker"] \
+                and preprocess_config["preprocessing"]["speaker_embedder"] != 'none'
+            with open(os.path.join(preprocess_config["path"]["preprocessed_path"], "speakers.json")) as f:
+                speaker_map = json.load(f)
+            speakers = np.array([speaker_map[args.speaker_id]]) if model_config["multi_speaker"] else np.array([0]) # single speaker is allocated 0
+            spker_embed = np.load(os.path.join(
+                preprocess_config["path"]["preprocessed_path"],
+                "spker_embed",
+                "{}-spker_embed.npy".format(args.speaker_id),
+            )) if load_spker_embed else None
         else:
-            raise NotImplementedError
+            speakers = np.array([0])
+            spker_embed = None
+
+        
+        texts = np.array([preprocess_english(to_arpa(args.text), preprocess_config)])
+        
         text_lens = np.array([len(texts[0])])
         batchs = [(ids, raw_texts, speakers, texts, text_lens, max(text_lens), spker_embed)]
 
