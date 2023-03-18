@@ -48,7 +48,11 @@ def main(args, configs):
         print(f"Warm starting from checkpoint {args.pretrained}")
         ckpt = torch.load(args.pretrained)
         model.load_state_dict(ckpt["model"])
-        
+    
+    if args.checkpoint_interval > 1:
+      print(f"Overriding checkpoint interval to {args.checkpoint_interval}")
+      train_config["step"]["save_step"] = args.checkpoint_interval
+
     model = nn.DataParallel(model)
     num_param = get_param_num(model)
     Loss = Tacotron2Loss(preprocess_config, model_config, train_config).to(device)
@@ -60,6 +64,12 @@ def main(args, configs):
     vocoder = get_vocoder(model_config, device)
 
     # Init logger
+    
+    if len(args.out_path):
+        train_config["path"]["log_path"] = os.path.join(args.out_path, "logs")
+        train_config["path"]["ckpt_path"] = os.path.join(args.out_path, "checkpoints")
+        train_config["path"]["result_path"] = os.path.join(args.out_path, "val")
+        
     for p in train_config["path"].values():
         os.makedirs(p, exist_ok=True)
     train_log_path = os.path.join(train_config["path"]["log_path"], "train")
@@ -210,6 +220,20 @@ if __name__ == "__main__":
         required=False,
         help="Path to pretrained checkpoint file to finetune from",
         default="",
+    )
+    parser.add_argument(
+        "--out-path",
+        type=str,
+        required=False,
+        help="Path override for train",
+        default="",
+    )
+    parser.add_argument(
+        "--checkpoint-interval",
+        type=int,
+        required=False,
+        help="Checkpoint interval override for train",
+        default=0,
     )
     args = parser.parse_args()
 

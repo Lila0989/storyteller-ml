@@ -72,6 +72,7 @@ Train your model with
 ```
 python3 train.py --dataset DATASET
 ```
+Check `training.ipynb` or the up-to-date [Colab Notebook](https://colab.research.google.com/drive/1ra5DRIyohXSNiT-3miBWkTZbaGDTczOJ?usp=sharing).
 
 # TensorBoard
 
@@ -86,7 +87,12 @@ Use
 python3 infer_arpa.py --mode single --dataset SingleSpk22 --checkpoint tacotron2.pth --out-path MyAud --text "there are no faces"
 ```
 Or check `inference.ipynb` for more lean, hands-on notebook version
-
+# Checking model
+Use
+```
+python3 check_model.py --dataset SingleSpk22 --checkpoint tacotron2.pth
+```
+This script will try to load a checkpoint to CPU. If the file doesn't exist, it will exit with `2` return code. If it does but there's an error loading, it will exit with `1`. Otherwise, if the model is loaded well, it will exit with `0`
 
 to serve TensorBoard on your localhost.
 <!-- The loss curves, synthesized mel-spectrograms, and audios are shown.
