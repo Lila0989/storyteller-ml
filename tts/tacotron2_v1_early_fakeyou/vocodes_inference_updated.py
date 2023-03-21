@@ -78,10 +78,10 @@ pipeline = FakeYouTt2Pipeline()
 # NB: Not sure if there was a historical decision to load the models first outside of the pipeline. 
 # Probably not, though. Seems like this could be cleaned up.
 if args.vocoder_type == 'hifigan-superres':
-    pipeline.maybe_load_waveglow_model(args.waveglow_vocoder_checkpoint_path)
+    pipeline.maybe_load_hifigan(args.hifigan_vocoder_checkpoint_path)
+    pipeline.maybe_load_hifigan_super_resolution(args.hifigan_superres_vocoder_checkpoint_path)
 elif args.vocoder_type == 'waveglow':
-    pipeline.maybe_load_waveglow_model(args.hifigan_vocoder_checkpoint_path)
-    pipeline.maybe_load_waveglow_model(args.hifigan_superres_vocoder_checkpoint_path)
+    pipeline.maybe_load_waveglow_model(args.waveglow_vocoder_checkpoint_path)
 else:
     raise Exception('Wrong vocoder type: {}'.format(args.vocoder_type))
 
