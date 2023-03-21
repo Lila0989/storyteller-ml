@@ -284,16 +284,21 @@ class FakeYouTt2Pipeline:
             len(self.tacotron_model_cache)))
 
     def infer(self, args):
+        # Model parameters
         assert('synthesizer_checkpoint_path' in args)
         assert('vocoder_type' in args)
+        assert('text_pipeline_type' in args)
+        # Optional mel scaling before vocodinng
         assert('use_default_mel_multiply_factor' in args)
         assert('maybe_custom_mel_multiply_factor' in args)
-        assert('text_pipeline_type' in args)
+        # Premium features
+        assert('max_decoder_steps' in args)
+        # User input
         assert('raw_text' in args)
+        # Output files
         assert('output_audio_filename' in args)
         assert('output_spectrogram_filename' in args)
         assert('output_metadata_filename' in args)
-        assert('max_decoder_steps' in args)
 
         LOGGER.info(f"raw inference text: {args['raw_text']}")
 

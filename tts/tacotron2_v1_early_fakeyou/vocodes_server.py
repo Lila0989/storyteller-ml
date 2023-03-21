@@ -222,24 +222,30 @@ class ApiHandler():
 
         LOGGER.info(f"TTS Request: {raw_data}")
 
-        # ========== RUST SERVICE ARGUMENTS ==========
+        # ========== RUST SERVICE ARGUMENTS (REQUEST PARAMETERS) ==========
 
-        # Request parameters
+        # Model parameters
         synthesizer_checkpoint_path = raw_data.get('synthesizer_checkpoint_path')
         text_pipeline_type = raw_data.get('text_pipeline_type')
-        use_default_mel_multiply_factor = raw_data.get('use_default_mel_multiply_factor')
-        maybe_custom_mel_multiply_factor = raw_data.get('maybe_custom_mel_multiply_factor')
         vocoder_type = raw_data.get('vocoder_type')
         waveglow_vocoder_checkpoint_path = raw_data.get('waveglow_vocoder_checkpoint_path')
         hifigan_vocoder_checkpoint_path = raw_data.get('hifigan_vocoder_checkpoint_path')
         hifigan_superres_vocoder_checkpoint_path = raw_data.get('hifigan_superres_vocoder_checkpoint_path')
+
+        #  Optional mel scaling before vocoding
+        use_default_mel_multiply_factor = raw_data.get('use_default_mel_multiply_factor')
+        maybe_custom_mel_multiply_factor = raw_data.get('maybe_custom_mel_multiply_factor')
+
+        # Premium features
+        maybe_max_decoder_steps = raw_data.get('max_decoder_steps')
+
+        # User input
         inference_text = raw_data.get('inference_text')
+
+        # Output files
         output_audio_filename = raw_data.get('output_audio_filename')
         output_spectrogram_filename = raw_data.get('output_spectrogram_filename')
         output_metadata_filename = raw_data.get('output_metadata_filename')
-
-        # Temporarily optional request parameters
-        maybe_max_decoder_steps = raw_data.get('max_decoder_steps')
 
         # Optional request parameters
         maybe_clear_synthesizer_checkpoint_path = \
