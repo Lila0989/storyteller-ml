@@ -91,10 +91,12 @@ pipeline.maybe_load_tacotron_model_to_cache(args.synthesizer_checkpoint_path)
 # NB: 1000 is the default and is roughly 12 seconds.
 max_decoder_steps = parse_int_or_default(args.max_decoder_steps, 1000) 
 
+input_text = open(args.input_text_filename, 'r').read().strip()
+
 inference_args = {
-    'raw_text': args.inference_text,
+    'raw_text': input_text,
     'use_default_mel_multiply_factor': args.use_default_mel_multiply_factor,
-    'maybe_custom_mel_multiply_factor': args.maybe_custom_mel_multiply_factor,
+    'maybe_custom_mel_multiply_factor': args.custom_mel_multiply_factor,
     'synthesizer_checkpoint_path': args.synthesizer_checkpoint_path,
     'vocoder_type': args.vocoder_type,
     'text_pipeline_type': args.text_pipeline_type,
