@@ -20,8 +20,8 @@ parser.add_argument('--hifigan_vocoder_checkpoint_path', type=str, help='path th
 parser.add_argument('--hifigan_superres_vocoder_checkpoint_path', type=str, help='path the TTS vocoder model')
 
 # Optional mel scaling before vocoding
-parser.add_argument('--use_default_mel_multiply_factor', type=bool, help='', action='store_true')
-parser.add_argument('--maybe_custom_mel_multiply_factor', type=int, help='')
+parser.add_argument('--use_default_mel_multiply_factor', help='', action='store_true')
+parser.add_argument('--custom_mel_multiply_factor', type=float, help='')
 
 # Premium features
 parser.add_argument('--max_decoder_steps', type=int, help='')
@@ -47,10 +47,10 @@ import json
 import numpy as np
 import torch
 
-from hparams import create_hparams
-from model import Tacotron2
-from text import text_to_sequence
-from denoiser import Denoiser
+#from hparams import create_hparams
+#from model import Tacotron2
+#from text import text_to_sequence
+#from denoiser import Denoiser
 
 from vocodes_common import FakeYouTt2Pipeline
 from vocodes_common import print_gpu_info
