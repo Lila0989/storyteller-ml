@@ -79,13 +79,14 @@ def split_silence(
             yield Chunk(
                 is_speech=False, audio=audio[last_end:start], start=last_end, end=start
             )
-            if end-start > chunk_size_max:
-                while last_end < end:
-                    yield Chunk(is_speech=True, audio=audio[last_end:last_end+chunk_size_max], start=last_end, end=last_end+chunk_size_max)
-                    last_end = last_end+chunk_size_max
-            else:
-                yield Chunk(is_speech=True, audio=audio[start:end], start=start, end=end)
-                last_end = end
+        if end-start > chunk_size_max:
+            chunk_count = (end-start) // chunk_size_max
+            for i in range(0, chunk_count):
+                yield Chunk(is_speech=True, audio=audio[start+(i*chunk_size_max):start+((i+1)*chunk_size_max)],
+                            start=start+(i*chunk_size_max), end=start+((i+1)*chunk_size_max))
+            yield Chunk(is_speech=True, audio=audio[start+chunk_count*chunk_size_max:end],
+                        start=start+chunk_count*chunk_size_max, end=end)
+            last_end=end
         else:
             yield Chunk(is_speech=True, audio=audio[start:end], start=start, end=end)
             last_end = end
