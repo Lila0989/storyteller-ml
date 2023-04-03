@@ -1,4 +1,5 @@
-from tensorflow.contrib.training import HParams
+#from tensorflow.contrib.training import HParams
+from dictobj import DictionaryObject
 from glob import glob
 import os
 
@@ -14,7 +15,7 @@ def get_image_list(data_root, split):
 	return filelist
 
 # Default hyperparameters
-hparams = HParams(
+hparams = DictionaryObject(
 	num_mels=80,  # Number of mel-spectrogram channels and local conditioning dimensionality
 	#  network
 	rescale=True,  # Whether to rescale audio prior to preprocessing
