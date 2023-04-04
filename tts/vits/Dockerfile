@@ -1,6 +1,8 @@
 # ==================== BASE CONTAINER + REQUIREMENTS ====================
 
-FROM nvidia/cuda:12.1.0-devel-ubuntu22.04
+# NB: Make sure the CUDA version supports the driver version:
+# https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
+FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 
 # See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.title='Storyteller ML : VITS'
