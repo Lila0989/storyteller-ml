@@ -17,6 +17,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Notes on packages:
 #  * espeak-ng is critical for speech
+#  * ffmpeg: file length detection
+#  * libmagic: mimetype detection, other magic bytes operations in Python
 #  * screen: not sure why included; I threw in tmux and curl for good measure
 #  * unzip: not sure why included, but perhaps downloading models
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
@@ -24,6 +26,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
         build-essential \
         curl \
         espeak-ng \
+        ffmpeg \
+        libmagic-dev \
+        libmagic1 \
         python3-dev \
         python3-pip \
         python3.10 \

@@ -10,7 +10,7 @@ from tsvitsfe import TSVITSFE
 # For metadata
 import subprocess
 import magic
-import os
+import sys
 
 def print_gpu_info():
     print('========================================')
@@ -119,16 +119,16 @@ if __name__ == "__main__":
 
     input_text = open(args.input_text_filename, 'r').read().strip()
     print(f'Input text: {input_text}')
-    
+
     vits_fe = TSVITSFE()
     print("Loading model...")
     vits_fe.load(args.checkpoint,args.config,args.device)
     print("Doing inference...")
     out_aud = vits_fe.infer(input_text)
-    
+
     out_fn = args.output_audio_filename
     sf.write(out_fn, out_aud, vits_fe.hps.data.sampling_rate)
     print(f"Wrote audio file {out_fn}")
 
     generate_metadata_file(out_fn, args.output_metadata_filename)
-    
+
