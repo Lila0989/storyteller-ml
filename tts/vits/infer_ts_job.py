@@ -2,6 +2,17 @@ import os
 import json
 import argparse
 
+# Adjust NLTK paths
+nltk_cache = os.environ.get('NLTK_DATA', None)
+if nltk_cache:
+    from pathlib import Path
+    Path(nltk_cache).mkdir(parents=True, exist_ok=True)
+    import nltk
+    nltk.data.path = [nltk_cache]
+
+#import nltk
+#print(nltk.data.path)
+
 import torch
 import numpy as np
 import soundfile as sf
