@@ -16,6 +16,22 @@ logging.getLogger('numba').setLevel(logging.WARNING)
 chunks_dict = infer_tool.read_temp("inference/chunks_temp.json")
 
 
+def stitch_wav_tensors_with_crossfade(wav_tensor1,wav_tensor2,sample_rate:int):
+    # Load two audio signals  as NumPy tensors
+
+    # Compute the length of the cross-fade window in samples
+    fade_len = int(0.01 * sample_rate)
+
+    # Create a cross-fade window
+    fade_window = np.hanning(2*fade_len)
+
+    # Concatenate the signals with cross-fade
+    audio_out = np.concatenate((wav_tensor1[:-fade_len], 
+                                wav_tensor1[-fade_len:] * fade_window[:fade_len] + wav_tensor2[:fade_len] * fade_window[fade_len:], 
+                                wav_tensor2[fade_len:]))
+    
+    #sf.write("audio_out.wav", audio_out, sample_rate)
+    return audio_out
 
 def main():
     import argparse
@@ -75,21 +91,72 @@ def main():
                 if slice_tag:
                     print('jump empty segment')
                     _audio = np.zeros(length)
-                else:
-                    # padd
+                    
+                elif length >= 15:
+                    # pad
                     pad_len = int(audio_sr * pad_seconds)
-                    data = np.concatenate([np.zeros([pad_len]), data, np.zeros([pad_len])])
-                    raw_path = io.BytesIO()
-                    soundfile.write(raw_path, data, audio_sr, format="wav")
-                    raw_path.seek(0)
-                    out_audio, out_sr = svc_model.infer(spk, tran, raw_path,
-                                                        cluster_infer_ratio=cluster_infer_ratio,
-                                                        auto_predict_f0=auto_predict_f0,
-                                                        noice_scale=noice_scale
-                                                        )
-                    _audio = out_audio.cpu().numpy()
-                    pad_len = int(svc_model.target_sample * pad_seconds)
-                    _audio = _audio[pad_len:-pad_len]
+                    # if chunk size is too large more than 15 seconds break it into smaller pieces because sliced by large amounts
+                    # final piece
+                    final_cross_faded_chunk_wav_tensor = None
+                    # chunk into smaller pieces cross fade 
+                    # Set the length of each chunk in seconds
+                    chunk_length = 15
+                    # Calculate the number of samples in each chunk
+                    chunk_samples = chunk_length * audio_sr
+                    # Calculate the total number of chunks
+                    total_chunks = int(len(data) / chunk_samples)
+                    # Calculate the number of remaining samples
+                    remaining_samples = len(data) - (total_chunks * chunk_samples)
+                    # Add an additional chunk for any remaining samples
+                    if remaining_samples > 0:
+                        total_chunks += 1
+                    # Slice the WAV tensor into chunks
+                    chunks = [data[i * chunk_samples:min((i + 1) * chunk_samples, len(data))] for i in range(total_chunks)]
+                    
+                    for chunk in chunks:
+                        # prepare for inference
+                        data = np.concatenate([np.zeros([pad_len]), chunk, np.zeros([pad_len])])
+                        
+                        # Testing writes to the audio to do a match up.
+                        
+                        soundfile.write(raw_path, data, audio_sr, format="wav")
+                        raw_path.seek(0)     
+
+                        out_audio, out_sr = svc_model.infer(spk, tran, raw_path,
+                                                            cluster_infer_ratio=cluster_infer_ratio,
+                                                            auto_predict_f0=auto_predict_f0,
+                                                            noice_scale=noice_scale
+                                                            )
+                        #trim padded audio by new sample length and cross fade
+                        pad_len = int(svc_model.target_sample * pad_seconds)
+                        _audio = _audio[pad_len:-pad_len]
+                        _audio = out_audio.cpu().numpy()
+                        
+                        if final_cross_faded_chunk_wav_tensor == None:
+                            final_cross_faded_chunk_wav_tensor = _audio
+                        else:
+                            final_cross_faded_chunk_wav_tensor = stitch_wav_tensors_with_crossfade(wav_tensor1=final_cross_faded_chunk_wav_tensor,wav_tensor2=_audio,sample_rate=svc_model.target_sample)
+                        
+                        _audio = final_cross_faded_chunk_wav_tensor
+                        
+                    else:
+                        data = np.concatenate([np.zeros([pad_len]), data, np.zeros([pad_len])])
+                        raw_path = io.BytesIO()
+                        
+                        soundfile.write(raw_path, data, audio_sr, format="wav")
+                        raw_path.seek(0)          
+                        
+                        out_audio, out_sr = svc_model.infer(spk, tran, raw_path,
+                                                            cluster_infer_ratio=cluster_infer_ratio,
+                                                            auto_predict_f0=auto_predict_f0,
+                                                            noice_scale=noice_scale
+                                                            )
+                        _audio = out_audio.cpu().numpy()
+                        
+                        #trim padded audio by new sample length
+                        pad_len = int(svc_model.target_sample * pad_seconds)
+                        # trim padded both sides with new sample ra
+                        _audio = _audio[pad_len:-pad_len]
 
                 audio.extend(list(infer_tool.pad_array(_audio, length)))
             key = "auto" if auto_predict_f0 else f"{tran}key"
