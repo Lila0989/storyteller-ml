@@ -106,7 +106,7 @@ inference_args = {
     'max_decoder_steps': max_decoder_steps,
 }
 
-LOGGER.info(f"running inference with args: {inference_args}")
+LOGGER.info("running inference with args: {}".format(str(inference_args)))
 
 
 # ========== INFERENCE ==========
