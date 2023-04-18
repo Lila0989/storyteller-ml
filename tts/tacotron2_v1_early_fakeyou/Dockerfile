@@ -33,7 +33,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # RUN apt-get update \
 #     && apt-get install -y \
 RUN apt-get update
-#RUN apt-cache search python3.8
 
 # NB: Here we install nvidia drivers
 # NB: Avoid keyboard prompt
@@ -44,7 +43,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # Notes on packages:
 #  * software-properties-common - needed for `apt-add-repository`
 #  * pciutils - needed for `lspci | grep -i nvidia`
-RUN apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y \
         build-essential \
         curl \
         cython3 \
@@ -72,7 +72,6 @@ RUN apt-get install -y \
         sox \
         tmux \
         unzip \
-        vim \
         wget
 
 # Wav2Lip needs Python3.6
@@ -80,12 +79,14 @@ RUN apt-get install -y \
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update
 RUN apt-get install -y \
+        python3-pip \
         python3.6 \
         python3.6-dev \
-        python3.6-pip \
         python3.6-venv
 
 RUN python3.6 --version
+
+RUN python3.6 -m pip install pip
 
 # ==================== Tacotron, Waveglow, HifiGan, etc. ====================
 
@@ -99,9 +100,9 @@ WORKDIR models/tts
 
 # NB: Not sure if we need Python3.6 for Tacotron2, but Python3.8 gave me trouble.
 # NB: Setuptools fix: https://github.com/tensorflow/tensorflow/issues/34302#issuecomment-554450289
-RUN pip3 install --upgrade pip setuptools \
-  && pip3 install -r requirements-tacotron-python36.txt \
-  && pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113 
+RUN python3.6 -m pip install --upgrade pip setuptools \
+  && python3.6 -m pip install -r requirements-tacotron-python36.txt \
+  && python3.6 -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113 
 
 # Final image
 #  FROM ubuntu:xenial
