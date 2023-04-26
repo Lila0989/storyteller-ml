@@ -34,18 +34,11 @@ COPY poetry.lock .
 COPY requirements.txt . 
 COPY requirements-without-poetry.txt . 
 
-#RUN python3 -m venv python \
-#  && source python/bin/activate
-#  && pip install -r requirements.xt
-
 RUN pip install -r requirements-without-poetry.txt 
 
-#COPY . . 
-
-#RUN pip install 
-#RUN $HOME/.poetry/bin/poetry install
-#RUN /root/.local/bin/poetry install -e .
-#RUN pip install -e .
+RUN python3 -m venv python \
+  && . python/bin/activate \
+  && pip install -r requirements-without-poetry.txt
 
 WORKDIR /
 
