@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import sys
+#sys.path.append(".")
+sys.path.append("/models/voice_conversion/so-vits-svc/src/so_vits_svc_fork")
+
 import os
 from logging import (
     DEBUG,
@@ -194,6 +198,7 @@ def infer(
 ):
     """Inference"""
     from .inference_main import infer
+    #from inference_main import infer
 
     if not auto_predict_f0:
         LOG.warning(
