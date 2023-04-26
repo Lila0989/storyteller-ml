@@ -20,10 +20,25 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 
+RUN mkdir /install
+WORKDIR /install
 
+#RUN curl -sSL https://install.python-poetry.org | python3 -
+
+#COPY pyproject.toml . 
+#COPY poetry.lock . 
+#COPY requirements.txt . 
+COPY requirements-without-poetry.txt . 
+
+#RUN pip install -r requirements-without-poetry.txt 
+
+RUN python3 -m venv python \
+  && . python/bin/activate \
+  && pip install -r requirements-without-poetry.txt
+
+WORKDIR /
 
 COPY . /models/voice_conversion/so-vits-svc
-
-WORKDIR /models/voice_conversion/so-vits-svc
-RUN pip install -e .
-WORKDIR /
+#WORKDIR /models/voice_conversion/so-vits-svc
+#RUN pip install -e .
+#WORKDIR /
