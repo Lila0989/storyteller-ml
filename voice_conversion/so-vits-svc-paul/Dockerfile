@@ -23,18 +23,14 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir /install
 WORKDIR /install
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+#RUN curl -sSL https://install.python-poetry.org | python3 -
 
-#WORKDIR / 
-
-#RUN find . | grep poetry
-
-COPY pyproject.toml . 
-COPY poetry.lock . 
-COPY requirements.txt . 
+#COPY pyproject.toml . 
+#COPY poetry.lock . 
+#COPY requirements.txt . 
 COPY requirements-without-poetry.txt . 
 
-RUN pip install -r requirements-without-poetry.txt 
+#RUN pip install -r requirements-without-poetry.txt 
 
 RUN python3 -m venv python \
   && . python/bin/activate \
