@@ -22,6 +22,8 @@ import pyinputplus as pyip
 import torch
 from rich.logging import RichHandler
 
+print("Env vars:")
+print(os.environ)
 
 def init_logger() -> None:
     IN_COLAB = os.getenv("COLAB_RELEASE_TAG")
