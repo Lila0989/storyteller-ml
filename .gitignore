@@ -16,11 +16,12 @@ secrets.yaml
 *.pyc
 __pycache__/
 
-# Python virtual environments (named "python")
+# Python virtual environments (typically named "python")
 models/Wav2Lip/python/
 models/tacotron2/python/
 tts/python/
 tts/tacotron2_v1_early_fakeyou/python/
+tts/vits/python/
 voice_conversion/softvc/python/
 
 # Rust build
