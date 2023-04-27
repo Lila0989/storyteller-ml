@@ -32,8 +32,7 @@ COPY requirements-without-poetry.txt .
 
 #RUN pip install -r requirements-without-poetry.txt 
 
-# NB: --copies flag creates a "thick" venv that copies the system python binary
-RUN python3 -m venv --copies python \
+RUN python3 -m venv python \
   && . python/bin/activate \
   && pip install -r requirements-without-poetry.txt
 

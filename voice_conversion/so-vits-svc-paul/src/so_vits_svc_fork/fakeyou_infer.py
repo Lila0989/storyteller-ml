@@ -25,6 +25,25 @@ from rich.logging import RichHandler
 print("Env vars:")
 print(os.environ)
 
+
+def print_gpu_info():
+    print('========================================')
+    print('Python interpreter', sys.executable)
+    print('PyTorch version', torch.__version__)
+    print('CUDA Available?', torch.cuda.is_available())
+    print('CUDA Device count', torch.cuda.device_count())
+    print('CUDA architectures library was compiled for', torch.cuda.get_arch_list())
+
+    #try:
+    #    from tensorflow.python.client import device_lib
+    #    print('local devices', str(device_lib.list_local_devices()).replace("\n", "\n  "))
+    #except ImportError:
+    #    print('no tensorflow - cannot list devices')
+    #    pass
+    print('========================================', flush=True)
+
+print_gpu_info()
+
 def init_logger() -> None:
     IN_COLAB = os.getenv("COLAB_RELEASE_TAG")
     IS_TEST = "test" in Path(__file__).parent.stem
