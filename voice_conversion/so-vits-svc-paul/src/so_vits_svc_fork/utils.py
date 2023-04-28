@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import json
 import re
 from itertools import groupby
@@ -312,9 +313,19 @@ def ensure_pretrained_model(folder_path: Path) -> None:
         if not model_path.exists():
             download_file(model_url, model_path, desc=f"Downloading {model_path.name}")
 
+def fakeyou_hubert_path():
+    """
+    Env var `HUBERT_PATH` lets external callers set where Hubert gets loaded or saved.
+    """
+    default_path = 'checkpoint_best_legacy_500.pt' # current directory
+    hubert_path = os.getenv('HUBERT_PATH')
+    if not hubert_path:
+        hubert_path = default_path
+    return Path(hubert_path)
 
 def ensure_hubert_model() -> Path:
-    vec_path = Path("checkpoint_best_legacy_500.pt")
+    # NB(bt): We need to control where hubert gets loaded from / saved to.
+    vec_path = fakeyou_hubert_path()
     vec_path.parent.mkdir(parents=True, exist_ok=True)
     if not vec_path.exists():
         # url = "http://obs.cstcloud.cn/share/obs/sankagenkeshi/checkpoint_best_legacy_500.pt"
