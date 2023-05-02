@@ -165,32 +165,71 @@ class Svc:
             "crepe", "crepe-tiny", "parselmouth", "dio", "harvest"
         ] = "dio",
     ):
+        LOG.warn("get_unit_f0(): f0_method = {}".format(f0_method))
+
+        LOG.warn("get_unit_f0(): compute_f0() ...")
+
         f0 = utils.compute_f0(
             audio,
             sampling_rate=self.target_sample,
             hop_length=self.hop_size,
             method=f0_method,
         )
+
+        LOG.warn("get_unit_f0(): compute_f0() - END") 
+
+        LOG.warn("get_unit_f0(): interpolate_f0()... ") 
+
         f0, uv = utils.interpolate_f0(f0)
+
+        LOG.warn("get_unit_f0(): interpolate_f0() - END") 
+
         f0 = torch.FloatTensor(f0)
         uv = torch.FloatTensor(uv)
         f0 = f0 * 2 ** (tran / 12)
         f0 = f0.unsqueeze(0).to(self.dev)
         uv = uv.unsqueeze(0).to(self.dev)
 
+        LOG.warn("get_unit_f0(): librosa.resample() ...") 
+
         wav16k = librosa.resample(
             audio, orig_sr=self.target_sample, target_sr=HUBERT_SAMPLING_RATE
         )
+
+        LOG.warn("get_unit_f0(): librosa.resample() - END") 
+
+        LOG.warn("get_unit_f0(): torch.from_numpy()... ") 
         wav16k = torch.from_numpy(wav16k).to(self.dev)
+
+        LOG.warn("get_unit_f0(): torch.from_numpy() - END ") 
+
+        LOG.warn("get_unit_f0(): utils.get_hubert_contet() ...") 
+
         c = utils.get_hubert_content(self.hubert_model, wav_16k_tensor=wav16k)
+
+        LOG.warn("get_unit_f0(): utils.get_hubert_contet() - END") 
+
+        LOG.warn("get_unit_f0(): utils.repeat_expand_2d() ... ") 
+
         c = utils.repeat_expand_2d(c.squeeze(0), f0.shape[1])
 
+        LOG.warn("get_unit_f0(): utils.repeat_expand_2d() - DONE") 
+
         if cluster_infer_ratio != 0:
+            LOG.warn("get_unit_f0(): cluster.get_cluster_center_result() ...") 
+
             cluster_c = cluster.get_cluster_center_result(
                 self.cluster_model, c.cpu().numpy().T, speaker
             ).T
+
+            LOG.warn("get_unit_f0(): cluster.get_cluster_center_result() - END") 
+
             cluster_c = torch.FloatTensor(cluster_c).to(self.dev)
             c = cluster_infer_ratio * cluster_c + (1 - cluster_infer_ratio) * c
+
+            LOG.warn("get_unit_f0(): cluster.get_cluster_center_result() - MATH DONE") 
+
+        LOG.warn("get_unit_f0(): c.unsqueze()") 
 
         c = c.unsqueeze(0)
         return c, f0, uv
