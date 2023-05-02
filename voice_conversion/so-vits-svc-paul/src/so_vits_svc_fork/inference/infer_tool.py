@@ -217,22 +217,36 @@ class Svc:
                     f"Speaker id {speaker} >= number of speakers {len(self.spk2id.__dict__)}"
                 )
         else:
+            LOG.warning(f"infer(): Setting speaker...")
+
             if speaker in self.spk2id.__dict__:
                 speaker_id = self.spk2id.__dict__[speaker]
             else:
                 LOG.warning(f"Speaker {speaker} is not found. Use speaker 0 instead.")
                 speaker_id = 0
+
+            LOG.warning(f"infer(): Setting speaker - DONE")
+
         sid = torch.LongTensor([int(speaker_id)]).to(self.dev).unsqueeze(0)
 
         # get unit f0
+        LOG.warning(f"infer(): get_unit_f0() ...")
+
         c, f0, uv = self.get_unit_f0(
             audio, transpose, cluster_infer_ratio, speaker, f0_method
         )
+
+        LOG.warning(f"infer(): get_unit_f0() - DONE ")
+
         if "half" in self.net_g_path and torch.cuda.is_available():
+            LOG.warning(f"infer(): get_unit_f0() self half...")
             c = c.half()
+            LOG.warning(f"infer(): get_unit_f0() self half - DONE")
 
         # inference
         with torch.no_grad():
+            LOG.warning(f"infer(): infer()... ")
+
             with timer() as t:
                 audio = self.net_g_ms.infer(
                     c,
@@ -243,6 +257,9 @@ class Svc:
                     noice_scale=noise_scale,
                 )[0, 0].data.float()
             realtime_coef = len(audio) / (t.elapsed * self.target_sample)
+            
+            LOG.warning(f"infer(): infer() - DONE !!!")
+
             LOG.info(
                 f"Inferece time: {t.elapsed:.2f}s, Realtime coef: {realtime_coef:.2f} "
                 f"Input shape: {audio.shape}, Output shape: {audio.shape}"
