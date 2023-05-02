@@ -111,14 +111,31 @@ class Svc:
         else:
             self.dev = torch.device(device)
         self.net_g_ms = None
+
+        LOG.info("Calling utils.get_hparams_from_file() ...")
+
         self.hps_ms = utils.get_hparams_from_file(config_path)
         self.target_sample = self.hps_ms.data.sampling_rate
         self.hop_size = self.hps_ms.data.hop_length
         self.spk2id = self.hps_ms.spk
+
+        LOG.info("setting self.hubert_model = utils.get_hubert_model() ... ")
         self.hubert_model = utils.get_hubert_model().to(self.dev)
+
+        LOG.info("done setting self.hubert_model = utils.get_hubert_model() ... ")
+
+        LOG.info("Calling self.load_model() ...")
+
         self.load_model()
+
+        LOG.info("Done with: Calling self.load_model() ...")
+
         if cluster_model_path is not None and Path(cluster_model_path).exists():
+            LOG.warn("cluster.get_cluster_model() ... ")
+
             self.cluster_model = cluster.get_cluster_model(cluster_model_path)
+
+            LOG.warn("done with: cluster.get_cluster_model() ... ")
 
     def load_model(self):
         self.net_g_ms = SynthesizerTrn(
@@ -126,7 +143,13 @@ class Svc:
             self.hps_ms.train.segment_size // self.hps_ms.data.hop_length,
             **self.hps_ms.model,
         )
+
+        LOG.warn("load_model() -> utils.load_checkpoint() ... ")
+
         _ = utils.load_checkpoint(self.net_g_path, self.net_g_ms, None)
+
+        LOG.warn("done with: load_model() -> utils.load_checkpoint() ... ")
+
         if "half" in self.net_g_path and torch.cuda.is_available():
             _ = self.net_g_ms.half().eval().to(self.dev)
         else:
@@ -260,6 +283,9 @@ class Svc:
             )
             // 2
         )
+
+        LOG.info("LOOP: for chunk in split_silence() ... ")
+
         for chunk in split_silence(
             audio,
             top_db=-db_thresh,
@@ -280,6 +306,9 @@ class Svc:
                         np.zeros([pad_len], dtype=np.float32),
                     ]
                 )
+
+                LOG.info("self.infer() [inside loop]")
+
                 audio_chunk_pad_infer_tensor, _ = self.infer(
                     speaker,
                     transpose,

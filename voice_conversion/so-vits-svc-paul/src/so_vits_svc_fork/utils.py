@@ -330,20 +330,33 @@ def ensure_hubert_model() -> Path:
     if not vec_path.exists():
         # url = "http://obs.cstcloud.cn/share/obs/sankagenkeshi/checkpoint_best_legacy_500.pt"
         # url = "https://huggingface.co/innnky/contentvec/resolve/main/checkpoint_best_legacy_500.pt"
+
+        LOG.warn("DOWNLOADING HUBERT! NOT ON FILESYSTEM!")
+        LOG.warn("download_file() ...")
+
         url = "https://huggingface.co/therealvul/so-vits-svc-4.0-init/resolve/main/checkpoint_best_legacy_500.pt"
         download_file(url, vec_path, desc="Downloading Hubert model")
+
+        LOG.warn("done with download_file()")
+
     return vec_path
 
 
 def get_hubert_model():
+    LOG.warn("ensure_hubert_model() ... ")
+
     vec_path = ensure_hubert_model()
     from fairseq import checkpoint_utils
+
+    LOG.warn("checkpoint_utils.load_model_ensemble_and_task() ... ")
 
     models, saved_cfg, task = checkpoint_utils.load_model_ensemble_and_task(
         [vec_path.as_posix()],
         suffix="",
     )
     model = models[0]
+
+    LOG.warn("model.eval() ... ")
     model.eval()
     return model
 

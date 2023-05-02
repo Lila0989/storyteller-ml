@@ -44,6 +44,9 @@ def infer(
     input_path = Path(input_path)
     config_path = Path(config_path)
     cluster_model_path = Path(cluster_model_path) if cluster_model_path else None
+
+    LOG.info("Calling Svc()...")
+
     svc_model = Svc(
         net_g_path=model_path.as_posix(),
         config_path=config_path.as_posix(),
@@ -53,7 +56,12 @@ def infer(
         device=device,
     )
 
+    LOG.info("Calling librosa.load()...")
+
     audio, _ = librosa.load(input_path, sr=svc_model.target_sample)
+
+    LOG.info("Calling svc_model.infer_silence()...")
+
     audio = svc_model.infer_silence(
         audio.astype(np.float32),
         speaker=speaker,
@@ -67,6 +75,8 @@ def infer(
         chunk_seconds=chunk_seconds,
         absolute_thresh=absolute_thresh,
     )
+
+    LOG.info("Calling soundfile.write()...")
 
     soundfile.write(output_path, audio, svc_model.target_sample)
 

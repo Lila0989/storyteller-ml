@@ -238,6 +238,9 @@ def infer(
     config_path = Path(config_path)
     if cluster_model_path is not None:
         cluster_model_path = Path(cluster_model_path)
+    
+    LOG.info("Calling infer()...")
+
     infer(
         input_path=input_path,
         output_path=output_path,
