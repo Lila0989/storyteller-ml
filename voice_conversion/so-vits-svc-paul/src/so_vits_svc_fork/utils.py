@@ -394,7 +394,13 @@ def load_checkpoint(
 ):
     if not Path(checkpoint_path).is_file():
         raise FileNotFoundError(f"File {checkpoint_path} not found")
+
+    LOG.info(f"load_checkpoint() - torch.load() ... ")
+
     checkpoint_dict = torch.load(checkpoint_path, map_location="cpu")
+
+    LOG.info(f"load_checkpoint() - torch.load() - DONE")
+
     iteration = checkpoint_dict["iteration"]
     learning_rate = checkpoint_dict["learning_rate"]
     if (
@@ -402,12 +408,19 @@ def load_checkpoint(
         and not skip_optimizer
         and checkpoint_dict["optimizer"] is not None
     ):
+        LOG.info(f"load_checkpoint() - optimizer.load_state_dict() ...")
         optimizer.load_state_dict(checkpoint_dict["optimizer"])
+        LOG.info(f"load_checkpoint() - optimizer.load_state_dict() - DONE")
+
     saved_state_dict = checkpoint_dict["model"]
     if hasattr(model, "module"):
+        LOG.info(f"load_checkpoint() - model.module.state_dict() ...")
         state_dict = model.module.state_dict()
+        LOG.info(f"load_checkpoint() - model.module.state_dict() - DONE")
     else:
+        LOG.info(f"load_checkpoint() - model.state_dict() ...")
         state_dict = model.state_dict()
+        LOG.info(f"load_checkpoint() - model.state_dict() - DONE")
     new_state_dict = {}
     for k, v in state_dict.items():
         try:
@@ -423,9 +436,12 @@ def load_checkpoint(
             LOG.error("%s is not in the checkpoint" % k)
             new_state_dict[k] = v
     if hasattr(model, "module"):
+        LOG.info(f"load_checkpoint() - [2] model.module.load_state_dict() ...")
         model.module.load_state_dict(new_state_dict)
     else:
+        LOG.info(f"load_checkpoint() - [2] model.load_state_dict() ...")
         model.load_state_dict(new_state_dict)
+
     LOG.info(f"Loaded checkpoint '{checkpoint_path}' (iteration {iteration})")
     return model, optimizer, learning_rate, iteration
 
