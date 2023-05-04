@@ -141,7 +141,7 @@ class Svc:
         _ = utils.load_checkpoint(self.net_g_path, self.net_g, None)
 
         LOG.info(f"Svc.load_model() utils.load_checkpoit() END")
-        
+
         _ = self.net_g.eval().to(self.device, dtype=self.dtype)
 
     def get_unit_f0(
@@ -154,18 +154,28 @@ class Svc:
             "crepe", "crepe-tiny", "parselmouth", "dio", "harvest"
         ] = "dio",
     ):
+        LOG.info(f"Svc.get_unit_f0() compute_f0 BEGIN")
+
         f0 = so_vits_svc_f0.compute_f0(
             audio,
             sampling_rate=self.target_sample,
             hop_length=self.hop_size,
             method=f0_method,
         )
+        LOG.info(f"Svc.get_unit_f0() compute_f0 END")
+
+        LOG.info(f"Svc.get_unit_f0() interpolate_f0 BEGIN")
+
         f0, uv = so_vits_svc_f0.interpolate_f0(f0)
         f0 = torch.as_tensor(f0, dtype=self.dtype, device=self.device)
         uv = torch.as_tensor(uv, dtype=self.dtype, device=self.device)
         f0 = f0 * 2 ** (tran / 12)
         f0 = f0.unsqueeze(0)
         uv = uv.unsqueeze(0)
+
+        LOG.info(f"Svc.get_unit_f0() interpolate_f0 END")
+
+        LOG.info(f"Svc.get_unit_f0() utils.get_content BEGIN")
 
         c = utils.get_content(
             self.hubert_model,
@@ -174,14 +184,26 @@ class Svc:
             self.target_sample,
             self.contentvec_final_proj,
         ).to(self.dtype)
+
+        LOG.info(f"Svc.get_unit_f0() utils.get_content END")
+
+        LOG.info(f"Svc.get_unit_f0() utils.repeat_expand_2d BEGIN")
+
         c = utils.repeat_expand_2d(c.squeeze(0), f0.shape[1])
 
+        LOG.info(f"Svc.get_unit_f0() utils.repeat_expand_2d END")
+
         if cluster_infer_ratio != 0:
+
+            LOG.info(f"Svc.get_unit_f0() cluster.get_cluster_center_result BEGIN [ON CPU!!]")
+
             cluster_c = cluster.get_cluster_center_result(
                 self.cluster_model, c.cpu().numpy().T, speaker
             ).T
             cluster_c = torch.FloatTensor(cluster_c).to(self.device)
             c = cluster_infer_ratio * cluster_c + (1 - cluster_infer_ratio) * c
+
+            LOG.info(f"Svc.get_unit_f0() cluster.get_cluster_center_result END [ON CPU!!]")
 
         c = c.unsqueeze(0)
         return c, f0, uv

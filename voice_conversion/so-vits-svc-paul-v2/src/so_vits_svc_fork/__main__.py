@@ -796,7 +796,7 @@ def clean():
     "-d",
     "--device",
     type=str,
-    default="cpu",
+    default="cuda",
     help="device to use",
 )
 def onnx(

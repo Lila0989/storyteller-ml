@@ -29,19 +29,24 @@ HUBERT_SAMPLING_RATE = 16000
 
 
 def get_optimal_device(index: int = 0) -> torch.device:
+    LOG.warn("util.get_optimal_device()")
     if torch.cuda.is_available():
+        LOG.warn("util.get_optimal_device() ... cuda")
         return torch.device(f"cuda:{index % torch.cuda.device_count()}")
     elif torch.backends.mps.is_available():
+        LOG.warn("util.get_optimal_device() ... mps")
         return torch.device("mps")
     else:
         try:
             import torch_xla.core.xla_model as xm  # noqa
 
             if xm.xrt_world_size() > 0:
+                LOG.warn("util.get_optimal_device() ... xla")
                 return torch.device("xla")
             # return xm.xla_device()
         except ImportError:
             pass
+    LOG.warn("util.get_optimal_device() ... cpu")
     return torch.device("cpu")
 
 

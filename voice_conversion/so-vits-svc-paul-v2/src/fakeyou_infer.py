@@ -196,6 +196,10 @@ def infer(
 ):
     """Inference"""
     #from .inference_main import infer
+
+    LOG.warning(f"Using device: {device}")
+    LOG.warning(f"Model path: {model_path}")
+
     from so_vits_svc_fork.inference.main import infer
 
     if not auto_predict_f0:
