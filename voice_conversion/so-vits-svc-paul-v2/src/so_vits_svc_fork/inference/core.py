@@ -12,8 +12,8 @@ import torch
 from cm_time import timer
 from numpy import dtype, float32, ndarray
 
-import so_vits_svc_fork.f0
-from so_vits_svc_fork import cluster, utils
+from .. import f0
+from . import cluster, utils
 
 from ..modules.synthesizers import SynthesizerTrn
 from ..utils import get_optimal_device
