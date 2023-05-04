@@ -113,13 +113,16 @@ from joblib import Parallel, delayed
 def ensure_pretrained_model(
     folder_path: Path | str, type_: str, **tqdm_kwargs: Any
 ) -> tuple[Path, ...] | None:
+    LOG.info("ensure_pretrained_model: Saving pretrained model to {}".format(folder_path))
     folder_path = Path(folder_path)
     models_candidates = PRETRAINED_MODEL_URLS.get(type_, None)
     if models_candidates is None:
         LOG.warning(f"Unknown pretrained model type: {type_}")
         return
     for model_urls in models_candidates:
+        LOG.info("ensure_pretrained_model: model urls: {}".format(model_urls))
         paths = [folder_path / model_url.split("/")[-1] for model_url in model_urls]
+        LOG.info("ensure_pretrained_model: file paths: {}".format(paths))
         try:
             Parallel(n_jobs=len(paths))(
                 [
