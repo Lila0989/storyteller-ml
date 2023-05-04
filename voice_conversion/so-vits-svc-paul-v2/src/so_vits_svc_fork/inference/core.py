@@ -129,12 +129,19 @@ class Svc:
             self.cluster_model = cluster.get_cluster_model(cluster_model_path)
 
     def load_model(self):
+        LOG.info(f"Svc.load_model() ... ")
         self.net_g = SynthesizerTrn(
             self.hps.data.filter_length // 2 + 1,
             self.hps.train.segment_size // self.hps.data.hop_length,
             **self.hps.model,
         )
+
+        LOG.info(f"Svc.load_model() utils.load_checkpoit() BEGIN")
+
         _ = utils.load_checkpoint(self.net_g_path, self.net_g, None)
+
+        LOG.info(f"Svc.load_model() utils.load_checkpoit() END")
+        
         _ = self.net_g.eval().to(self.device, dtype=self.dtype)
 
     def get_unit_f0(

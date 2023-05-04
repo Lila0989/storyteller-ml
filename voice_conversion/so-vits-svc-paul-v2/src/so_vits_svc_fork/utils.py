@@ -151,6 +151,7 @@ class HubertModelWithFinalProj(HubertModel):
 def get_hubert_model(
     device: str | torch.device, final_proj: bool = True
 ) -> HubertModel:
+    LOG.info("get_hubert_model()")
     if final_proj:
         return HubertModelWithFinalProj.from_pretrained(
             "lengyue233/content-vec-best"
@@ -233,6 +234,9 @@ def load_checkpoint(
     optimizer: torch.optim.Optimizer | None = None,
     skip_optimizer: bool = False,
 ) -> tuple[torch.nn.Module, torch.optim.Optimizer | None, float, int]:
+
+    LOG.info(f"utils.load_checkpoint(): path = {checkpoint_path}")
+
     if not Path(checkpoint_path).is_file():
         raise FileNotFoundError(f"File {checkpoint_path} not found")
     with Path(checkpoint_path).open("rb") as f:
@@ -242,15 +246,28 @@ def load_checkpoint(
             )
             # NB(paul): iirc changing this to false prevented an error at some point
             # but it also worsens security
-            checkpoint_dict = torch.load(f, map_location="cpu", weights_only=False)
+
+            LOG.info("utils.load_checkpoint(): torch.load() BEGIN")
+
+            # NB(bt, 2023-05-04): This was set to CPU! Maybe this is the fix
+            # checkpoint_dict = torch.load(f, map_location="cpu", weights_only=False)
+            checkpoint_dict = torch.load(f, weights_only=False)
+
+            LOG.info("utils.load_checkpoint(): torch.load() END")
+
     iteration = checkpoint_dict["iteration"]
     learning_rate = checkpoint_dict["learning_rate"]
 
     # safe load module
+    LOG.info("utils.load_checkpoint(): safe_load() BEGIN")
+
     if hasattr(model, "module"):
         safe_load(model.module, checkpoint_dict["model"])
     else:
         safe_load(model, checkpoint_dict["model"])
+
+    LOG.info("utils.load_checkpoint(): safe_load() END")
+
     # safe load optim
     if (
         optimizer is not None
@@ -259,7 +276,12 @@ def load_checkpoint(
     ):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
+
+            LOG.info("utils.load_checkpoint(): safe_load() optimizer BEGIN")
+
             safe_load(optimizer, checkpoint_dict["optimizer"])
+
+            LOG.info("utils.load_checkpoint(): safe_load() optimizer END")
 
     LOG.info(f"Loaded checkpoint '{checkpoint_path}' (epoch {iteration})")
     return model, optimizer, learning_rate, iteration
