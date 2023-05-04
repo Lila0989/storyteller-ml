@@ -10,8 +10,8 @@ import soundfile
 import torch
 from cm_time import timer
 
-from so_vits_svc_fork.inference.core import RealtimeVC, RealtimeVC2, Svc
-from so_vits_svc_fork.utils import get_optimal_device
+from core import RealtimeVC, RealtimeVC2, Svc
+from utils import get_optimal_device
 
 LOG = getLogger(__name__)
 
