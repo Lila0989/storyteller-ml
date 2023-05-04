@@ -196,7 +196,7 @@ def infer(
 ):
     """Inference"""
     #from .inference_main import infer
-    from inference_main import infer
+    from inference.main import infer
 
     if not auto_predict_f0:
         LOG.warning(
