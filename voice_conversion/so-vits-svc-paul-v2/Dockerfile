@@ -33,5 +33,5 @@ RUN python3 -m venv python \
 
 WORKDIR /
 
-COPY . /models/voice_conversion/so-vits-svc-2
+COPY . /models/voice_conversion/so-vits-svc
 
