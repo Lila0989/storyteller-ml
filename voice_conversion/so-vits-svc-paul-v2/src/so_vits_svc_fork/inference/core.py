@@ -12,11 +12,12 @@ import torch
 from cm_time import timer
 from numpy import dtype, float32, ndarray
 
-from .. import f0
-from . import cluster, utils
+from so_vits_svc_fork import f0
+from so_vits_svc_fork import utils
+from so_vits_svc_fork import cluster
 
-from ..modules.synthesizers import SynthesizerTrn
-from ..utils import get_optimal_device
+from so_vits_svc_fork.modules.synthesizers import SynthesizerTrn
+from so_vits_svc_fork.utils import get_optimal_device
 
 LOG = getLogger(__name__)
 
