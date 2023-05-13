@@ -18,7 +18,6 @@ class MDXNetMain():
         self.window = torch.hann_window(self.n_fft)
         self.freq_pad = torch.zeros([1, self.dim_c, self.n_bins-self.dim_f, self.dim_t])
         self.adjust = 1
-        self.device="cpu"
         self.ort_ = ort.InferenceSession("models/UVR_MDXNET_Main.onnx")
         self.model_run = lambda spek:self.ort_.run(None, {'input': spek})[0]
 
@@ -44,7 +43,7 @@ class MDXNetMain():
     def run_model(self, mix, is_ckpt=False, is_match_mix=False):
             spek = self.stft(mix)*self.adjust
             spek[:, :, :3, :] *= 0
-            spec_pred = self.model_run(spek.cpu().float().numpy())
+            spec_pred = self.model_run(spek.float().numpy())
             vocal = self.istft(torch.from_numpy(spec_pred)).transpose(0,1).reshape(2, -1).numpy()
             return vocal
 
@@ -58,7 +57,11 @@ def normalize_two_stem(wave, mix, is_normalize=False):
     return wave, mix
 
 def process(input_file_path, vocal_output_path, instrumental_output_path):
-    wav = torchaudio.load(input_file_path)[0]
+    wav, _ = librosa.load(input_file_path, sr=44100, mono=False)
+    if wav.ndim == 1:
+        wav = np.array([wav, wav])
+    if wav.ndim != 2:
+        raise Exception("Only mono or stereo files are supported")
     mdx = MDXNetMain()
     full_size = ((wav.shape[1] // mdx.chunk_size)+1)*mdx.chunk_size
     full_vocal = np.ndarray([2, full_size])
@@ -66,9 +69,9 @@ def process(input_file_path, vocal_output_path, instrumental_output_path):
     for i in range(0, wav.shape[1], mdx.chunk_size):
         chunk_wav_pad = np.zeros([2, mdx.chunk_size])
         if i + mdx.chunk_size < wav.shape[1]:
-            chunk_wav_pad[:2, :mdx.chunk_size] = wav[:2, i:i+mdx.chunk_size].numpy()
+            chunk_wav_pad[:2, :mdx.chunk_size] = wav[:2, i:i+mdx.chunk_size]
         else:
-            chunk_wav_pad[:2, i+mdx.chunk_size:full_size] = wav[:2, i*mdx.chunk_size:full_size].numpy()
+            chunk_wav_pad[:2, i+mdx.chunk_size:full_size] = wav[:2, i*mdx.chunk_size:full_size]
         chunk_vocal = mdx.run_model(chunk_wav_pad)
         chunk_wav_pad, chunk_vocal = normalize_two_stem(chunk_wav_pad, chunk_vocal)
         chunk_inst = chunk_wav_pad - chunk_vocal
@@ -80,11 +83,3 @@ def process(input_file_path, vocal_output_path, instrumental_output_path):
 
     torchaudio.save(vocal_output_path, torch.from_numpy(full_vocal).float(), 44100)
     torchaudio.save(instrumental_output_path, torch.from_numpy(full_instrumental).float(), 44100)
-
-
-if __name__ == "__main__":
-    process(
-            "/mnt/nas/media/Music/Days N' Daze/Rogue Taxidemy [REMASTER] [WAV] [LOSSLESS]/06 Blue Jays_1644.wav",
-            "vocals.wav",
-            "inst.wav"
-   )
