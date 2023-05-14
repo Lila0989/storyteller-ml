@@ -18,7 +18,13 @@ class MDXModel:
         self.window = torch.hann_window(self.n_fft)
         self.freq_pad = torch.zeros([1, self.dim_c, self.n_bins-self.dim_f, self.dim_t])
         self.adjust = 1
-        self.ort_ = ort.InferenceSession("models/" + model_file)
+        self.ort_ = ort.InferenceSession(
+            "models/" + model_file,
+            providers=[
+                "CUDAExecutionProvider",
+                "CPUExecutionProvider"
+            ]
+        )
         self.model_run = lambda spek:self.ort_.run(None, {'input': spek})[0]
 
 
@@ -100,5 +106,5 @@ class ReverbHQ(MDXModel):
 
 
 if __name__ == "__main__":
-    ReverbHQ().process("/mnt/8terra/tts/voice-conversion-sources/eyeofthetiger.wav", "/tmp/stem1.wav", "/tmp/stem2.wav")
-    #MDXNetMain().process("/tmp/Carly Rae Jepsen - Call Me Maybe [fWNaR-rxAic].webm", "stem1.wav", "stem2.wav")
+    #ReverbHQ().process("/mnt/8terra/tts/voice-conversion-sources/eyeofthetiger.wav", "/tmp/stem1.wav", "/tmp/stem2.wav")
+    MDXNetMain().process("/tmp/Carly Rae Jepsen - Call Me Maybe [fWNaR-rxAic].webm", "stem1.wav", "stem2.wav")

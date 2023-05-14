@@ -56,14 +56,12 @@ class VR_Arch:
         self.primary_source = spec_utils.normalize(self.spec_to_wav(y_spec), self.is_normalization).T
         if not self.model_samplerate == 44100:
             self.primary_source = librosa.resample(self.primary_source.T, orig_sr=self.model_samplerate, target_sr=44100)
-        print(self.primary_source.shape)
         torchaudio.save(primary_stem_path, torch.from_numpy(self.primary_source).float().T, 44100)
 
         self.secondary_source = self.spec_to_wav(v_spec)
         self.secondary_source = spec_utils.normalize(self.spec_to_wav(v_spec), self.is_normalization).T
         if not self.model_samplerate == 44100:
             self.secondary_source = librosa.resample(self.secondary_source.T, orig_sr=self.model_samplerate, target_sr=44100)
-        print(self.secondary_source.shape)
         torchaudio.save(secondary_stem_path, torch.from_numpy(self.secondary_source).float().T, 44100)
         torch.cuda.empty_cache()
 

@@ -2,3 +2,4 @@
 *.wav
 *.pt
 *.pth
+env/
