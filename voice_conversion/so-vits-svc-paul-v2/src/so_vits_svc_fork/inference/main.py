@@ -54,11 +54,13 @@ def infer(
         device=device,
     )
 
-    LOG.info("infer() librosa.load()")
+    LOG.info("infer() librosa.load() BEGIN")
 
     audio, _ = librosa.load(input_path, sr=svc_model.target_sample)
 
-    LOG.info("infer() svc_model.infer_silence()")
+    LOG.info("infer() librosa.load() END")
+
+    LOG.info("infer() svc_model.infer_silence() BEGIN")
 
     audio = svc_model.infer_silence(
         audio.astype(np.float32),
@@ -74,8 +76,10 @@ def infer(
         absolute_thresh=absolute_thresh,
     )
 
+    LOG.info("infer() svc_model.infer_silence() END")
+
     LOG.info("infer() soundfile.write()")
-    
+
     soundfile.write(output_path, audio, svc_model.target_sample)
 
 
