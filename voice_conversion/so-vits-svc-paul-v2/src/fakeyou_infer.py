@@ -165,6 +165,13 @@ def cli():
     "-r", "--cluster-infer-ratio", type=float, default=0, help="cluster infer ratio"
 )
 @click.option("-n", "--noise-scale", type=float, default=0.4, help="noise scale")
+@click.option(
+    "-fm",
+    "--f0-method",
+    type=click.Choice(["crepe", "crepe-tiny", "parselmouth", "dio", "harvest"]),
+    default="dio",
+    help="f0 prediction method",
+)
 @click.option("-p", "--pad-seconds", type=float, default=0.5, help="pad seconds")
 @click.option(
     "-d",
@@ -189,6 +196,7 @@ def infer(
     auto_predict_f0: bool = False,
     cluster_infer_ratio: float = 0,
     noise_scale: float = 0.4,
+    f0_method: Literal["crepe", "crepe-tiny", "parselmouth", "dio", "harvest"] = "dio",
     pad_seconds: float = 0.5,
     chunk_seconds: float = 0.5,
     absolute_thresh: bool = False,
@@ -234,6 +242,7 @@ def infer(
         auto_predict_f0=auto_predict_f0,
         cluster_infer_ratio=cluster_infer_ratio,
         noise_scale=noise_scale,
+        f0_method=f0_method,
         pad_seconds=pad_seconds,
         chunk_seconds=chunk_seconds,
         absolute_thresh=absolute_thresh,
