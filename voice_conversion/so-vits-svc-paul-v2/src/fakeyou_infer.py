@@ -207,7 +207,9 @@ def infer(
 
     LOG.warning(f"Using device: {device}")
     LOG.warning(f"Model path: {model_path}")
+    LOG.warning(f"auto_predict_f0: {auto_predict_f0}")
     LOG.warning(f"f0 method: {f0_method}")
+    LOG.warning(f"transpose: {transpose}")
 
     from so_vits_svc_fork.inference.main import infer
 
