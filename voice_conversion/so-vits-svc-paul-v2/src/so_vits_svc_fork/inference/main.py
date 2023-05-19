@@ -38,6 +38,8 @@ def infer(
     absolute_thresh: bool = False,
     device: str | torch.device = get_optimal_device(),
 ):
+    LOG.info("infer()")
+    
     model_path = Path(model_path)
     output_path = Path(output_path)
     input_path = Path(input_path)
@@ -52,7 +54,12 @@ def infer(
         device=device,
     )
 
+    LOG.info("infer() librosa.load()")
+
     audio, _ = librosa.load(input_path, sr=svc_model.target_sample)
+
+    LOG.info("infer() svc_model.infer_silence()")
+
     audio = svc_model.infer_silence(
         audio.astype(np.float32),
         speaker=speaker,
@@ -67,6 +74,8 @@ def infer(
         absolute_thresh=absolute_thresh,
     )
 
+    LOG.info("infer() soundfile.write()")
+    
     soundfile.write(output_path, audio, svc_model.target_sample)
 
 

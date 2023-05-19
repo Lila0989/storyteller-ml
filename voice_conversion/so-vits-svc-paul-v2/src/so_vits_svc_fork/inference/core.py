@@ -290,6 +290,7 @@ class Svc:
         absolute_thresh: bool = False,
         # fade_seconds: float = 0.0,
     ) -> np.ndarray[Any, np.dtype[np.float32]]:
+        LOG.info(f"infer_silence(): f0_method = {f0_method}")
         sr = self.target_sample
         result_audio = np.array([], dtype=np.float32)
         chunk_length_min = chunk_length_min = (
