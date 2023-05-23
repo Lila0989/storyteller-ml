@@ -156,7 +156,7 @@ class HubertModelWithFinalProj(HubertModel):
 def get_hubert_model(
     device: str | torch.device, final_proj: bool = True
 ) -> HubertModel:
-    LOG.info("get_hubert_model()")
+    LOG.info(f"get_hubert_model() for device = {device}")
     if final_proj:
         return HubertModelWithFinalProj.from_pretrained(
             "lengyue233/content-vec-best"

@@ -184,6 +184,12 @@ def cli():
 @click.option(
     "-ab", "--absolute-thresh", type=bool, default=False, help="absolute thresh"
 )
+@click.option(
+    "--hacky-fix",
+    type=bool,
+    default=False,
+    help="activate hacky fixes for FakeYou job runner"
+)
 def infer(
     input_path: Path,
     output_path: Path,
@@ -201,6 +207,7 @@ def infer(
     chunk_seconds: float = 0.5,
     absolute_thresh: bool = False,
     device: Literal["cpu", "cuda"] = "cuda" if torch.cuda.is_available() else "cpu",
+    hacky_fix: bool = False,
 ):
     """Inference"""
     #from .inference_main import infer
@@ -210,6 +217,15 @@ def infer(
     LOG.warning(f"auto_predict_f0: {auto_predict_f0}")
     LOG.warning(f"f0 method: {f0_method}")
     LOG.warning(f"transpose: {transpose}")
+
+    if hacky_fix:
+        # NB(bt,2023-05-23): Not sure why so-vits-svc is taking minutes to run.
+        # Maybe this helps?
+        print('torch.cuda.empty_cache() ...')
+        torch.cuda.empty_cache()
+        print('torch._C._jit_set_profiling_mode(False) ...')
+        torch._C._jit_set_profiling_mode(False)
+        print('continuing ...')
 
     from so_vits_svc_fork.inference.main import infer
 
