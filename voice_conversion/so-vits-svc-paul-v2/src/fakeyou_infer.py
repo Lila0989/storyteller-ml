@@ -32,6 +32,7 @@ def print_gpu_info():
     print('PyTorch version', torch.__version__)
     print('CUDA Available?', torch.cuda.is_available())
     print('CUDA Device count', torch.cuda.device_count())
+    print('CUDA threads for parallelizing CPU operations', torch.get_num_threads())
     print('CUDA architectures library was compiled for', torch.cuda.get_arch_list())
 
     #try:
