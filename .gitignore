@@ -12,6 +12,9 @@ secrets.yaml
 *.swp
 *~
 
+# Stupid Mac crap
+.DS_Store
+
 # Python cruft
 *.pyc
 __pycache__/
