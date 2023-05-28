@@ -19,6 +19,9 @@ from so_vits_svc_fork import cluster
 from so_vits_svc_fork.modules.synthesizers import SynthesizerTrn
 from so_vits_svc_fork.utils import get_optimal_device
 
+from so_vits_svc_fork.hack import maybe_hacky_fix_after
+from so_vits_svc_fork.hack import maybe_hacky_fix_before
+
 LOG = getLogger(__name__)
 
 
@@ -220,6 +223,8 @@ class Svc:
             "crepe", "crepe-tiny", "parselmouth", "dio", "harvest"
         ] = "dio",
     ) -> tuple[torch.Tensor, int]:
+        LOG.info(f"Svc.infer()")
+
         audio = audio.astype(np.float32)
         # get speaker id
         if isinstance(speaker, int):
@@ -255,6 +260,8 @@ class Svc:
         # inference
         with torch.no_grad():
             with timer() as t:
+                LOG.info(f"Svc.infer() inference BEGIN ...")
+                maybe_hacky_fix_before()
                 audio = self.net_g.infer(
                     c,
                     f0=f0,
@@ -263,6 +270,8 @@ class Svc:
                     predict_f0=auto_predict_f0,
                     noice_scale=noise_scale,
                 )[0, 0].data.float()
+                LOG.info(f"Svc.infer() inference END");
+                maybe_hacky_fix_after()
             audio_duration = audio.shape[-1] / self.target_sample
             LOG.info(
                 f"Inferece time: {t.elapsed:.2f}s, RTF: {t.elapsed / audio_duration:.2f}"

@@ -23,6 +23,8 @@ from tqdm import tqdm
 from transformers import HubertModel
 
 from so_vits_svc_fork.hparams import HParams
+from so_vits_svc_fork.hack import maybe_hacky_fix_after
+from so_vits_svc_fork.hack import maybe_hacky_fix_before
 
 LOG = getLogger(__name__)
 HUBERT_SAMPLING_RATE = 16000
@@ -156,13 +158,21 @@ class HubertModelWithFinalProj(HubertModel):
 def get_hubert_model(
     device: str | torch.device, final_proj: bool = True
 ) -> HubertModel:
-    LOG.info(f"get_hubert_model() for device = {device}")
+    LOG.info(f"get_hubert_model() for device = {device} BEGIN")
+    hubert = None
     if final_proj:
-        return HubertModelWithFinalProj.from_pretrained(
+        maybe_hacky_fix_before()
+        hubert = HubertModelWithFinalProj.from_pretrained(
             "lengyue233/content-vec-best"
         ).to(device)
+        maybe_hacky_fix_after()
     else:
-        return HubertModel.from_pretrained("lengyue233/content-vec-best").to(device)
+        maybe_hacky_fix_before()
+        hubert = HubertModel.from_pretrained("lengyue233/content-vec-best").to(device)
+        maybe_hacky_fix_after()
+
+    LOG.info(f"get_hubert_model() for device = {device} AFTER")
+    return hubert
 
 
 def get_content(
@@ -172,16 +182,21 @@ def get_content(
     sr: int,
     legacy_final_proj: bool = False,
 ) -> torch.Tensor:
+    LOG.info("HuBERT inference...")
     audio = torch.as_tensor(audio)
     if sr != HUBERT_SAMPLING_RATE:
+        LOG.info("HuBERT inference... AUDIO RESAMPLE")
         audio = (
             torchaudio.transforms.Resample(sr, HUBERT_SAMPLING_RATE)
             .to(audio.device)(audio)
             .to(device)
         )
+        LOG.info("HuBERT inference... AUDIO RESAMPLE DONE")
     if audio.ndim == 1:
         audio = audio.unsqueeze(0)
+    LOG.info("HuBERT inference... BEGIN")
     with torch.no_grad(), timer() as t:
+        maybe_hacky_fix_before()
         if legacy_final_proj:
             warnings.warn("legacy_final_proj is deprecated")
             if not hasattr(cmodel, "final_proj"):
@@ -191,6 +206,7 @@ def get_content(
         else:
             c = cmodel(audio)["last_hidden_state"]
         c = c.transpose(1, 2)
+        maybe_hacky_fix_after()
     wav_len = audio.shape[-1] / HUBERT_SAMPLING_RATE
     LOG.info(
         f"HuBERT inference time  : {t.elapsed:.3f}s, RTF: {t.elapsed / wav_len:.3f}"

@@ -13,6 +13,9 @@ from cm_time import timer
 from so_vits_svc_fork.inference.core import RealtimeVC, RealtimeVC2, Svc
 from so_vits_svc_fork.utils import get_optimal_device
 
+from so_vits_svc_fork.hack import maybe_hacky_fix_after
+from so_vits_svc_fork.hack import maybe_hacky_fix_before
+
 LOG = getLogger(__name__)
 
 
@@ -62,6 +65,7 @@ def infer(
 
     LOG.info("infer() svc_model.infer_silence() BEGIN")
 
+    maybe_hacky_fix_before()
     audio = svc_model.infer_silence(
         audio.astype(np.float32),
         speaker=speaker,
@@ -75,12 +79,14 @@ def infer(
         chunk_seconds=chunk_seconds,
         absolute_thresh=absolute_thresh,
     )
+    maybe_hacky_fix_after()
 
     LOG.info("infer() svc_model.infer_silence() END")
 
     LOG.info("infer() soundfile.write()")
 
     soundfile.write(output_path, audio, svc_model.target_sample)
+    maybe_hacky_fix_after()
 
 
 def realtime(
