@@ -222,11 +222,11 @@ def infer(
     if hacky_fix:
         # NB(bt,2023-05-23): Not sure why so-vits-svc is taking minutes to run.
         # Maybe this helps?
-        print('torch.cuda.empty_cache() ...')
+        LOG.debug('torch.cuda.empty_cache() ...')
         torch.cuda.empty_cache()
-        print('torch._C._jit_set_profiling_mode(False) ...')
+        LOG.debug('torch._C._jit_set_profiling_mode(False) ...')
         torch._C._jit_set_profiling_mode(False)
-        print('continuing ...')
+        LOG.debug('continuing ...')
 
     from so_vits_svc_fork.inference.main import infer
 
