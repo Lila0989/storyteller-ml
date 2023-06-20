@@ -158,7 +158,7 @@ def get_vc(model_path):
         else:
             net_g = SynthesizerTrnMs768NSFsid_nono(*cpt["config"])
     del net_g.enc_q
-    print(net_g.load_state_dict(cpt["weight"], strict=False))ss
+    print(net_g.load_state_dict(cpt["weight"], strict=False))
     net_g.eval().to(device)
     if (is_half):net_g = net_g.half()
     else:net_g = net_g.float()
