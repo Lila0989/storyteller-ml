@@ -90,7 +90,7 @@ class Config:
 f0up_key=sys.argv[1]
 input_path=sys.argv[2]
 index_path=sys.argv[3]
-f0method=sys.argv[4]#harvest or pm
+f0method=sys.argv[4]#harvest, crepe or pm
 opt_path=sys.argv[5]
 model_path=sys.argv[6]
 index_rate=float(sys.argv[7])
