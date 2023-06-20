@@ -21,7 +21,7 @@ Each argument passed to the script is used as follows:
 
 `index_path`: Path to the index file.
 
-`f0method`: F0 estimation method to be used ('harvest' or 'pm').
+`f0method`: F0 estimation method to be used ('harvest' 'crepe' or 'pm').
 
 `opt_path`: Path to the output audio file.
 
