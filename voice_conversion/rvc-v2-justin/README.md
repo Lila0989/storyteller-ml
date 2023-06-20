@@ -27,19 +27,19 @@ Each argument passed to the script is used as follows:
 
 `model_path`: Path to the trained model.
 
-`index_rate`: The rate for the index.
+`index_rate`: The rate for the index. (Search feature ratio)
 
 `device`: The computation device to be used ('cuda:0' for GPU or 'cpu' for CPU).
 
-`is_half`: Boolean value indicating whether to use half precision. Use 'True' for half precision and 'False' for full precision.
+`is_half`: Boolean value indicating whether to use half precision. Use 'True' for half-precision and 'False' for full-precision.
 
-`filter_radius`: The radius of the filter.
+`filter_radius`: The radius of the filter. (If >=3: apply median filtering to the harvested pitch results. The value represents the filter radius and can reduce breathiness.)
 
-`resample_sr`: The sample rate for resampling.
+`resample_sr`: The sample rate for resampling. (Resample the output audio in post-processing to the final sample rate. Set to 0 for no resampling)
 
-`rms_mix_rate`: The RMS mix rate.
+`rms_mix_rate`: The RMS mix rate. (Use the volume envelope of the input to replace or mix with the volume envelope of the output. The closer the ratio is to 1, the more the output envelope is used)
 
-`protect`: The protect value.
+`protect`: The protect value. (Protect voiceless consonants and breath sounds to prevent artifacts such as tearing in electronic music. Set to 0.5 to disable. Decrease the value to increase protection, but it may reduce indexing accuracy:)
 
 
 See `fakeyou_infer-v2.py` for more info
