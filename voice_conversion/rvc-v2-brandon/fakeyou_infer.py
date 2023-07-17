@@ -1,8 +1,5 @@
 """
-v1
-runtime\python.exe myinfer-v2-0528.py 0 "E:\codes\py39\RVC-beta\todo-songs" "E:\codes\py39\logs\mi-test\added_IVF677_Flat_nprobe_7.index" harvest "E:\codes\py39\RVC-beta\output" "E:\codes\py39\test-20230416b\weights\mi-test.pth" 0.66 cuda:0 True 3 0 1 0.33
-v2
-runtime\python.exe myinfer-v2-0528.py 0 "E:\codes\py39\RVC-beta\todo-songs" "E:\codes\py39\test-20230416b\logs\mi-test-v2\aadded_IVF677_Flat_nprobe_1_v2.index" harvest "E:\codes\py39\RVC-beta\output_v2" "E:\codes\py39\test-20230416b\weights\mi-test-v2.pth" 0.66 cuda:0 True 3 0 1 0.33
+Our own copy of RVC's (somewhat difficult to use) script, `infer_batch_rvc.py`.
 """
 import os, sys, pdb, torch
 
@@ -114,21 +111,45 @@ class Config:
 
         return x_pad, x_query, x_center, x_max
 
+import argparse
 
-f0up_key = sys.argv[1]
-input_path = sys.argv[2]
-index_path = sys.argv[3]
-f0method = sys.argv[4]  # harvest or pm
-opt_path = sys.argv[5]
-model_path = sys.argv[6]
-index_rate = float(sys.argv[7])
-device = sys.argv[8]
-is_half = sys.argv[9].lower() != "false"
-filter_radius = int(sys.argv[10])
-resample_sr = int(sys.argv[11])
-rms_mix_rate = float(sys.argv[12])
-protect = float(sys.argv[13])
-print(sys.argv)
+parser = argparse.ArgumentParser(description='Run VC inference')
+
+parser.add_argument('--model_path', type=str, help='path to the .pth file', required=True)
+parser.add_argument('--model_index_path', type=str, help='path to the .index file', required=True)
+
+parser.add_argument('--input_audio_filename', type=str, help='source audio file', required=True)
+parser.add_argument('--output_audio_filename', type=str, help='result audio file', required=True)
+#parser.add_argument('--output_metadata_filename', type=str, help='where to save extra metadata', required=True)
+
+parser.add_argument('--f0_method', type=str, help='harvest (default) or pm', required=False, default='harvest')
+parser.add_argument('--f0_up_key', type=str, help='???? (default "0" ???)', required=False, default='0')
+parser.add_argument('--index_rate', type=float, help='???? (default 0.66 ???)', required=False, default=0.66)
+parser.add_argument('--filter_radius', type=int, help='???? (default 3 ???)', required=False, default=3)
+parser.add_argument('--resample_sr', type=int, help='???? (default 0 ???)', required=False, default=0)
+parser.add_argument('--rms_mix_rate', type=float, help='???? (default 1 ???)', required=False, default=1.0)
+parser.add_argument('--protect', type=float, help='???? (default 0.33 ???)', required=False, default=0.33)
+
+parser.add_argument('--device', type=str, help='compute device (eg. "cuda:0"), default "cuda:0".', required=False, default='cuda:0')
+parser.add_argument('--is_half', type=bool, help='halfwidth tensors (default false)', required=False, default=False)
+
+args = parser.parse_args()
+
+f0up_key = args.f0_up_key
+input_path = args.input_audio_filename
+index_path = args.model_index_path
+f0method = args.f0_method
+opt_path = args.output_audio_filename
+model_path = args.model_path
+index_rate = args.index_rate
+device = args.device
+is_half = args.is_half
+filter_radius = args.filter_radius
+resample_sr = args.resample_sr
+rms_mix_rate = args.rms_mix_rate
+protect = args.protect
+
+
 config = Config(device, is_half)
 now_dir = os.getcwd()
 sys.path.append(now_dir)
