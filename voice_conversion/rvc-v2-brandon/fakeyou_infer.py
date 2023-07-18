@@ -116,7 +116,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Run VC inference')
 
 parser.add_argument('--model_path', type=str, help='path to the .pth file', required=True)
-parser.add_argument('--model_index_path', type=str, help='path to the .index file', required=True)
+parser.add_argument('--model_index_path', type=str, help='path to the .index file (empty string for none)', required=False, default='')
 
 parser.add_argument('--input_audio_filename', type=str, help='source audio file', required=True)
 parser.add_argument('--output_audio_filename', type=str, help='result audio file', required=True)
