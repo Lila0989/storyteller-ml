@@ -36,7 +36,12 @@ absl-py>=1.2.0
 audioread
 uvicorn>=0.21.1
 colorama>=0.4.5
-pyworld>=0.3.2
+# NB(bt, 2023-07-18): This issue literally just cropped up with PyWorld:
+# Docker images were building yesterday, but not today. Downgrade 
+# pyworld>=0.3.2 to pyworld==0.3.2. (Granted, 0.3.3 was released back in
+# April.)
+# https://github.com/gitmylo/audio-webui/issues/78
+pyworld==0.3.2
 httpx==0.23.0
 #onnxruntime-gpu
 torchcrepe==0.0.20
