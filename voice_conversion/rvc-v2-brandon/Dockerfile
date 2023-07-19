@@ -29,6 +29,13 @@ FROM python:3.10-bullseye
 #     --no-install-recommends \
 #     && apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+     rsync \
+     --no-install-recommends \
+     && apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
 RUN mkdir /python_install
 RUN mkdir /model_code
 
