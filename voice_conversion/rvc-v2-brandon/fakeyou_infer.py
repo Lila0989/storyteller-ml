@@ -124,15 +124,29 @@ parser.add_argument('--input_audio_filename', type=str, help='source audio file'
 parser.add_argument('--output_audio_filename', type=str, help='result audio file', required=True)
 
 ########
-# TODO: determine what we should do with these
+# Default values are taken from the Gradio UI
 ########
-parser.add_argument('--f0_method', type=str, help='harvest (default) or pm', required=False, default='harvest')
-parser.add_argument('--f0_up_key', type=str, help='???? (default "0" ???)', required=False, default='0')
-parser.add_argument('--index_rate', type=float, help='???? (default 0.66 ???)', required=False, default=0.66)
-parser.add_argument('--filter_radius', type=int, help='???? (default 3 ???)', required=False, default=3)
-parser.add_argument('--resample_sr', type=int, help='???? (default 0 ???)', required=False, default=0)
-parser.add_argument('--rms_mix_rate', type=float, help='???? (default 1 ???)', required=False, default=1.0)
-parser.add_argument('--protect', type=float, help='???? (default 0.33 ???)', required=False, default=0.33)
+parser.add_argument('--f0_up_key', type=str, 
+                    help='the f0 key for the input audio file(default "0")', 
+                    required=False, default='0')
+parser.add_argument('--f0_method', type=str, 
+                    help='f0 estimation method to use: harvest (default), crepe, or pm', 
+                    required=False, default='harvest')
+parser.add_argument('--index_rate', type=float, 
+                    help='The rate for the index (search feature ratio) (default 0.75)', 
+                    required=False, default=0.75) # Gradio default 0.75
+parser.add_argument('--filter_radius', type=int, 
+                    help='The radius of the filter. If >=3, apply median filtering to harvested pitch results. Represents the filter radius and can reduce breathiness. (default 3)', 
+                    required=False, default=3) # Gradio default 3
+parser.add_argument('--resample_sr', type=int, 
+                    help='The sample rate for resampling (post process). Set to zero for no resample. (default 0)', 
+                    required=False, default=0)
+parser.add_argument('--rms_mix_rate', type=float, 
+                    help='RMS mix rate. Use the volume envelope of the input to replace or mix with the volume envelope of the output. The closer the ratio to 1, the more the output envelope is used (default 0.25)', 
+                    required=False, default=0.25) # Gradio default 0.25
+parser.add_argument('--protect', type=float, 
+                    help='The protect value. Protect voiceless consonants and breath sounds to prevent artifacts such as tearing in electronic music. Set to 0.5 to disable. Decrease the value to increase protection, but may reduce indexing accuracy (default 0.33 ???)', 
+                    required=False, default=0.33) # Gradio default 0.33
 
 # Device / precision
 parser.add_argument('--device', type=str, help='compute device (eg. "cuda:0"), default "cuda:0".', required=False, default='cuda:0')
