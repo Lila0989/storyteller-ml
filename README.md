@@ -56,4 +56,4 @@ storyteller-ml
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠶⠦⣤⡷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ```
 
-User documentation [lives here](_docs/)
+User documentation [lives here](_develop/)
