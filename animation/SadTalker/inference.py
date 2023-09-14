@@ -12,6 +12,31 @@ from src.generate_batch import get_data
 from src.generate_facerender_batch import get_facerender_data
 from src.utils.init_path import init_path
 
+print("Env vars:")
+print(os.environ)
+
+
+def print_gpu_info():
+    print('========================================')
+    print('Python interpreter', sys.executable)
+    print('PyTorch version', torch.__version__)
+    print('CUDA Available?', torch.cuda.is_available())
+    print('CUDA Device count', torch.cuda.device_count())
+    print('CUDA threads for parallelizing CPU operations', torch.get_num_threads())
+    print('CUDA architectures library was compiled for', torch.cuda.get_arch_list())
+
+    #try:
+    #    from tensorflow.python.client import device_lib
+    #    print('local devices', str(device_lib.list_local_devices()).replace("\n", "\n  "))
+    #except ImportError:
+    #    print('no tensorflow - cannot list devices')
+    #    pass
+    print('========================================', flush=True)
+
+
+print_gpu_info(
+
+)
 def main(args):
     #torch.backends.cudnn.enabled = False
 
@@ -87,8 +112,12 @@ def main(args):
     result = animate_from_coeff.generate(data, save_dir, pic_path, crop_info, \
                                 enhancer=args.enhancer, background_enhancer=args.background_enhancer, preprocess=args.preprocess, img_size=args.size)
     
-    shutil.move(result, save_dir+'.mp4')
-    print('The generated video is named:', save_dir+'.mp4')
+    final_filename = save_dir + '.mp4'
+    if args.result_file:
+        final_filename = args.result_file
+
+    shutil.move(result, final_filename)
+    print('The generated video is named:', final_filename)
 
     if not args.verbose:
         shutil.rmtree(save_dir)
@@ -119,6 +148,8 @@ if __name__ == '__main__':
     parser.add_argument("--verbose",action="store_true", help="saving the intermedia output or not" ) 
     parser.add_argument("--old_version",action="store_true", help="use the pth other than safetensor version" ) 
 
+    # NB(Fakeyou): Added for fakeyou
+    parser.add_argument("--result_file", default='./result.mp4', help="path to output file")
 
     # net structure and parameters
     parser.add_argument('--net_recon', type=str, default='resnet50', choices=['resnet18', 'resnet34', 'resnet50'], help='useless')
