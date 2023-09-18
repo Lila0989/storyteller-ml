@@ -1,45 +1,78 @@
-```sh
-virtualenv env
-source env/bin/activate
-pip install -r requirements.txt
+# TTS and RVC Inference Script
 
-python3 fakeyou_infer-v2.py 0 "Path/to/the/input/audio file/Chug_Jug.wav" "Path/to/the/index file/added_IVF2933_Flat_nprobe_10.index" harvest "Path/to/the/output audio file/test_v2.wav" "Path/to/the/trained model/biggie-smalls.pth" 0.66 cuda:0 True 3 0 1 0.33
+## Overview
 
-Example:
+This Python script runs both Text-To-Speech (TTS) and Retrieval-based-Voice-Conversion (RVC) inferences. It uses Piper for TTS and a custom RVC voice conversion model. The script takes a variety of command-line arguments to specify the models, configurations, and audio files to use.
 
-python3 fakeyou_infer-v2.py 0 "E:\codes\py39\RVC-beta\todo-songs\1111.wav" "E:\codes\py39\test-20230416b\logs\mi-test-v2\aadded_IVF677_Flat_nprobe_1_v2.index" harvest "test_v2.wav" "E:\codes\py39\test-20230416b\weights\mi-test-v2.pth" 0.66 cuda:0 True 3 0 1 0.33
+## Prerequisites
 
+- Python 3.x
+- PyTorch 2.0 or higher
+- Piper TTS
+- ffmpeg (for audio processing)
 
+### Installation
 
+1. Install Python 3.x and PyTorch 2.0 or higher.
+2. Install Piper TTS via pip:
+
+    ```bash
+    pip install piper-tts
+    ```
+
+3. Make sure `ffmpeg` is installed and available in the system's PATH.
+
+    - For Ubuntu:
+
+        ```bash
+        sudo apt-get install ffmpeg
+        ```
+
+    - For macOS:
+
+        ```bash
+        brew install ffmpeg
+        ```
+
+## Usage
+
+Run the script with the required and optional command-line arguments.
+
+### Example:
+
+```bash
+python fakeyou_rvc_tts_infer.py --tts_model_path "path/to/tts/model" --tts_config_path "path/to/tts/config" --text "Hello, World" --model_path "path/to/vc/model" --input_audio_filename "path/to/input/audio.wav" --output_audio_filename "path/to/output/audio.wav"
 ```
 
-Each argument passed to the script is used as follows:
+### Command-line Arguments
 
-`f0up_key`: The f0 key for the input audio file.
+- `--tts_model_path`: Path to the TTS model.
+- `--tts_config_path`: Path to the TTS configuration.
+- `--text`: Text to convert to speech.
+- `--model_path`: Path to the VC model.
+- `--model_index_path`: (Optional) Path to the VC model index.
+- `--hubert_model_path`: (Optional) Path to the Hubert model. Default is `hubert_base.pt`.
+- `--input_audio_filename`: Path to the input audio file for VC.
+- `--output_audio_filename`: Path to save the output audio file from VC.
 
-`input_path`: Path to the input audio file.
+... (Other optional arguments for fine-tuning the VC process)
 
-`index_path`: Path to the index file.
+`--f0up_key`: The f0 key for the input audio file.
 
-`f0method`: F0 estimation method to be used ('harvest' 'crepe' or 'pm').
+`--index_path`: Path to the index file.
 
-`opt_path`: Path to the output audio file.
+`--f0method`: F0 estimation method to be used ('pm' 'harvest' 'crepe' or rmvpe).
 
-`model_path`: Path to the trained model.
+`--index_rate`: The rate for the index. (Search feature ratio)
 
-`index_rate`: The rate for the index. (Search feature ratio)
+`--device`: The computation device to be used ('cuda:0' for GPU or 'cpu' for CPU).
 
-`device`: The computation device to be used ('cuda:0' for GPU or 'cpu' for CPU).
+`--is_half`: Boolean value indicating whether to use half precision. Use 'True' for half-precision and 'False' for full-precision.
 
-`is_half`: Boolean value indicating whether to use half precision. Use 'True' for half-precision and 'False' for full-precision.
+`--filter_radius`: The radius of the filter. (If >=3: apply median filtering to the harvested pitch results. The value represents the filter radius and can reduce breathiness.)
 
-`filter_radius`: The radius of the filter. (If >=3: apply median filtering to the harvested pitch results. The value represents the filter radius and can reduce breathiness.)
+`--resample_sr`: The sample rate for resampling. (Resample the output audio in post-processing to the final sample rate. Set to 0 for no resampling)
 
-`resample_sr`: The sample rate for resampling. (Resample the output audio in post-processing to the final sample rate. Set to 0 for no resampling)
+`--rms_mix_rate`: The RMS mix rate. (Use the volume envelope of the input to replace or mix with the volume envelope of the output. The closer the ratio is to 1, the more the output envelope is used)
 
-`rms_mix_rate`: The RMS mix rate. (Use the volume envelope of the input to replace or mix with the volume envelope of the output. The closer the ratio is to 1, the more the output envelope is used)
-
-`protect`: The protect value. (Protect voiceless consonants and breath sounds to prevent artifacts such as tearing in electronic music. Set to 0.5 to disable. Decrease the value to increase protection, but it may reduce indexing accuracy:)
-
-
-See `fakeyou_infer-v2.py` for more info
+`--protect`: The protect value. (Protect voiceless consonants and breath sounds to prevent artifacts such as tearing in electronic music. Set to 0.5 to disable. Decrease the value to increase protection, but it may reduce indexing accuracy:)
