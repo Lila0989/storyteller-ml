@@ -3,7 +3,11 @@ from piper import PiperVoice
 import wave
 import argparse
 from scipy.io import wavfile
+import tqdm as tq
+from multiprocessing import cpu_count
 
+
+# Environment and GPU Info
 print("Env vars:")
 print(os.environ)
 print('========================================')
@@ -16,11 +20,8 @@ print('========================================', flush=True)
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-import sys
-import torch
-import tqdm as tq
-from multiprocessing import cpu_count
 
+# Config Class
 class Config:
     def __init__(self, device, is_half):
         self.device = device
@@ -58,11 +59,19 @@ class Config:
             x_max = 32
         return x_pad, x_query, x_center, x_max
 
-parser = argparse.ArgumentParser(description='Run TTS and VC inference')
+# Argument Parser
+parser = argparse.ArgumentParser(description='Run Piper-TTS and RVC inference')
 
+# Arguments for Piper-TTS
 parser.add_argument('--tts_model_path', type=str, required=True)
 parser.add_argument('--tts_config_path', type=str, required=True)
 parser.add_argument('--text', type=str, required=True)
+
+# Additional Arguments for Piper TTS
+parser.add_argument('--length_scale', type=float, required=False, default=1.0, help='Phoneme length scale for TTS')
+parser.add_argument('--noise_scale', type=float, required=False, default=0.5, help='Noise scale for TTS')
+parser.add_argument('--noise_w', type=float, required=False, default=0.3, help='Phoneme width noise for TTS')
+parser.add_argument('--sentence_silence', type=float, required=False, default=0.0, help='Seconds of silence after each sentence in TTS')
 
 parser.add_argument('--model_path', type=str, required=True)
 parser.add_argument('--model_index_path', type=str, required=False, default='')
@@ -81,9 +90,17 @@ parser.add_argument('--is_half', type=bool, required=False, default=False)
 
 args = parser.parse_args()
 
+# Load Piper Voice with additional settings
 voice = PiperVoice.load(model_path=args.tts_model_path, config_path=args.tts_config_path)
+synthesize_args = {
+    "length_scale": args.length_scale,
+    "noise_scale": args.noise_scale,
+    "noise_w": args.noise_w,
+    "sentence_silence": args.sentence_silence,
+}
+
 with wave.open('temp.wav', "wb") as wav_file:
-    voice.synthesize(args.text, wav_file)
+    voice.synthesize(args.text, wav_file, **synthesize_args)
 
 config = Config(args.device, args.is_half)
 now_dir = os.getcwd()
