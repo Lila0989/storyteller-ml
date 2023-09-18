@@ -19,8 +19,11 @@ This Python script runs both Text-To-Speech (TTS) and Retrieval-based-Voice-Conv
     ```bash
     pip install piper-tts
     ```
+3. **Download Piper Voice Models**
 
-3. Make sure `ffmpeg` is installed and available in the system's PATH.
+    Piper voice models can be downloaded from [Hugging Face's Piper Voices Repository](https://huggingface.co/rhasspy/piper-voices/tree/v1.0.0/en/en_US).
+   
+4. Make sure `ffmpeg` is installed and available in the system's PATH.
 
     - For Ubuntu:
 
