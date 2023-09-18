@@ -39,16 +39,6 @@ This Python script runs both Text-To-Speech (TTS) and Retrieval-based-Voice-Conv
 
 ## Usage
 
-Run the script with the required and optional command-line arguments.
-
-### Example:
-
-```bash
-python fakeyou_rvc_tts_infer.py --tts_model_path "path/to/tts/model" --tts_config_path "path/to/tts/config" --text "Hello, World" --model_path "path/to/vc/model" --input_audio_filename "path/to/input/audio.wav" --output_audio_filename "path/to/output/audio.wav"
-```
-
-## Usage
-
 To run the script, you need to pass in several command-line arguments.
 
 ### TTS Arguments
@@ -93,3 +83,10 @@ To run the script, you need to pass in several command-line arguments.
 `--rms_mix_rate`: The RMS mix rate. (Use the volume envelope of the input to replace or mix with the volume envelope of the output. The closer the ratio is to 1, the more the output envelope is used)
 
 `--protect`: The protect value. (Protect voiceless consonants and breath sounds to prevent artifacts such as tearing in electronic music. Set to 0.5 to disable. Decrease the value to increase protection, but it may reduce indexing accuracy:)
+
+
+### Example:
+
+```bash
+python fakeyou_rvc_tts_infer.py --tts_model_path "path/to/tts/model" --tts_config_path "path/to/tts/config" --text "Hello, World" --model_path "path/to/vc/model" --input_audio_filename "path/to/input/audio.wav" --output_audio_filename "path/to/output/audio.wav"
+```
