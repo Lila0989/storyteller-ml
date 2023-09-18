@@ -47,11 +47,25 @@ Run the script with the required and optional command-line arguments.
 python fakeyou_rvc_tts_infer.py --tts_model_path "path/to/tts/model" --tts_config_path "path/to/tts/config" --text "Hello, World" --model_path "path/to/vc/model" --input_audio_filename "path/to/input/audio.wav" --output_audio_filename "path/to/output/audio.wav"
 ```
 
-### Command-line Arguments
+## Usage
 
-- `--tts_model_path`: Path to the TTS model.
-- `--tts_config_path`: Path to the TTS configuration.
-- `--text`: Text to convert to speech.
+To run the script, you need to pass in several command-line arguments.
+
+### TTS Arguments
+
+- `--tts_model_path`: Required. The path to the TTS model.
+- `--tts_config_path`: Required. The path to the TTS configuration file.
+- `--text`: Required. The text you want to convert to speech.
+
+#### Additional TTS Options
+
+- `--length_scale`: Optional. Phoneme length scale for TTS. Default is 1.0.
+- `--noise_scale`: Optional. Noise scale for TTS. Default is 0.5.
+- `--noise_w`: Optional. Phoneme width noise for TTS. Default is 0.3.
+- `--sentence_silence`: Optional. Seconds of silence after each sentence in TTS. Default is 0.0.
+
+### RVC Arguments
+
 - `--model_path`: Path to the VC model.
 - `--model_index_path`: (Optional) Path to the VC model index.
 - `--hubert_model_path`: (Optional) Path to the Hubert model. Default is `hubert_base.pt`.
