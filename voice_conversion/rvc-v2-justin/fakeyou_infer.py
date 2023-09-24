@@ -1,3 +1,6 @@
+"""
+Our own copy of RVC's (somewhat difficult to use) script, `infer_batch_rvc.py`.
+"""
 import os, sys, pdb, torch
 
 print("Env vars:")
