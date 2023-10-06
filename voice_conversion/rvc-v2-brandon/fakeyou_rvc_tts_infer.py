@@ -105,7 +105,7 @@ with wave.open('temp.wav', "wb") as wav_file:
 config = Config(args.device, args.is_half)
 now_dir = os.getcwd()
 sys.path.append(now_dir)
-from lib.train.vc_infer_pipeline import VC
+from vc_infer_pipeline import VC
 from lib.infer_pack.models import SynthesizerTrnMs256NSFsid, SynthesizerTrnMs256NSFsid_nono, SynthesizerTrnMs768NSFsid, SynthesizerTrnMs768NSFsid_nono
 from lib.audio import load_audio
 from fairseq import checkpoint_utils
