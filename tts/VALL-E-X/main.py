@@ -90,7 +90,7 @@ class VoiceDesigner():
         # load models from host system.
         self.logger = self.setup_logger()
         
-        self.mount_folder = pathlib.Path.cwd() / pathlib.Path("..") / pathlib.Path("Vall-E-mount") 
+        self.mount_folder = pathlib.Path.cwd() / pathlib.Path("Vall-E-mount") 
         # Path for the inputs bunch of audio files
         self.input_path = self.mount_folder / pathlib.Path("input")
         # Path for the models to be used
@@ -103,7 +103,7 @@ class VoiceDesigner():
         self.temp_path = self.mount_folder / pathlib.Path("temp")
         # Path for output
         self.output_path = self.mount_folder / pathlib.Path("output")
-
+        # Will have to load whisper from here as well ... todo fix
         load_models_from_mount(model_path=self.models_path,
                            vocos_path=pathlib.Path("vocos-encodec-24khz"),
                            vall_e_x=pathlib.Path("vallex-checkpoint.pt"))
