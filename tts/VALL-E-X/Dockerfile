@@ -29,4 +29,4 @@ RUN git reset --hard origin/main
 #RUN git checkout 47c491a29d10c04c6f1efd01bc7b334d11cad4f2
 
 # # Allow parameters to be passed
-# ENTRYPOINT ["python3", "main.py"]
+ENTRYPOINT ["python3", "main.py"]
