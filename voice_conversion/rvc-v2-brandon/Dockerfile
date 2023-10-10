@@ -46,7 +46,7 @@ COPY requirements.txt .
 # NB: Kubernetes will copy over the venv we create here.
 RUN python3 -m venv python \
   && . python/bin/activate \
-  && pip install -r requirements.txt
+  && pip install -r requirements.txt \
   && pip install piper-tts
 
 # NB: The model code is uploaded next
