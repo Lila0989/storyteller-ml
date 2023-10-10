@@ -27,6 +27,18 @@ def cache_harvest_f0(input_audio_path, fs, f0max, f0min, frame_period):
     f0 = pyworld.stonemask(audio, f0, t, fs)
     return f0
 
+@lru_cache
+def cache_dio_f0(input_audio_path, fs, f0max, f0min, frame_period):
+    audio = input_audio_path2wav[input_audio_path]
+    f0, t = pyworld.dio(
+        audio,
+        fs=fs,
+        f0_ceil=f0max,
+        f0_floor=f0min,
+        frame_period=frame_period,
+    )
+    f0 = pyworld.stonemask(audio, f0, t, fs)
+    return f0
 
 def change_rms(data1, sr1, data2, sr2, rate):  # 1是输入音频，2是输出音频,rate是2的占比
     # print(data1.max(),data2.max())
@@ -72,6 +84,7 @@ class VC(object):
     def get_f0(
         self,
         input_audio_path,
+        rmvpe_model_path,
         x,
         p_len,
         f0_up_key,
@@ -106,6 +119,11 @@ class VC(object):
             f0 = cache_harvest_f0(input_audio_path, self.sr, f0_max, f0_min, 10)
             if filter_radius > 2:
                 f0 = signal.medfilt(f0, 3)
+        elif f0_method == "dio":
+            input_audio_path2wav[input_audio_path] = x.astype(np.double)
+            f0 = cache_dio_f0(input_audio_path, self.sr, f0_max, f0_min, 10)
+            if filter_radius > 2:
+                f0 = signal.medfilt(f0, 3)
         elif f0_method == "crepe":
             model = "full"
             # Pick a batch size that doesn't cause memory errors on your gpu
@@ -132,7 +150,8 @@ class VC(object):
                 from lib.rmvpe import RMVPE
                 print("loading rmvpe model")
                 self.model_rmvpe = RMVPE(
-                    "rmvpe.pt", is_half=self.is_half, device=self.device
+                    #"rmvpe.pt", is_half=self.is_half, device=self.device
+                    rmvpe_model_path, is_half=self.is_half, device=self.device
                 )
 
             f0 = self.model_rmvpe.infer_from_audio(x, thred=0.03)
@@ -275,6 +294,7 @@ class VC(object):
         sid,
         audio,
         input_audio_path,
+        rmvpe_model_path,
         times,
         f0_up_key,
         f0_method,
@@ -344,6 +364,7 @@ class VC(object):
         if if_f0 == 1:
             pitch, pitchf = self.get_f0(
                 input_audio_path,
+                rmvpe_model_path,
                 audio_pad,
                 p_len,
                 f0_up_key,

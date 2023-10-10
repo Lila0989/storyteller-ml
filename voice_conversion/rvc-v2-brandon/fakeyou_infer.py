@@ -119,6 +119,8 @@ parser.add_argument('--model_path', type=str, help='path to the .pth file', requ
 parser.add_argument('--model_index_path', type=str, help='path to the .index file (empty string for none)', required=False, default='')
 parser.add_argument('--hubert_model_path', type=str, help='path to the hubert model .pth file (default hubert_base.pt)', 
                     required=False, default='hubert_base.pt')
+parser.add_argument('--rmvpe_model_path', type=str, help='path to the RMVPE model .pth file (default rmvpe.pt)', 
+                    required=False, default='rmvpe.pt')
 
 parser.add_argument('--input_audio_filename', type=str, help='source audio file', required=True)
 parser.add_argument('--output_audio_filename', type=str, help='result audio file', required=True)
@@ -130,7 +132,7 @@ parser.add_argument('--f0_up_key', type=str,
                     help='the f0 key for the input audio file(default "0")', 
                     required=False, default='0')
 parser.add_argument('--f0_method', type=str, 
-                    help='f0 estimation method to use: harvest (default), crepe, or pm', 
+                    help='f0 estimation method to use: rmvpe (best), harvest (default), crepe, or pm', 
                     required=False, default='harvest')
 parser.add_argument('--index_rate', type=float, 
                     help='The rate for the index (search feature ratio) (default 0.75)', 
@@ -168,6 +170,7 @@ resample_sr = args.resample_sr
 rms_mix_rate = args.rms_mix_rate
 protect = args.protect
 hubert_path = args.hubert_model_path
+rmvpe_path = args.rmvpe_model_path
 
 config = Config(device, is_half)
 now_dir = os.getcwd()
@@ -201,7 +204,7 @@ def load_hubert(hubert_path="hubert_base.pt"):
     hubert_model.eval()
 
 
-def vc_single(sid, input_audio, f0_up_key, f0_file, f0_method, file_index, index_rate, hubert_path="hubert_base.pt"):
+def vc_single(sid, input_audio, f0_up_key, f0_file, f0_method, file_index, index_rate, rmvpe_path, hubert_path="hubert_base.pt"):
     global tgt_sr, net_g, vc, hubert_model, version
     if input_audio is None:
         return "You need to upload an audio", None
@@ -218,6 +221,7 @@ def vc_single(sid, input_audio, f0_up_key, f0_file, f0_method, file_index, index
         sid,
         audio,
         input_audio,
+        rmvpe_path,
         times,
         f0_up_key,
         f0_method,
@@ -270,7 +274,7 @@ get_vc(model_path)
 
 file_path = input_path
 wav_opt = vc_single(
-    0, file_path, f0up_key, None, f0method, index_path, index_rate, hubert_path
+    0, file_path, f0up_key, None, f0method, index_path, index_rate, rmvpe_path, hubert_path
 )
 out_path = opt_path
 wavfile.write(out_path, tgt_sr, wav_opt)
