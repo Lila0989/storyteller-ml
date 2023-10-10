@@ -72,6 +72,7 @@ class VC(object):
     def get_f0(
         self,
         input_audio_path,
+        rmvpe_model_path,
         x,
         p_len,
         f0_up_key,
@@ -132,7 +133,8 @@ class VC(object):
                 from lib.rmvpe import RMVPE
                 print("loading rmvpe model")
                 self.model_rmvpe = RMVPE(
-                    "rmvpe.pt", is_half=self.is_half, device=self.device
+                    #"rmvpe.pt", is_half=self.is_half, device=self.device
+                    rmvpe_model_path, is_half=self.is_half, device=self.device
                 )
 
             f0 = self.model_rmvpe.infer_from_audio(x, thred=0.03)
@@ -275,6 +277,7 @@ class VC(object):
         sid,
         audio,
         input_audio_path,
+        rmvpe_model_path,
         times,
         f0_up_key,
         f0_method,
@@ -344,6 +347,7 @@ class VC(object):
         if if_f0 == 1:
             pitch, pitchf = self.get_f0(
                 input_audio_path,
+                rmvpe_model_path,
                 audio_pad,
                 p_len,
                 f0_up_key,
