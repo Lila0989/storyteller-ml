@@ -11,7 +11,6 @@ import argparse
 
 from typing import List
 import pathlib
-import whisperx
 
 # https://discuss.pytorch.org/t/how-to-calculate-the-gpu-memory-that-a-model-uses/157486/6 <-- for fine tuning memory usage later.
 
@@ -169,48 +168,71 @@ class VoiceDesigner():
         return logger
 
 
-global voice_designer 
-voice_designer = VoiceDesigner()
+#global voice_designer 
+#voice_designer = VoiceDesigner()
 
 def main(args):
-    print(args.create_prompt_with_list)
-    print(args.create_prompt_name)
+    # print(args.create_prompt_with_list)
+    # print(args.create_prompt_name)
     
+    # print(args.text)
+    # print(args.use_prompt_name)
+    # print(args.output_file_name)
+    
+    # if args.create_prompt_name is not None and args.create_prompt_name is not None:
+    #     voice_designer.create_prompt(audio_file_paths=args.create_prompt_with_list,
+    #                                  prompt_file_name=args.create_prompt_name)
+    
+    # if args.text is not None and args.use_prompt_name is not None:
+    #     voice_designer.tts_with_prompt(prompt=args.use_prompt_name,
+    #                                    text=args.text,
+    #                                    output_file_name=args.output_file_name)    
     print(args.text)
-    print(args.use_prompt_name)
-    print(args.output_file_name)
     
-    if args.create_prompt_name is not None and args.create_prompt_name is not None:
-        voice_designer.create_prompt(audio_file_paths=args.create_prompt_with_list,
-                                     prompt_file_name=args.create_prompt_name)
+    print(args.audio_wav_files)
+    print(args.whisper_file_path)
+    print(args.vocos_folder_path)
     
-    if args.text is not None and args.use_prompt_name is not None:
-        voice_designer.tts_with_prompt(prompt=args.use_prompt_name,
-                                       text=args.text,
-                                       output_file_name=args.output_file_name)    
-
+    print(args.vallex_path)
+    
+    print(args.audio_prompt_output_path)
+    print(args.audio_output_path)
+    print(args.prompt_path)
+    
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Process a list of speaker samples for zero shot - .wav file pathes, convert text to speech, and specify language.")
 
-    parser.add_argument('-create_prompt_with_list', metavar='prompt wav files', nargs='+', 
-                        help='Takes in a list of .wav files for an audio prompt provide the absolute path. Must be less than 15 seconds otherwise will error out.')
+    # parser.add_argument('-create_prompt_with_list', metavar='prompt wav files', nargs='+', 
+    #                     help='Takes in a list of .wav files for an audio prompt provide the absolute path. Must be less than 15 seconds otherwise will error out.')
+    # parser.add_argument('-create_prompt_name',metavar="prompt name to create",
+    #                     help='required with -create-prompt prompt output name this will be written to the mount. In Vall-E-mount/prompts')
+    # parser.add_argument("-use_prompt_name",metavar="prompt you want to use",type=str)
+    # parser.add_argument("-output_file_name",metavar="file name",type=str)
+    # parser.add_argument('-text', metavar='text to synthesize', type=str,help='Text to be converted to speech.')
     
-    parser.add_argument('-create_prompt_name',metavar="prompt name to create",
-                        help='required with -create-prompt prompt output name this will be written to the mount. In Vall-E-mount/prompts')
+    parser.add_argument('--text', metavar='text to synthesize', type=str,help='Text to be converted to speech.')
+    parser.add_argument('--audio-wav-files', metavar='wav to voice clone', type=str,nargs='+',help='Takes in a list of .wav files for an audio prompt provide the absolute path. Must be less than 15 seconds otherwise will error out.')           
     
-    parser.add_argument('-text', metavar='text to synthesize', type=str, 
-                        help='Text to be converted to speech.')
+    parser.add_argument("--whisper-file-path",metavar="abs whisper model path",type=str,help="Path to the Whisper Model")
+    parser.add_argument("--vocos-folder-path",metavar="abs vocos model path",type=str,help="Path to vocos codec Model requires the folder path")
+    parser.add_argument("--vallex-path",metavar="abs vall-e model path",type=str,help="Path to the Valle Model File")
     
-    parser.add_argument("-use_prompt_name",metavar="prompt you want to use",type=str)
-    
-    parser.add_argument("-output_file_name",metavar="file name",type=str)
+    parser.add_argument("--audio-prompt-output-path",metavar="abs output path",type=str,help="Path Output Created Voice")
+    parser.add_argument("--audio-output-path",metavar="abs output path",type=str,help="Audio Output")    
+    parser.add_argument("--prompt-path",metavar="abs path to prompt",type=str,help="Prompt Embedding Path")
     
     args = parser.parse_args()
 
     main(args)
 
-     
-    
-     
+# /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python 
+# /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" 
+# --audio-wav-files /home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav /home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav 
+# --whisper-file-path /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper/medium.pt 
+# --vocos-folder-path /home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz 
+# --vallex-path /home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt
+
+# long ass command
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" --audio-wav-files "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" --whisper-file-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper/medium.pt" --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt"
      
