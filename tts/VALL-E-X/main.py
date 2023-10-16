@@ -25,148 +25,147 @@ from typing import List
 import uuid
 import torchaudio.transforms as T
 
-class AudioOps():
+# class AudioOps():
     
-    @staticmethod
-    def stitch_wav_tensors_with_crossfade(wav_tensor1:np.array,wav_tensor2:np.array,sample_rate:int):
-        # Load two audio signals  as NumPy tensors
-        # Compute the length of the cross-fade window in samples
-        fade_len = int(0.01 * sample_rate)
+#     @staticmethod
+#     def stitch_wav_tensors_with_crossfade(wav_tensor1:np.array,wav_tensor2:np.array,sample_rate:int):
+#         # Load two audio signals  as NumPy tensors
+#         # Compute the length of the cross-fade window in samples
+#         fade_len = int(0.01 * sample_rate)
 
-        # Create a cross-fade window
-        fade_window = np.hanning(2*fade_len)
+#         # Create a cross-fade window
+#         fade_window = np.hanning(2*fade_len)
 
-        # Concatenate the signals with cross-fade
-        audio_out = np.concatenate((wav_tensor1[:-fade_len], 
-                                    wav_tensor1[-fade_len:] * fade_window[:fade_len] + wav_tensor2[:fade_len] * fade_window[fade_len:], 
-                                    wav_tensor2[fade_len:]))
-        return audio_out
+#         # Concatenate the signals with cross-fade
+#         audio_out = np.concatenate((wav_tensor1[:-fade_len], 
+#                                     wav_tensor1[-fade_len:] * fade_window[:fade_len] + wav_tensor2[:fade_len] * fade_window[fade_len:], 
+#                                     wav_tensor2[fade_len:]))
+#         return audio_out
     
-    @staticmethod
-    def cut_audio_range(file_path, start_seconds, end_seconds, output_path="cut_audio.wav"):
-        """
-        Cuts out a specific segment from an audio file and saves the result.
+#     @staticmethod
+#     def cut_audio_range(file_path, start_seconds, end_seconds, output_path="cut_audio.wav"):
+#         """
+#         Cuts out a specific segment from an audio file and saves the result.
 
-        Args:
-        - file_path (str): Path to the audio file from which the segment will be cut.
-        - start_seconds (float): Start time of the segment to be cut out in seconds.
-        - end_seconds (float): End time of the segment to be cut out in seconds.
-        - output_path (str): Path to save the resulting audio. Defaults to "cut_audio.wav".
+#         Args:
+#         - file_path (str): Path to the audio file from which the segment will be cut.
+#         - start_seconds (float): Start time of the segment to be cut out in seconds.
+#         - end_seconds (float): End time of the segment to be cut out in seconds.
+#         - output_path (str): Path to save the resulting audio. Defaults to "cut_audio.wav".
         
-        Returns:
-        - None
-        """
-        # Load the audio file
-        waveform, sr = torchaudio.load(file_path)
-        # Convert the range to sample indices
-        start_sample = int(start_seconds * sr)
-        end_sample = int(end_seconds * sr)
-        cut_tensor = waveform[:,start_sample:end_sample]
-        torchaudio.save(output_path, cut_tensor, sr)
+#         Returns:
+#         - None
+#         """
+#         # Load the audio file
+#         waveform, sr = torchaudio.load(file_path)
+#         # Convert the range to sample indices
+#         start_sample = int(start_seconds * sr)
+#         end_sample = int(end_seconds * sr)
+#         cut_tensor = waveform[:,start_sample:end_sample]
+#         torchaudio.save(output_path, cut_tensor, sr)
         
-    @staticmethod
-    def stitch_wav_files_resample(root_path:pathlib.Path, files:List[str],target_sample_rate:int=SAMPLE_RATE):
-        resampler = None 
-        result = None
-        for file in files:  
-            if type(result) == type(None):
-                tensor, sr = torchaudio.load(root_path / pathlib.Path(file))
-                resampler = T.Resample(orig_freq=sr,new_freq=target_sample_rate) 
-                resampled_tensor = resampler(tensor)
-                result = resampled_tensor.squeeze()
-                result = np.array(result)
-            else:  
-                tensor, _ = torchaudio.load(root_path / pathlib.Path(file))
-                resampled_tensor = resampler(tensor)
-                resampled_tensor = resampled_tensor.squeeze()
-                resampled_tensor = np.array(resampled_tensor)
-                result = AudioOps.stitch_wav_tensors_with_crossfade(result,resampled_tensor,sample_rate=target_sample_rate)
+#     @staticmethod
+#     def stitch_wav_files_resample(root_path:pathlib.Path, files:List[str],target_sample_rate:int=SAMPLE_RATE):
+#         resampler = None 
+#         result = None
+#         for file in files:  
+#             if type(result) == type(None):
+#                 tensor, sr = torchaudio.load(root_path / pathlib.Path(file))
+#                 resampler = T.Resample(orig_freq=sr,new_freq=target_sample_rate) 
+#                 resampled_tensor = resampler(tensor)
+#                 result = resampled_tensor.squeeze()
+#                 result = np.array(result)
+#             else:  
+#                 tensor, _ = torchaudio.load(root_path / pathlib.Path(file))
+#                 resampled_tensor = resampler(tensor)
+#                 resampled_tensor = resampled_tensor.squeeze()
+#                 resampled_tensor = np.array(resampled_tensor)
+#                 result = AudioOps.stitch_wav_tensors_with_crossfade(result,resampled_tensor,sample_rate=target_sample_rate)
                 
-        return result
+#         return result
     
-class VoiceDesigner():
-    def __init__(self) -> None:
-        # load models from host system.
-        self.logger = self.setup_logger()
+# class VoiceDesigner():
+#     def __init__(self) -> None:
+#         # load models from host system.
+#         self.logger = self.setup_logger()
         
-        self.mount_folder = pathlib.Path.cwd() / pathlib.Path("Vall-E-mount") 
-        # Path for the inputs bunch of audio files
-        self.input_path = self.mount_folder / pathlib.Path("input")
-        # Path for the models to be used
-        self.models_path = self.mount_folder / pathlib.Path("models") 
-        # Path for the existing presets
-        self.presets_path = self.mount_folder / pathlib.Path("presets")
-        # Path for the new prompts created by the user
-        self.prompts_path = self.mount_folder / pathlib.Path("prompts")
-        # Path for the temporary files
-        self.temp_path = self.mount_folder / pathlib.Path("temp")
-        # Path for output
-        self.output_path = self.mount_folder / pathlib.Path("output")
-        # Will have to load whisper from here as well ... todo fix
-        load_models_from_mount(model_path=self.models_path,
-                           vocos_path=pathlib.Path("vocos-encodec-24khz"),
-                           vall_e_x=pathlib.Path("vallex-checkpoint.pt"))
+#         self.mount_folder = pathlib.Path.cwd() / pathlib.Path("Vall-E-mount") 
+#         # Path for the inputs bunch of audio files
+#         self.input_path = self.mount_folder / pathlib.Path("input")
+#         # Path for the models to be used
+#         self.models_path = self.mount_folder / pathlib.Path("models") 
+#         # Path for the existing presets
+#         self.presets_path = self.mount_folder / pathlib.Path("presets")
+#         # Path for the new prompts created by the user
+#         self.prompts_path = self.mount_folder / pathlib.Path("prompts")
+#         # Path for the temporary files
+#         self.temp_path = self.mount_folder / pathlib.Path("temp")
+#         # Path for output
+#         self.output_path = self.mount_folder / pathlib.Path("output")
+#         # Will have to load whisper from here as well ... todo fix
+#         load_models_from_mount(model_path=self.models_path,
+#                            vocos_path=pathlib.Path("vocos-encodec-24khz"),
+#                            vall_e_x=pathlib.Path("vallex-checkpoint.pt"))
         
-    def tts_with_prompt(self,prompt:pathlib.Path,text:str,output_file_name:str):
-        # TODO Filtering bad words
-        # TODO check if the files are actually wav ...
-        audio_array = generate_audio(text,prompt=prompt)
-        # save audio to disk
-        sf.write(self.output_path / pathlib.Path(output_file_name), audio_array, SAMPLE_RATE)
+#     def tts_with_prompt(self,prompt:pathlib.Path,text:str,output_file_name:str):
+#         # TODO Filtering bad words
+#         # TODO check if the files are actually wav ...
+#         audio_array = generate_audio(text,prompt=prompt)
+#         # save audio to disk
+#         sf.write(self.output_path / pathlib.Path(output_file_name), audio_array, SAMPLE_RATE)
      
-    def create_prompt(self,audio_file_paths:List[pathlib.Path],prompt_file_name:str):
-        # multiple audio files concat
-        # concat audio and trim the audio if it is longer than 14-15 seconds# if prompt is too long it will error out anyways
-        if len(audio_file_paths) > 0:
-            # TODO: going to assume brandon renames the files as they are uploaded
-            try:# ./customs/ <-- folder it adds by default until we modified.
-                    # load the audio files and then concat them. 
-                tensor_result = AudioOps.stitch_wav_files_resample(root_path=self.input_path,files=audio_file_paths)
-                # save to disk
-                generated_name = f"{uuid.uuid4()}"
+#     def create_prompt(self,audio_file_paths:List[pathlib.Path],prompt_file_name:str):
+#         # multiple audio files concat
+#         # concat audio and trim the audio if it is longer than 14-15 seconds# if prompt is too long it will error out anyways
+#         if len(audio_file_paths) > 0:
+#             # TODO: going to assume brandon renames the files as they are uploaded
+#             try:# ./customs/ <-- folder it adds by default until we modified.
+#                     # load the audio files and then concat them. 
+#                 tensor_result = AudioOps.stitch_wav_files_resample(root_path=self.input_path,files=audio_file_paths)
+#                 # save to disk
+#                 generated_name = f"{uuid.uuid4()}"
                 
-                concat_audio_file_path = self.temp_path / pathlib.Path(f"audio_concat_{generated_name}.wav")               
-                sf.write(concat_audio_file_path, tensor_result, SAMPLE_RATE)
-                # save result into processing...
-                # trim to 15 seconds.
-                audio_cut_path = self.temp_path / pathlib.Path(f"audio_cut_{generated_name}.wav")
-                AudioOps.cut_audio_range(file_path=concat_audio_file_path,start_seconds=0,end_seconds=15,output_path=audio_cut_path)
-                # TODO get whisper x to work in the container and generate transcription that way or use a different container to do that work.
-                make_prompt(name=prompt_file_name,audio_prompt_output_path=self.prompts_path,audio_prompt_path=audio_cut_path,transcript=None)
-            except Exception as e:
-                self.logger.debug(f"Exception: {e.with_traceback()}")
-                raise
-        else:
-            self.logger.debug(f"No audio files to load")
+#                 concat_audio_file_path = self.temp_path / pathlib.Path(f"audio_concat_{generated_name}.wav")               
+#                 sf.write(concat_audio_file_path, tensor_result, SAMPLE_RATE)
+#                 # save result into processing...
+#                 # trim to 15 seconds.
+#                 audio_cut_path = self.temp_path / pathlib.Path(f"audio_cut_{generated_name}.wav")
+#                 AudioOps.cut_audio_range(file_path=concat_audio_file_path,start_seconds=0,end_seconds=15,output_path=audio_cut_path)
+#                 # TODO get whisper x to work in the container and generate transcription that way or use a different container to do that work.
+#                 make_prompt(name=prompt_file_name,audio_prompt_output_path=self.prompts_path,audio_prompt_path=audio_cut_path,transcript=None)
+#             except Exception as e:
+#                 self.logger.debug(f"Exception: {e.with_traceback()}")
+#                 raise
+#         else:
+#             self.logger.debug(f"No audio files to load")
             
-    def setup_logger(self):
-        # Create a logger object
-        logger = logging.getLogger(__name__)
+#     def setup_logger(self):
+#         # Create a logger object
+#         logger = logging.getLogger(__name__)
 
-        # Set the log level
-        logger.setLevel(logging.DEBUG)
+#         # Set the log level
+#         logger.setLevel(logging.DEBUG)
 
-        # Create a file handler to log messages to a file
-        file_handler = logging.FileHandler('docker_valle-x.log')
-        file_handler.setLevel(logging.DEBUG)
+#         # Create a file handler to log messages to a file
+#         file_handler = logging.FileHandler('docker_valle-x.log')
+#         file_handler.setLevel(logging.DEBUG)
 
-        # Create a console handler to log messages to the console
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)
+#         # Create a console handler to log messages to the console
+#         console_handler = logging.StreamHandler()
+#         console_handler.setLevel(logging.DEBUG)
 
-        # Create a formatter
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#         # Create a formatter
+#         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         
-        # Set the formatter for the handlers
-        file_handler.setFormatter(formatter)
-        console_handler.setFormatter(formatter)
+#         # Set the formatter for the handlers
+#         file_handler.setFormatter(formatter)
+#         console_handler.setFormatter(formatter)
 
-        # Add the handlers to the logger
-        logger.addHandler(file_handler)
-        logger.addHandler(console_handler)
+#         # Add the handlers to the logger
+#         logger.addHandler(file_handler)
+#         logger.addHandler(console_handler)
 
-        return logger
-
+#         return logger
 
 #global voice_designer 
 #voice_designer = VoiceDesigner()
@@ -187,17 +186,20 @@ def main(args):
     #     voice_designer.tts_with_prompt(prompt=args.use_prompt_name,
     #                                    text=args.text,
     #                                    output_file_name=args.output_file_name)    
-    print(args.text)
     
+    
+    print(args.mode)
+    
+    print(args.text)
     print(args.audio_wav_files)
     print(args.whisper_file_path)
     print(args.vocos_folder_path)
     
     print(args.vallex_path)
     
-    print(args.audio_prompt_output_path)
-    print(args.audio_output_path)
     print(args.prompt_path)
+    print(args.audio_name)
+    print(args.prompt_name)
     
 if __name__ == "__main__":
     
@@ -211,28 +213,39 @@ if __name__ == "__main__":
     # parser.add_argument("-output_file_name",metavar="file name",type=str)
     # parser.add_argument('-text', metavar='text to synthesize', type=str,help='Text to be converted to speech.')
     
+    # modes
+    parser.add_argument('--mode', metavar='model mode',type=int,help='Mode 0 - (Inference) | Mode 1 - (Create)')
     parser.add_argument('--text', metavar='text to synthesize', type=str,help='Text to be converted to speech.')
-    parser.add_argument('--audio-wav-files', metavar='wav to voice clone', type=str,nargs='+',help='Takes in a list of .wav files for an audio prompt provide the absolute path. Must be less than 15 seconds otherwise will error out.')           
+    # inputs
+    parser.add_argument('--audio-wav-files', metavar='wav to voice clone', type=str,nargs='+',help='Takes in a list of .wav files for an audio prompt provide the absolute path. Must be less than 15 seconds otherwise will error out. (Create Voice Only)')           
     
-    parser.add_argument("--whisper-file-path",metavar="abs whisper model path",type=str,help="Path to the Whisper Model")
-    parser.add_argument("--vocos-folder-path",metavar="abs vocos model path",type=str,help="Path to vocos codec Model requires the folder path")
+    # model pathes 
+    parser.add_argument("--whisper-file-path",metavar="abs whisper model path",type=str,help="Path to the Whisper Model .pt file")
+    parser.add_argument("--vocos-folder-path",metavar="abs vocos model path",type=str,help="Path to vocos codec Model requires the (folder path)")
     parser.add_argument("--vallex-path",metavar="abs vall-e model path",type=str,help="Path to the Valle Model File")
     
-    parser.add_argument("--audio-prompt-output-path",metavar="abs output path",type=str,help="Path Output Created Voice")
-    parser.add_argument("--audio-output-path",metavar="abs output path",type=str,help="Audio Output")    
-    parser.add_argument("--prompt-path",metavar="abs path to prompt",type=str,help="Prompt Embedding Path")
+    # output and input pathes
+    parser.add_argument("--audio-name",metavar="abs output path",type=str,help="Audio Output Saved Name (Inference)")   
+    parser.add_argument("--audio-path",metavar="abs path to prompt",type=str,help="Audio Output Path (Inference)")
+    parser.add_argument("--prompt-path",metavar="abs path to prompt",type=str,help="Prompt Embedding Path (Inference and Create Voice)")
+    parser.add_argument("--prompt-name",metavar="abs path to prompt",type=str,help="Prompt Name (Inference and Create Voice)")
     
     args = parser.parse_args()
 
     main(args)
 
-# /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python 
-# /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" 
-# --audio-wav-files /home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav /home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav 
-# --whisper-file-path /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper/medium.pt 
-# --vocos-folder-path /home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz 
-# --vallex-path /home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt
+# all params command
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" 
+# --mode 0 
+# --audio-wav-files "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" 
+# --whisper-file-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper/medium.pt" 
+# --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" 
+# --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" 
+# --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" 
+# --prompt-name "test_prompt.npz" 
+# --audio-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/output/"
+# --audio-name "test.wav"
 
-# long ass command
-#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" --audio-wav-files "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" --whisper-file-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper/medium.pt" --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt"
-     
+# all params command copy paste
+# /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" --mode 0 --audio-wav-files "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" --whisper-file-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper/medium.pt" --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" --prompt-name "test_prompt.npz" --audio-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/output/" --audio-name "test.wav"
