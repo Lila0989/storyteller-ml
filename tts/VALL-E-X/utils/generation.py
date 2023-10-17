@@ -4,6 +4,8 @@ import torch
 from vocos import Vocos
 from vocos.feature_extractors import FeatureExtractor, EncodecFeatures
 
+import whisper
+
 import logging
 import langid
 langid.set_languages(['en', 'zh', 'ja'])
@@ -40,14 +42,57 @@ checkpoints_dir = "./checkpoints/"
 model_checkpoint_name = "vallex-checkpoint.pt"
 
 model = None
-
 codec = None
-
 vocos = None
+whisper_model = None
 
 text_tokenizer = PhonemeBpeTokenizer(tokenizer_path="./utils/g2p/bpe_69.json")
 text_collater = get_text_token_collater()
 
+def load_models_from_pathes(vocos_folder_path:pathlib.Path,vall_e_x_file_path:pathlib.Path,whisper_folder_path:pathlib.Path):
+    global model, codec, vocos, whisper_model
+        
+    model = VALLE(
+        N_DIM,
+        NUM_HEAD,
+        NUM_LAYERS,
+        norm_first=True,
+        add_prenet=False,
+        prefix_mode=PREFIX_MODE,
+        share_embedding=True,
+        nar_scale_factor=1.0,
+        prepend_bos=True,
+        num_quantizers=NUM_QUANTIZERS,
+    ).to(device)
+    checkpoint = torch.load(pathlib.Path(vall_e_x_file_path), map_location='cpu')
+    missing_keys, unexpected_keys = model.load_state_dict(
+        checkpoint["model"], strict=True
+    )
+    
+    assert not missing_keys
+    model.eval()
+    # Encodec
+    codec = AudioTokenizer(device)
+
+    vocos = None 
+    vocos_model = Vocos.from_hparams(vocos_folder_path / pathlib.Path("config.yaml")) 
+    state_dict = torch.load(vocos_folder_path / pathlib.Path("pytorch_model.bin"), map_location="cpu")
+    if isinstance(vocos_model.feature_extractor, EncodecFeatures):
+        encodec_parameters = {
+            "feature_extractor.encodec." + key: value
+            for key, value in vocos_model.feature_extractor.encodec.state_dict().items()
+        }
+        state_dict.update(encodec_parameters)
+        
+    vocos_model.load_state_dict(state_dict)
+    vocos_model.eval()
+    vocos = vocos_model
+    vocos.to(device)
+    # TODO replace
+    whisper_model_name = "medium"
+    whisper_model = whisper.load_model(whisper_model_name,download_root=whisper_folder_path).cpu()
+
+# DEPRECATED
 def load_models_from_mount(model_path:pathlib.Path,vocos_path:pathlib.Path,vall_e_x:pathlib.Path):
     global model, codec, vocos
         
@@ -131,13 +176,11 @@ def preload_models():
     vocos = Vocos.from_pretrained('charactr/vocos-encodec-24khz').to(device)
 
 @torch.no_grad()
-def generate_audio(text, 
-                   prompt=None, 
+def generate_audio(text:str, 
+                   prompt_name:pathlib.Path=None, 
+                   prompt_dir:pathlib.Path=None,
                    language='auto', 
-                   accent='no-accent', 
-                   mount_dir:pathlib.Path=pathlib.Path.cwd() / pathlib.Path("..") / pathlib.Path("Vall-E-mount"),
-                   presets_dir:pathlib.Path=pathlib.Path("presets"),
-                   prompt_dir:pathlib.Path=pathlib.Path("prompts")):
+                   accent='no-accent'):
     
     global model, codec, vocos, text_tokenizer, text_collater
     text = text.replace("\n", "").strip(" ")
@@ -149,22 +192,12 @@ def generate_audio(text,
     text = lang_token + text + lang_token
 
     # load prompt
-    if prompt is not None:
-        prompt_path = prompt
-        # if not os.path.exists(prompt_path):
-        #     prompt_path = "./presets/" + prompt + ".npz"
-        # if not os.path.exists(prompt_path):
-        #     prompt_path = "./customs/" + prompt + ".npz"
-        # check preset dir
-        # mounted dirs
-        if pathlib.Path.exists(mount_dir / presets_dir / pathlib.Path(f"{prompt}.npz")):
-            prompt_path = mount_dir / presets_dir / pathlib.Path(f"{prompt}.npz")
-            
-        if pathlib.Path.exists(mount_dir / prompt_dir / pathlib.Path(f"{prompt}.npz")):
-            prompt_path = mount_dir / prompt_dir / pathlib.Path(f"{prompt}.npz")
-            
-        if not os.path.exists(prompt_path):
-            raise ValueError(f"Cannot find prompt {prompt}")
+    if prompt_name is not None:
+        prompt_path = prompt_name
+        path = prompt_dir / pathlib.Path(f"{prompt_name}")
+        print(f"Loading Prompt From Path: {path}")
+        if pathlib.Path.exists(path):
+            prompt_path = path
            
         prompt_data = np.load(prompt_path)
         audio_prompts = prompt_data['audio_tokens']

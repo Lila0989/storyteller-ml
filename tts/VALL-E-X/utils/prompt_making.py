@@ -27,7 +27,7 @@ if torch.cuda.is_available():
 codec = AudioTokenizer(device)
 
 if not os.path.exists("./whisper/"): os.mkdir("./whisper/")
-whisper_model = None
+# whisper_model = None
 
 @torch.no_grad()
 def transcribe_one(model, audio_path):
@@ -54,7 +54,7 @@ def transcribe_one(model, audio_path):
         text_pr += "."
     return lang, text_pr
 
-def make_prompt(name, audio_prompt_path,audio_prompt_output_path:pathlib.Path=None, transcript=None):
+def make_prompt(name, audio_prompt_path,audio_prompt_output_path:pathlib.Path=None):
     global model, text_collater, text_tokenizer, codec
     wav_pr, sr = torchaudio.load(audio_prompt_path)
     # check length
@@ -62,7 +62,7 @@ def make_prompt(name, audio_prompt_path,audio_prompt_output_path:pathlib.Path=No
         raise ValueError(f"Prompt too long, expect length below 15 seconds, got {wav_pr / sr} seconds.")
     if wav_pr.size(0) == 2:
         wav_pr = wav_pr.mean(0, keepdim=True)
-    text_pr, lang_pr = make_transcript(name, wav_pr, sr, transcript)
+    text_pr, lang_pr = make_transcript(name, wav_pr, sr, None)
 
     # tokenize audio
     encoded_frames = tokenize_audio(codec, (wav_pr, sr))
