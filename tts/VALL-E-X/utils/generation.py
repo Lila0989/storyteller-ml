@@ -88,10 +88,9 @@ def load_models_from_pathes(vocos_folder_path:pathlib.Path,vall_e_x_file_path:pa
     vocos_model.eval()
     vocos = vocos_model
     vocos.to(device)
-    # TODO replace
+    # TODO replace model name
     whisper_model_name = "medium"
     whisper_model = whisper.load_model(whisper_model_name,download_root=whisper_folder_path).cpu()
-
 # DEPRECATED
 def load_models_from_mount(model_path:pathlib.Path,vocos_path:pathlib.Path,vall_e_x:pathlib.Path):
     global model, codec, vocos

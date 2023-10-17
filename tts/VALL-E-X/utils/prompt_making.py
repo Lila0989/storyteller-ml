@@ -26,8 +26,8 @@ if torch.cuda.is_available():
 
 codec = AudioTokenizer(device)
 
-if not os.path.exists("./whisper/"): os.mkdir("./whisper/")
-# whisper_model = None
+#if not os.path.exists("./whisper/"): os.mkdir("./whisper/")
+whisper_model = None
 
 @torch.no_grad()
 def transcribe_one(model, audio_path):
@@ -54,7 +54,7 @@ def transcribe_one(model, audio_path):
         text_pr += "."
     return lang, text_pr
 
-def make_prompt(name, audio_prompt_path,audio_prompt_output_path:pathlib.Path=None):
+def make_prompt(name:pathlib.Path, audio_prompt_path:pathlib.Path,audio_prompt_output_path:pathlib.Path,whisper_folder_path:pathlib.Path):
     global model, text_collater, text_tokenizer, codec
     wav_pr, sr = torchaudio.load(audio_prompt_path)
     # check length
@@ -62,7 +62,7 @@ def make_prompt(name, audio_prompt_path,audio_prompt_output_path:pathlib.Path=No
         raise ValueError(f"Prompt too long, expect length below 15 seconds, got {wav_pr / sr} seconds.")
     if wav_pr.size(0) == 2:
         wav_pr = wav_pr.mean(0, keepdim=True)
-    text_pr, lang_pr = make_transcript(name, wav_pr, sr, None)
+    text_pr, lang_pr = make_transcript(name, wav_pr, sr,whisper_folder_path,None)
 
     # tokenize audio
     encoded_frames = tokenize_audio(codec, (wav_pr, sr))
@@ -86,7 +86,7 @@ def make_prompt(name, audio_prompt_path,audio_prompt_output_path:pathlib.Path=No
     np.savez(save_path, audio_tokens=audio_tokens, text_tokens=text_tokens, lang_code=lang2code[lang_pr])
     logging.info(f"Successful. Prompt saved to {save_path}")
 
-def make_transcript(name, wav, sr, transcript=None):
+def make_transcript(name, wav, sr, whisper_folder_path: pathlib.Path,transcript=None):
 
     if not isinstance(wav, torch.FloatTensor):
         wav = torch.tensor(wav)
@@ -101,7 +101,8 @@ def make_transcript(name, wav, sr, transcript=None):
         logging.info("Transcript not given, using Whisper...")
         global whisper_model
         if whisper_model is None:
-            whisper_model = whisper.load_model("medium", download_root=os.path.join(os.getcwd(), "whisper"))
+            # TODO: replace
+            whisper_model = whisper.load_model("medium", download_root=whisper_folder_path)
         whisper_model.to(device)
         torchaudio.save(f"./prompts/{name}.wav", wav, sr)
         lang, text = transcribe_one(whisper_model, f"./prompts/{name}.wav")
