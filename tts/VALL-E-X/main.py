@@ -1,11 +1,5 @@
 import argparse
 
-# python3 main.py -create_prompt_with_list 20.wav 21.wav -create_prompt_name alice
-# python3 main.py -use_prompt_name alice -output_file_name alice_says.wav -text "This is the text to be converted to speech."
-# python3 main.py -create_prompt_with_list 20.wav 21.wav 20.wav 21.wav -create_prompt_name alice -use_prompt_name alice -output_file_name alice_says.wav -text "This is my voice."
-# python3 main.py -create_prompt_with_list goku.wav -create_prompt_name goku -use_prompt_name goku -output_file_name goku_test.wav -text "oh my god krillin! where did you put my sensu beans!?"
-# python3 main.py -create_prompt_with_list
-
 from typing import List
 import pathlib
 
@@ -106,7 +100,6 @@ class VoiceDesigner():
         # multiple audio files concat
         # concat audio and trim the audio if it is longer than 14-15 seconds# if prompt is too long it will error out anyways
         if len(audio_file_paths) > 0:
-            # TODO: going to assume brandon renames the files as they are uploaded
             # try:# ./customs/ <-- folder it adds by default until we modified.
                     # load the audio files and then concat them. 
             tensor_result = AudioOps.stitch_wav_files_resample(files=audio_file_paths)
@@ -220,23 +213,24 @@ if __name__ == "__main__":
     main(args)
 
 
-# /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python
-# /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py
+# inference example
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" --mode 0 --whisper-folder-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper" --whisper-model medium --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" --prompt-name "goku.npz" --audio-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/output/" --audio-name "hello_world_test.wav" --tmp-work-dir "/tmp"
+
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py 
+
 # --text "hello world" 
 # --mode 0 
-# --audio-wav-files "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" 
 # --whisper-folder-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper" 
 # --whisper-model medium 
 # --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" 
 # --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" 
 # --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" 
-# --prompt-name "goku.npz" 
+# --prompt-name "goku" 
 # --audio-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/output/" 
 # --audio-name "hello_world_test.wav" 
 # --tmp-work-dir "/tmp"
 
-# inference example
-#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --text "hello world" --mode 0 --whisper-folder-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper" --whisper-model medium --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" --prompt-name "goku.npz" --audio-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/output/" --audio-name "hello_world_test.wav" --tmp-work-dir "/tmp"
 
 # create voice example
 #/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --mode 1 --audio-wav-files "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" --whisper-folder-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper" --whisper-model medium --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" --prompt-name "test_prompt" --tmp-work-dir "/tmp"

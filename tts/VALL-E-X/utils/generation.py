@@ -76,7 +76,7 @@ def load_models_from_pathes(vocos_folder_path:pathlib.Path,vall_e_x_file_path:pa
 
     vocos = None 
     vocos_model = Vocos.from_hparams(vocos_folder_path / pathlib.Path("config.yaml")) 
-    state_dict = torch.load(vocos_folder_path / pathlib.Path("pytorch_model.bin"), map_location="cpu")
+    state_dict = torch.load(vocos_folder_path / pathlib.Path("encodec_pytorch_model.bin"), map_location="cpu")
     if isinstance(vocos_model.feature_extractor, EncodecFeatures):
         encodec_parameters = {
             "feature_extractor.encodec." + key: value
