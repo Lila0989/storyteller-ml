@@ -32,6 +32,7 @@ unet = UNet2DConditionModel.from_pretrained(model_id, subfolder="unet", revision
 tokenflow_pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=to).to(device)
 if device == "cuda":
     tokenflow_pipe.enable_xformers_memory_efficient_attention()
+  # tokenflow_pipe.enable_attention_slicing()
 
 def randomize_seed_fn():
     seed = random.randint(0, np.iinfo(np.int32).max)
@@ -120,7 +121,7 @@ def preprocess_and_invert(input_video,
                           steps,
                           n_timesteps = 50,
                           batch_size: int = 8,
-                          n_frames: int = 40,
+                          n_frames: int = 10000,
                           inversion_prompt:str = '',
                           
               ):
@@ -172,11 +173,11 @@ def edit_with_pnp(input_video,
                   pnp_attn_t: float = 0.5,
                   pnp_f_t: float = 0.8,
                   batch_size: int = 8, #needs to be the same as for preprocess
-                  n_frames: int = 40,#needs to be the same as for preprocess
+                  n_frames: int = 10000,#needs to be the same as for preprocess
                   n_timesteps: int = 50,
                   gudiance_scale: float = 7.5,
                   inversion_prompt: str = "", #needs to be the same as for preprocess
-                  n_fps: int = 10,
+                  n_fps: int = 30,
                   progress=gr.Progress(track_tqdm=True)
 ):
     config = {}
@@ -281,19 +282,19 @@ with gr.Blocks(css="style.css") as demo:
                         randomize_seed = gr.Checkbox(label='Randomize seed', value=False)
                         gudiance_scale = gr.Slider(label='Guidance Scale', minimum=1, maximum=30,
                                               value=7.5, step=0.5, interactive=True)
-                        steps = gr.Slider(label='Inversion steps', minimum=10, maximum=500,
-                                              value=200, step=1, interactive=True)
+                        steps = gr.Slider(label='Inversion steps', minimum=10, maximum=200,
+                                              value=500, step=1, interactive=True)
                         
                     with gr.Column(min_width=100):
                         inversion_prompt = gr.Textbox(lines=1, label="Inversion prompt", interactive=True, placeholder="")
                         batch_size = gr.Slider(label='Batch size', minimum=1, maximum=10,
-                                              value=8, step=1, interactive=True)
-                        n_frames = gr.Slider(label='Num frames', minimum=2, maximum=200,
-                                              value=24, step=1, interactive=True)
+                                              value=10, step=1, interactive=True)
+                        n_frames = gr.Slider(label='Num frames', minimum=2, maximum=10000,
+                                              value=10000, step=1, interactive=True)
                         n_timesteps = gr.Slider(label='Diffusion steps', minimum=25, maximum=100,
                                               value=25, step=25, interactive=True)
                         n_fps = gr.Slider(label='Frames per second', minimum=1, maximum=60,
-                                              value=10, step=1, interactive=True)
+                                              value=30, step=1, interactive=True)
                         
             with gr.TabItem('Plug-and-Play Parameters'):
                  with gr.Column(min_width=100):
