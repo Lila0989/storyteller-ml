@@ -84,6 +84,7 @@ def make_prompt(name:pathlib.Path, audio_prompt_path:pathlib.Path,audio_prompt_o
     else:
         save_path = os.path.join("./customs/", f"{name}.npz")
     np.savez(save_path, audio_tokens=audio_tokens, text_tokens=text_tokens, lang_code=lang2code[lang_pr])
+    print(f"Embedding Save Path {save_path}")
     logging.info(f"Successful. Prompt saved to {save_path}")
 
 def make_transcript(name, wav, sr, whisper_folder_path: pathlib.Path,transcript=None):
