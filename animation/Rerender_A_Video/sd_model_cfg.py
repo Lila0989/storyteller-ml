@@ -7,3 +7,8 @@ model_dict = {
     'CounterfeitV30_25': 'models/CounterfeitV30_25.safetensors',
     'ghibli_style_offset': 'models/ghibli_style_offset.safetensors'
 }
+
+loRA_dict = {
+    'None': '',
+    'Dark Sushi': 'loRAs/dark_sushi'
+}
