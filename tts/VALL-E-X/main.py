@@ -150,22 +150,22 @@ voice_designer = VoiceDesigner()
 
 def main(args):
     
-    print(args.mode)
+    print("Starting Inference on Vall-E-X With Inputs")
+    print(f"Mode: {args.mode}")
     
-    print(args.text)
-    print(args.audio_wav_files)
-    print(args.whisper_folder_path)
-    print(args.vocos_folder_path)
+    print(f"Text: {args.text}")
+    print(f"List of Files For Create: {args.audio_wav_files}")
+    print(f"Whisper Folder Path: {args.whisper_folder_path}")
+    print(f"Vocos Folder Path: {args.vocos_folder_path}")
+    print(f"Vall-E-X Path: {args.vallex_path}")
     
-    print(args.vallex_path)
+    print(f"Prompt Path: {args.prompt_path}")
+    print(f"Prompt Name: {args.prompt_name}")
     
-    print(args.prompt_path)
-    print(args.prompt_name)
+    print(f"Audio Name: {args.audio_name}")
+    print(f"Audio Path: {args.audio_path}")
     
-    print(args.audio_name)
-    print(args.audio_path)
-    
-    print(args.tmp_work_dir)
+    print(f"Temp Work Dir: {args.tmp_work_dir}")
     
     voice_designer.temp_path = pathlib.Path(args.tmp_work_dir)
 
@@ -174,6 +174,7 @@ def main(args):
                                              pathlib.Path(args.whisper_folder_path))
     
     if args.mode == 0: # run inference
+        print("Running Inference")
         voice_designer.tts_with_prompt(prompt_dir=pathlib.Path(args.prompt_path),
                                        prompt_name=pathlib.Path(args.prompt_name),
                                        audio_output_path=pathlib.Path(args.audio_path),
@@ -234,3 +235,17 @@ if __name__ == "__main__":
 
 # create voice example
 #/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python /home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py --mode 1 --audio-wav-files "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" --whisper-folder-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper" --whisper-model medium --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" --prompt-name "test_prompt" --tmp-work-dir "/tmp"
+
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/.venv/bin/python 
+#/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/main.py 
+# --mode 1 
+# --audio-wav-files 
+# "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/20.wav" 
+# "/home/tensor/code/TTSDockerContainer/Vall-E-mount/input/21.wav" 
+# --whisper-folder-path "/home/tensor/code/storyteller/storyteller-ml/tts/VALL-E-X/whisper" 
+# --whisper-model medium 
+# --vocos-folder-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vocos-encodec-24khz" 
+# --vallex-path "/home/tensor/code/TTSDockerContainer/Vall-E-mount/models/vallex-checkpoint.pt" 
+# --prompt-path "/home/tensor/code/storyteller/VALL-E-X-TTS-Container/Vall-E-mount/prompts" 
+# --prompt-name "test_prompt" 
+# --tmp-work-dir "/tmp"
