@@ -172,7 +172,7 @@ video_frame_count = None
 def create_cfg(input_path, prompt, image_resolution, control_strength,
                color_preserve, left_crop, right_crop, top_crop, bottom_crop,
                control_type, low_threshold, high_threshold, ddim_steps, scale,
-               seed, sd_model, a_prompt, n_prompt, interval, keyframe_count,
+               seed, sd_model,loRA_weights, a_prompt, n_prompt, interval, keyframe_count,
                x0_strength, use_constraints, cross_start, cross_end,
                style_update_freq, warp_start, warp_end, mask_start, mask_end,
                ada_start, ada_end, mask_strength, inner_strength,
