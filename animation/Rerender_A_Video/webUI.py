@@ -24,7 +24,7 @@ from deps.ControlNet.annotator.util import HWC3
 from deps.ControlNet.cldm.model import create_model, load_state_dict
 from deps.gmflow.gmflow.gmflow import GMFlow
 from flow.flow_utils import get_warped_and_mask
-from sd_model_cfg import model_dict,loRA_dict
+from sd_model_cfg import model_dict
 from src.config import RerenderConfig
 from src.controller import AttentionControl
 from src.ddim_v_hacked import DDIMVSampler
@@ -172,7 +172,7 @@ video_frame_count = None
 def create_cfg(input_path, prompt, image_resolution, control_strength,
                color_preserve, left_crop, right_crop, top_crop, bottom_crop,
                control_type, low_threshold, high_threshold, ddim_steps, scale,
-               seed, sd_model,loRA_weights, a_prompt, n_prompt, interval, keyframe_count,
+               seed, sd_model, a_prompt, n_prompt, interval, keyframe_count,
                x0_strength, use_constraints, cross_start, cross_end,
                style_update_freq, warp_start, warp_end, mask_start, mask_end,
                ada_start, ada_end, mask_strength, inner_strength,
@@ -206,7 +206,6 @@ def create_cfg(input_path, prompt, image_resolution, control_strength,
         interval=interval,
         crop=[left_crop, right_crop, top_crop, bottom_crop],
         sd_model=sd_model,
-        loRA_weights=loRA_weights,        
         ddim_steps=ddim_steps,
         scale=scale,
         control_type=control_type,
@@ -240,13 +239,11 @@ def cfg_to_input(filename):
     ]
 
     sd_model = inversed_model_dict.get(cfg.sd_model, 'Stable Diffusion 1.5')
-    loRA_weights = inversed_model_dict.get(cfg.loRA_weights,"None")
-      
 
     args = [
         cfg.input_path, cfg.prompt, cfg.image_resolution, cfg.control_strength,
         cfg.color_preserve, *cfg.crop, cfg.control_type, cfg.canny_low,
-        cfg.canny_high, cfg.ddim_steps, cfg.scale, cfg.seed, sd_model,loRA_weights,
+        cfg.canny_high, cfg.ddim_steps, cfg.scale, cfg.seed, sd_model,
         cfg.a_prompt, cfg.n_prompt, cfg.interval, keyframe_count,
         cfg.x0_strength, use_constraints, *cfg.cross_period,
         cfg.style_update_freq, *cfg.warp_period, *cfg.mask_period,
@@ -296,9 +293,6 @@ def process1(*args):
     global global_state
     global_state.update_sd_model(cfg.sd_model, cfg.control_type,
                                  cfg.freeu_args)
-    # TODO: support Koha loRA
-    # global_state.update_loRA_weights()
-    
     global_state.update_controller(cfg.inner_strength, cfg.mask_period,
                                    cfg.cross_period, cfg.ada_period,
                                    cfg.warp_period, cfg.loose_cfattn)
@@ -760,13 +754,6 @@ with block:
                 sd_model = gr.Dropdown(sd_model_list,
                                        label='Base model',
                                        value='Stable Diffusion 1.5')
-                
-                loRA_weights_list = list(loRA_dict.keys())
-                loRA_weights = gr.Dropdown(loRA_weights_list,
-                                           label="loRA",
-                                           value="None")
-                
-                
                 a_prompt = gr.Textbox(label='Added prompt',
                                       value='best quality, extremely detailed')
                 n_prompt = gr.Textbox(
@@ -928,7 +915,7 @@ with block:
                     prompt, image_resolution, control_strength, color_preserve,
                     left_crop, right_crop, top_crop, bottom_crop, control_type,
                     low_threshold, high_threshold, ddim_steps, scale, seed,
-                    sd_model,loRA_weights, a_prompt, n_prompt, interval, keyframe_count,
+                    sd_model, a_prompt, n_prompt, interval, keyframe_count,
                     x0_strength, use_constraints[0], cross_start, cross_end,
                     style_update_freq, warp_start, warp_end, mask_start,
                     mask_end, ada_start, ada_end, mask_strength,
