@@ -1,0 +1,3 @@
+[submodule "animation/Rerender_A_Video/deps/ControlNet"]
+	path = animation/Rerender_A_Video/deps/ControlNet
+	url = https://github.com/lllyasviel/ControlNet
