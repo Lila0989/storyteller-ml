@@ -1,3 +1,6 @@
 [submodule "animation/Rerender_A_Video/deps/ControlNet"]
 	path = animation/Rerender_A_Video/deps/ControlNet
 	url = https://github.com/lllyasviel/ControlNet
+[submodule "animation/Rerender_A_Video/deps/ebsynth"]
+	path = animation/Rerender_A_Video/deps/ebsynth
+	url = https://github.com/SingleZombie/ebsynth
