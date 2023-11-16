@@ -1,9 +1,9 @@
-[submodule "animation/Rerender_A_Video/deps/ControlNet"]
-	path = animation/Rerender_A_Video/deps/ControlNet
+[submodule "deps/gmflow"]
+	path = deps/gmflow
+	url = https://github.com/haofeixu/gmflow.git
+[submodule "deps/ControlNet"]
+	path = deps/ControlNet
 	url = https://github.com/lllyasviel/ControlNet.git
-[submodule "animation/Rerender_A_Video/deps/ebsynth"]
-	path = animation/Rerender_A_Video/deps/ebsynth
-	url = https://github.com/SingleZombie/ebsynth/
-[submodule "animation/Rerender_A_Video/deps/gmflow"]
-	path = animation/Rerender_A_Video/deps/gmflow
-	url = https://github.com/haofeixu/gmflow/
+[submodule "deps/ebsynth"]
+	path = deps/ebsynth
+	url = https://github.com/SingleZombie/ebsynth.git
