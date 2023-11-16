@@ -1,3 +1,7 @@
+# ENSURE YOU USE 
+openai-whisper==20230918
+using 3.8.10 python
+
 # VALL-E X: Multilingual Text-to-Speech Synthesis and Voice Cloning 🔊
 # This is for inference, will require some work to get it to inference with Vall-E repo later on.
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/qCBRmAnTxg)
