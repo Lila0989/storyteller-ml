@@ -1,5 +1,5 @@
 import argparse
-
+import sys
 from typing import List
 import pathlib
 
@@ -149,7 +149,9 @@ global voice_designer
 voice_designer = VoiceDesigner()
 
 def main(args):
-    
+    print("Starting Vall-E-X")
+    print(f"Python Version: {sys.version_info}")
+
     print("Starting Inference on Vall-E-X With Inputs")
     print(f"Mode: {args.mode}")
     
