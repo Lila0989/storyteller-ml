@@ -64,6 +64,16 @@ def download_controlnet_hed():
            'resolve/main/models/control_sd15_hed.pth')
     download(url, 'models')
 
+def download_controlnet_depth():
+    url = ('https://huggingface.co/lllyasviel/ControlNet/'
+           'resolve/main/models/control_sd15_depth.pth')
+    download(url, 'models')
+
+def download_controlnet_openpose():
+    url = ('https://huggingface.co/lllyasviel/ControlNet/'
+           'resolve/main/models/control_sd15_openpose.pth')
+    download(url, 'models')
+
 
 def download_vae():
     url = ('https://huggingface.co/stabilityai/sd-vae-ft-mse-original'
@@ -75,4 +85,6 @@ build_ebsynth()
 download_gmflow_ckpt()
 download_controlnet_canny()
 download_controlnet_hed()
+download_controlnet_depth()
+download_controlnet_openpose()
 download_vae()
