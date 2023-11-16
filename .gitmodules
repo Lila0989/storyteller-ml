@@ -4,6 +4,3 @@
 [submodule "animation/Rerender_A_Video/deps/ebsynth"]
 	path = animation/Rerender_A_Video/deps/ebsynth
 	url = https://github.com/SingleZombie/ebsynth
-[submodule "animation/Rerender_A_Video/deps/gmflow"]
-	path = animation/Rerender_A_Video/deps/gmflow
-	url = https://github.com/SingleZombie/ebsynth
