@@ -35,10 +35,13 @@ RUN python3.8 get-pip.py
 
 # Clone the repository
 
-
 COPY requirements-pinned.txt . 
 
-RUN pip3 install -r requirements-pinned.txt
+RUN python3.8 -m venv .venv
+RUN source .venv/bin/activate
+RUN pip install -r requirements-pinned.txt
+
+#RUN pip3 install -r requirements-pinned.txt
 
 WORKDIR /model_code
 
