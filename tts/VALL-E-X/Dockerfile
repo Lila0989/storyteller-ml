@@ -4,6 +4,11 @@ FROM nvidia/cuda:12.2.0-devel-ubuntu20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN mkdir /python_install
+RUN mkdir /model_code
+
+WORKDIR /python_install
+
 RUN apt-get update && apt-get install -y curl
 
     # Preconfigure package selections (as an example)
@@ -22,15 +27,17 @@ RUN apt-get install -y git
 RUN apt-get install -y ffmpeg
 RUN apt-get install -y wget
 
-
 RUN wget https://bootstrap.pypa.io/get-pip.py
 RUN python3.8 get-pip.py
 
 # Clone the repository
 
+
 COPY requirements-pinned.txt . 
 
 RUN pip3 install -r requirements-pinned.txt
+
+RUN mkdir /model_code
 
 # Navigate to the cloned directory and checkout the specific commit
 #WORKDIR TestingDockerIO
