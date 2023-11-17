@@ -27,6 +27,9 @@ RUN apt-get install -y git
 RUN apt-get install -y ffmpeg
 RUN apt-get install -y wget
 
+# rsync to copy between pods with rich logs
+RUN apt-get install -y rsync
+
 RUN wget https://bootstrap.pypa.io/get-pip.py
 RUN python3.8 get-pip.py
 
