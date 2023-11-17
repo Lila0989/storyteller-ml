@@ -684,7 +684,7 @@ with block:
                               open=False):
                 image_resolution = gr.Slider(label='Frame resolution',
                                              minimum=256,
-                                             maximum=768,
+                                             maximum=2048,
                                              value=512,
                                              step=64)
                 control_strength = gr.Slider(label='ControlNet strength',
