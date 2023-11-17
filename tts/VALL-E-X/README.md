@@ -1,6 +1,22 @@
-# ENSURE YOU USE 
+Storyteller Notes
+-----------------
+
+Ubuntu 22.04 requires Python 3.8, not 3.10 as is default
+
+```
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt-get update
+sudo apt-get install python3.8 python3.8-venv python3.8-dev
+```
+
+Use the following:
+
+```
 openai-whisper==20230918
 using 3.8.10 python
+```
+
+Now back to the regularly scheduled README:
 
 # VALL-E X: Multilingual Text-to-Speech Synthesis and Voice Cloning 🔊
 # This is for inference, will require some work to get it to inference with Vall-E repo later on.
