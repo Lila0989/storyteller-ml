@@ -37,9 +37,9 @@ RUN python3.8 get-pip.py
 
 COPY requirements-pinned.txt . 
 
-RUN python3.8 -m venv .venv
-RUN source .venv/bin/activate
-RUN pip install -r requirements-pinned.txt
+RUN python3.8 -m venv python \
+  && . python/bin/activate \
+  && pip install -r requirements-pinned.txt
 
 #RUN pip3 install -r requirements-pinned.txt
 
