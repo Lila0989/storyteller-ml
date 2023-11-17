@@ -45,9 +45,6 @@ RUN python3.8 -m venv python \
 
 WORKDIR /model_code
 
-# Navigate to the cloned directory and checkout the specific commit
-#WORKDIR TestingDockerIO
-#COPY VALL-E-X . 
 COPY . . 
 
 #RUN git pull
