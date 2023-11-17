@@ -10,29 +10,35 @@ RUN apt-get update && apt-get install -y curl
 RUN echo "package-name package-name/some-option select option-value" | debconf-set-selections && \ 
     apt-get install -y software-properties-common
 
-RUN apt install software-properties-common -y
+RUN apt-get install software-properties-common -y
 
 RUN add-apt-repository ppa:deadsnakes/ppa
 
-RUN sudo apt-get update
-RUN sudo apt-get install python3.8 python3.8-venv python3.8-dev
+RUN apt-get update
+RUN apt-get install -y python3.8 python3.8-venv python3.8-dev python3.8-full python3.8-distutils
 
 #RUN apt install python3.10 -y
 RUN apt-get install -y git
-RUN sudo apt install ffmpeg
+RUN apt-get install -y ffmpeg
+RUN apt-get install -y wget
 
+
+RUN wget https://bootstrap.pypa.io/get-pip.py
+RUN python3.8 get-pip.py
 
 # Clone the repository
 
-# RUN pwd
-RUN pip3 install requirements-pinned.txt
+COPY requirements-pinned.txt . 
+
+RUN pip3 install -r requirements-pinned.txt
 
 # Navigate to the cloned directory and checkout the specific commit
-WORKDIR TestingDockerIO
-COPY VALL-E-X . 
+#WORKDIR TestingDockerIO
+#COPY VALL-E-X . 
+COPY . . 
 
-RUN git pull
-RUN git reset --hard origin/main
+#RUN git pull
+#RUN git reset --hard origin/main
 #RUN git checkout 47c491a29d10c04c6f1efd01bc7b334d11cad4f2
 
 # # Allow parameters to be passed
