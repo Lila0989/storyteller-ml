@@ -37,7 +37,7 @@ COPY requirements-pinned.txt .
 
 RUN pip3 install -r requirements-pinned.txt
 
-RUN mkdir /model_code
+WORKDIR /model_code
 
 # Navigate to the cloned directory and checkout the specific commit
 #WORKDIR TestingDockerIO
