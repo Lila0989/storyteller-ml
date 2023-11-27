@@ -147,7 +147,7 @@ RUN pip3 install gdown
 #RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
 
 # Mostly for local development:
-COPY ./start_tts_server.sh /
+COPY ./container_start_tts_server.sh /
 
 # TTS model code:
 COPY ./ ./models/tts

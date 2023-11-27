@@ -26,3 +26,7 @@ target/
 .git
 .idea/
 .ipynb_checkpoints/
+
+# Dev scripts
+dev_launch_docker_instance.sh
+
