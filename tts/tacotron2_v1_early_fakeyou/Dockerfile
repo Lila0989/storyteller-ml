@@ -6,7 +6,11 @@
 #  - multiple python versions (3.6, 3.8)
 #  THIS IS NOT VERIFIED TO WORK YET (2021-05-30)
 
-FROM nvidia/cuda:11.3.0-devel-ubuntu20.04 
+# NB(bt,2023-11-27): Nvida yanked their "nvidia/cuda:11.3.0-devel-ubuntu20.04" image from Docker Hub
+# We've attempted to recreate our own base image replacement, but we haven't tested it in production 
+# as of this writing. (This is only for TT2, which uses a very outdated set of dependencies.)
+# FROM nvidia/cuda:11.3.0-devel-ubuntu20.04 
+FROM storytold/nvidia-cuda-11.3.0-ubuntu-20.04:edf8110202f2
 
 # See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.title='Storyteller ML'
