@@ -234,6 +234,9 @@ class FakeYouTt2Pipeline:
         self.hifigan_super_resolution_filename = None
 
     def maybe_load_hifigan(self, checkpoint_path):
+        if not checkpoint_path or checkpoint_path == 'BOGUS_NOT_USED':
+            # Requests no longer have to specify a hifigan to use (if using waveglow)
+            return
         if self.hifigan_filename == checkpoint_path:
             LOGGER.info('Hifi-gan model already loaded into memory: {}'.format(checkpoint_path))
             return
@@ -246,6 +249,9 @@ class FakeYouTt2Pipeline:
         self.hifigan_filename = checkpoint_path
 
     def maybe_load_hifigan_super_resolution(self, checkpoint_path):
+        if not checkpoint_path or checkpoint_path == 'BOGUS_NOT_USED':
+            # Requests no longer have to specify a hifigan to use (if using waveglow)
+            return
         if self.hifigan_super_resolution_filename == checkpoint_path:
             LOGGER.info('Hifi-gan (SuperRes) model already loaded into memory: {}'.format(checkpoint_path))
             return
@@ -258,6 +264,9 @@ class FakeYouTt2Pipeline:
         self.hifigan_super_resolution_filename = checkpoint_path
 
     def maybe_load_waveglow_model(self, checkpoint_path):
+        if not checkpoint_path or checkpoint_path == 'BOGUS_NOT_USED':
+            # Requests no longer have to specify a waveglow to use (if using hifigan)
+            return
         if self.waveglow_filename == checkpoint_path:
             LOGGER.info('Waveglow model already loaded into memory: {}'.format(checkpoint_path))
             return
