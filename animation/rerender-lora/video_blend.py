@@ -4,6 +4,7 @@ import platform
 import struct
 import subprocess
 import time
+from collections import namedtuple
 from typing import List
 
 import cv2
@@ -270,6 +271,28 @@ def main(args):
                        False)
     if not args.tmp:
         video_sequence.remove_out_and_tmp()
+
+
+def process_video(name, output=None, fps=30, beg=1, end=101, itv=10, key='keys0', n_proc=8, ps=False, ne=False, tmp=False):
+    """
+    Process a video with the specified parameters.
+
+    :param name: Path to input video.
+    :param output: Path to output video.
+    :param fps: The FPS of output video.
+    :param beg: The index of the first frame to be stylized.
+    :param end: The index of the last frame to be stylized.
+    :param itv: The interval of key frame.
+    :param key: The subfolder name of stylized key frames.
+    :param n_proc: The max process count.
+    :param ps: Use poisson gradient blending if True.
+    :param ne: Do not run ebsynth if True (use previous ebsynth output).
+    :param tmp: Keep temporary output if True.
+    """
+    Args = namedtuple('Args', ['name', 'output', 'fps', 'beg', 'end', 'itv', 'key', 'n_proc', 'ps', 'ne', 'tmp'])
+    args = Args(name, output, fps, beg, end, itv, key, n_proc, ps, ne, tmp)
+
+    main(args)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@
 
 # CrossAttn precision handling
 import os
+import sys
 
 import einops
 import numpy as np
@@ -290,7 +291,7 @@ class DDIMVSampler(object):
             else timesteps.shape[0]
         print(f'Running DDIM Sampling with {total_steps} timesteps')
 
-        iterator = tqdm(time_range, desc='DDIM Sampler', total=total_steps)
+        iterator = tqdm(time_range, desc='DDIM Sampler', total=total_steps, file=sys.stdout)
         if controller is not None:
             controller.set_total_step(total_steps)
         if mask is None:
