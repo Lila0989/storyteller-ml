@@ -1,6 +1,8 @@
 import argparse
 import os
 import random
+import subprocess
+import sys
 
 import cv2
 import einops
@@ -402,12 +404,20 @@ def postprocess(cfg: RerenderConfig, ne: bool, max_process: int, tmp: bool,
     use_ps = '-ps' if ps else ''
     o_video_cmd = f'--output {o_video}'
 
+    python_executable = sys.executable
+
     cmd = (
-        f'python video_blend.py {video_base_dir} --beg 1 --end {end_frame} '
+        f'{python_executable} video_blend.py {video_base_dir} --beg 1 --end {end_frame} '
         f'--itv {interval} --key {key_dir} {use_e} {o_video_cmd} --fps {fps} '
         f'--n_proc {max_process} {use_tmp} {use_ps}')
     print(cmd)
-    os.system(cmd)
+    completed_process = subprocess.run(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr)
+
+    # Check if the command was executed successfully
+    if completed_process.returncode == 0:
+        print("Command executed successfully")
+    else:
+        print(f"Command failed with return code {completed_process.returncode}")
 
 
 if __name__ == '__main__':

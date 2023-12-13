@@ -71,6 +71,7 @@ def download_vae():
     download(url, 'models')
 
 
+print("Before installing, make sure you have initialized the submodules! (git submodule init)")
 build_ebsynth()
 download_gmflow_ckpt()
 download_controlnet_canny()
