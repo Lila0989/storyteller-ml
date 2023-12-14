@@ -341,8 +341,7 @@ def rerender(cfg: RerenderConfig, first_img_only: bool, key_video_path: str):
                 noise_rescale = torch.ones_like(mask)
             masks = []
             for j in range(ddim_steps):
-                if j <= ddim_steps * mask_period[
-0] or j >= ddim_steps * mask_period[1]:
+                if j <= ddim_steps * mask_period[0] or j >= ddim_steps * mask_period[1]:
                     masks += [None]
                 else:
                     masks += [mask * cfg.mask_strength]
