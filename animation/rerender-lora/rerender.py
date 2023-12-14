@@ -92,6 +92,8 @@ def rerender(cfg: RerenderConfig, first_img_only: bool, key_video_path: str):
         elif model_ext == '.ckpt' or model_ext == '.pth':
             model.load_state_dict(torch.load(cfg.sd_model)['state_dict'],
                                   strict=False)
+        else:
+            raise Exception(f'Unknown model extension {model_ext}')
 
     # apply lora if exists
     if cfg.lora_path:
@@ -340,7 +342,7 @@ def rerender(cfg: RerenderConfig, first_img_only: bool, key_video_path: str):
             masks = []
             for j in range(ddim_steps):
                 if j <= ddim_steps * mask_period[
-                    0] or j >= ddim_steps * mask_period[1]:
+0] or j >= ddim_steps * mask_period[1]:
                     masks += [None]
                 else:
                     masks += [mask * cfg.mask_strength]
