@@ -1,78 +1,58 @@
-MocapNET V4
-===========
+# MocapNET V4
+Welcome to the MocapNET V4 documentation! 🎉
 
-Original docs are in [README\_ORIGINAL.md](./README_ORIGINAL.md).
+🔗 **Original Documentation**: Find the original docs at [README_ORIGINAL.md](./README_ORIGINAL.md).
 
-This is a snapshot of (branch `tag mnet4`). It was taken
-from the official MocapNET repo at https://github.com/FORTH-ModelBasedTracker/MocapNET/tree/mnet4
+This snapshot from the `tag mnet4` branch is brought to you directly from the [official MocapNET repo](https://github.com/FORTH-ModelBasedTracker/MocapNET/tree/mnet4). Dive into the world of motion capture with ease!
 
+## 🚀 Getting Started: Developer Installation
 
-Dev Installation
-----------------
+To get up and running with MocapNET V4, follow these simple steps:
 
 ```sh
 cd MocapNET/tree/mnet4/docker
 bash build_and_deploy.sh
 ```
 
-Usage
------
+## 🎬 How to Use
 
-Download a sample vid as a test: `wget http://ammar.gr/mocapnet/shuffle.webm -O shuffle.webm`
+### Quick Start with a Sample Video
+Get started by downloading a sample video:
 
-Run: `python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2`
-
+```sh
+wget http://ammar.gr/mocapnet/shuffle.webm -O shuffle.webm
 ```
-Usage: python3 -m mediapipeHolisticWebcamMocapNET --from INPUT_VID_PATH [OPTIONS]
 
-  Inference
+### Run the Magic ✨
+Execute this command:
 
-Options:
-**--headless**: Runs the script without displaying the live video output in a window. Useful when you don't need a GUI or are running on a headless server (Prolly need this enabled in out case).
-
-**--live**: Activates a live demo mode. Specific functionality might change based on the script's implementation.
-
-**--mt**: Stands for multi-threaded. This enables the script to run in a multi-threaded mode, potentially improving performance on multi-core processors.
-
-**--calib [filename]**: Specifies a calibration file to use. Calibration files are used to adjust camera parameters or other settings.
-
-**--frameskip [number]**: Skips a specified number of frames. Useful for reducing processing load or speeding up video processing.
-
-**--nnsubsample [number]**: Specifies how often to run the neural network. For example, if set to 2, the NN will run on every second frame.
-
-**--ik [float int int]**: Parameters for inverse kinematics (IK). The float might be a learning rate, followed by epochs and iterations, which control the IK optimization process.
-
-**--smooth [float float]**: Sets parameters for smoothing, likely the sampling rate and cutoff frequency. This is used to smooth the motion capture data.
-
-**--noik**: Disables the inverse kinematics processing.
-
-**--aspectCorrection [float]**: Adjusts the aspect ratio of the input video or image stream.
-
-**--noise [float]**: Adds a specified level of noise to the input data, possibly to test robustness or simulate less-than-ideal conditions.
-
-**--size [int int]**: Sets the width and height of the video or image stream.
-
-**--scale [float]**: Scales the output motion capture data.
-
-**--plot**: Enables plotting of BVH (Biovision Hierarchy) channels, which might display skeletal animation or similar data.
-
-**--all**: Activates all processing options (body, eyes, mouth, hands).
-
-**--nobody**: Disables body joint estimation.
-
-**--face**: Enables face joint estimation.
-
-**--eyes / --reye**: Activates right eye joint estimation.
-
-**--mouth**: Enables mouth joint estimation.
-
-**--hands**: Activates hand joint estimation.
-
-**--save**: Saves the output of the script. Depending on the script's functionality, this could mean saving processed video frames, motion capture data, or logs. In the context of this script, it seems to save the output images and possibly videos of the motion capture process.
-
-**--engine [engine_name]**: Specifies the engine to be used, which could be different versions or types of neural network backends.
-
-**--from [filepath]**: Defines the input source. This could be a file path to a video or a device path for live camera feed.
-
-**--profile**: Possibly activates a profiling mode, which would gather performance metrics during script execution.
+```sh
+python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2
 ```
+
+### Command-Line Options Explained
+
+- `--headless`: Skip the live video display. Ideal for headless servers or GUI-less environments.
+- `--live`: Launches a live demo. Functionalities may vary.
+- `--mt`: Enable multi-threading for better performance on multi-core CPUs.
+- `--calib [filename]`: Use a specific calibration file for camera adjustments.
+- `--frameskip [number]`: Skip a set number of frames to reduce load or speed up processing.
+- `--nnsubsample [number]`: Run the neural network at set intervals (e.g., every 2nd frame).
+- `--ik [float int int]`: Set parameters for inverse kinematics optimization.
+- `--smooth [float float]`: Apply smoothing to motion capture data.
+- `--noik`: Turn off inverse kinematics processing.
+- `--aspectCorrection [float]`: Adjust video or image aspect ratio.
+- `--noise [float]`: Add noise to input for testing under varied conditions.
+- `--size [int int]`: Define video/image dimensions.
+- `--scale [float]`: Scale the output motion data.
+- `--plot`: Plot BVH channels for skeletal animation visualization.
+- `--all`: Activate all processing features (body, eyes, mouth, hands).
+- `--nobody`: Disable body joint estimation.
+- `--face`: Enable face joint estimation.
+- `--eyes / --reye`: Estimate right eye joints.
+- `--mouth`: Enable mouth joint estimation.
+- `--hands`: Estimate hand joints.
+- `--save`: Save outputs (images, videos, data, logs).
+- `--engine [engine_name]`: Choose a specific neural network backend.
+- `--from [filepath]`: Specify input source (video file or live feed).
+- `--profile`: Activate performance profiling.
