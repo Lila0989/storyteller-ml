@@ -7,7 +7,7 @@ This snapshot from the `tag mnet4` branch is brought to you directly from the [o
 
 ## 🚀 Getting Started: Developer Installation
 
-To get up and running with MocapNET V4, follow these simple steps:
+To get up and running with MocapNET V4, follow these simple steps. This script will build and run a Docker image:
 
 ```sh
 cd MocapNET/tree/mnet4/docker
