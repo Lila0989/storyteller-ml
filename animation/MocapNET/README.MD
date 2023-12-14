@@ -56,3 +56,6 @@ python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 
 - `--engine [engine_name]`: Choose a specific neural network backend.
 - `--from [filepath]`: Specify input source (video file or live feed).
 - `--profile`: Activate performance profiling.
+
+
+## THIS README IS A W.I.P 
