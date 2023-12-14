@@ -17,11 +17,10 @@ bash build_and_deploy.sh
 
 Usage
 -----
-```
+
 Download a sample vid as a test: `wget http://ammar.gr/mocapnet/shuffle.webm -O shuffle.webm`
 
 Run: `python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2`
-```
 
 ```
 Usage: python3 -m mediapipeHolisticWebcamMocapNET --from INPUT_VID_PATH [OPTIONS]
