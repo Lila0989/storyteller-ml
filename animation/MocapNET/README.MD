@@ -71,6 +71,12 @@ Execute this command:
 ./GroundTruthDumper --from dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions/DAZFriendlyCGSPEED_ZXYAndHandsAxisBigHands.bvh --merge src/python/mnet4/out.bvh dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions//mergeDazFriendlyAndAddHead.profile --setPositionRotation 0 0 0 0 0 0 --bvh remade.bvh
 ```
 
+### Notes:
+
+- The output bvh file will be stored inside this directory ``MocapNET/src/python/mnet4`` with the filename ``out.bvh``
+
+- The converted bvh file will be stored in the root directory ``MocapNET`` with the filename ``remade.bvh``
+
 
 
 ### Command-Line Options Explained
