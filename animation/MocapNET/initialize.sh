@@ -50,6 +50,19 @@ else
 fi
 
 cd "$DIR"
+if [ -f dependencies/libtensorflow-gpu-linux-x86_64-2.3.1.tar.gz ]; then
+ #Doing a local installation that requires no SUDO 
+ cd "$DIR/dependencies"
+ mkdir libtensorflow
+ tar -C libtensorflow -xzf libtensorflow-gpu-linux-x86_64-2.3.1.tar.gz  
+ #echo "Please give me sudo permissions to install Tensorflow $TENSORFLOW_VERSION C Bindings.."
+ #sudo tar -C /usr/local -xzf libtensorflow-gpu-linux-x86_64-$TENSORFLOW_VERSION.tar.gz
+ else
+   echo "Failed to download/extract tensorflow.."
+fi
+#---------------------------------------------------------------------------------------------------------------------------
+
+cd "$DIR"
 if [ -f dependencies/RGBDAcquisition/README.md ]; then
  echo "RGBDAcquisition appears to already exist .."
 else
