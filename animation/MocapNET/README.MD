@@ -48,24 +48,34 @@ For Windows users, using the Windows Subsystem for Linux (WSL) is recommended:
 
 For a detailed guide on setting up WSL, watch this YouTube tutorial: [How to Set Up WSL](https://www.youtube.com/watch?v=1HzYU2_t3yc)
 
-## 🎬 How to Use
+## 🎬 How to Use MocapNET V4
+
+### Preparing for Usage
+
+Before running MocapNET V4, navigate to the appropriate directory:
+
+```sh
+cd src/python/mnet4
+```
 
 ### Quick Start with a Sample Video
-Get started by downloading a sample video:
 
-```sh
-wget http://ammar.gr/mocapnet/shuffle.webm -O shuffle.webm
-```
+Now you're ready to download and use a sample video:
 
-### Run the Magic ✨
-Execute this command:
+1. **Download a Sample Video**:
+   ```sh
+   wget http://ammar.gr/mocapnet/shuffle.webm -O shuffle.webm
+   ```
 
-```sh
-python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2
-```
+2. **Process the Video**:
+   Execute the following command to run MocapNET on the downloaded video:
+   ```sh
+   python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2
+   ```
 
-### Convert the output bvh to generate bvh without face and toes bones
-Execute this command:
+### Convert Output BVH
+
+For further processing, such as generating a BVH file without face and toes bones, execute:
 
 ```sh
 ./GroundTruthDumper --from dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions/DAZFriendlyCGSPEED_ZXYAndHandsAxisBigHands.bvh --merge src/python/mnet4/out.bvh dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions//mergeDazFriendlyAndAddHead.profile --setPositionRotation 0 0 0 0 0 0 --bvh remade.bvh
@@ -76,8 +86,6 @@ Execute this command:
 - The output bvh file will be stored inside this directory ``MocapNET/src/python/mnet4`` with the filename ``out.bvh``
 
 - The converted bvh file will be stored in the root directory ``MocapNET`` with the filename ``remade.bvh``
-
-
 
 ### Command-Line Options Explained
 
