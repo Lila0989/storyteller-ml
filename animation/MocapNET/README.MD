@@ -119,6 +119,31 @@ ________________________________________________________________________________
 
 ______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
+## 🌟 BVH File Examples
+
+MocapNET provides different types of BVH (BioVision Hierarchy) files to cater to various needs. Below are two specific examples that demonstrate the range of outputs possible with MocapNET.
+
+### Full-Body Estimation Example
+
+The `shuffle_with_whole_body.bvh` file includes a full-body motion capture estimation, encompassing all major body parts, including the face, hands, toes etc. This file is ideal for comprehensive motion analysis.
+
+- **Access the Full-Body BVH File**: [Shuffle with Whole Body BVH](https://github.com/storytold/storyteller-ml/blob/master/animation/MocapNET/exampleOutputs/shuffle_with_whole_body.bvh)
+
+### Minimalistic Version (Currently Buggy)
+
+The `shuffle_without_face_toes.bvh` file represents a more minimalistic version of motion capture data, where face and toes bones are omitted. Note that this version is currently buggy and may have limitations in its use.
+
+- **Access the Minimalistic BVH File**: [Shuffle without Face and Toes BVH](https://github.com/storytold/storyteller-ml/blob/master/animation/MocapNET/exampleOutputs/shuffle_without_face_toes.bvh)
+
+### Using the BVH Files
+
+These example files are beneficial for:
+
+- **Animation and Simulation**: Load these BVH files into animation software to visualize and further process the motion data for example in Blender.
+- **Comparison and Learning**: Use these files to compare the differences in data output and structure between full-body and minimalistic motion capture.
+
+______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
 ### Command-Line Options Explained
 
 - `--headless`: Skip the live video display. Ideal for headless servers or GUI-less environments.
