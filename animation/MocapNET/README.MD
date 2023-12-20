@@ -64,6 +64,15 @@ Execute this command:
 python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2
 ```
 
+### Convert bvh to bvh without face and toes bones 
+Execute this command:
+
+```sh
+./GroundTruthDumper --from dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions/DAZFriendlyCGSPEED_ZXYAndHandsAxisBigHands.bvh --merge out.bvh dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions//mergeDazFriendlyAndAddHead.profile --setPositionRotation 0 0 0 0 0 0 --bvh remade.bvh
+```
+
+
+
 ### Command-Line Options Explained
 
 - `--headless`: Skip the live video display. Ideal for headless servers or GUI-less environments.
