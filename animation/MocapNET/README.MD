@@ -1,52 +1,81 @@
+# MocapNET V4 Documentation
 
-# MocapNET V4
-Welcome to the MocapNET V4 documentation! 🎉
+Welcome to the MocapNET V4 documentation! 🎉 Immerse yourself in the world of advanced motion capture technology with ease.
 
-🔗 **Original Documentation**: Find the original docs at [README_ORIGINAL.md](./README_ORIGINAL.md).
+🔗 **Find the Original Documentation** at [README_ORIGINAL.md](./README_ORIGINAL.md).
 
-This snapshot from the `tag mnet4` branch is brought to you directly from the [official MocapNET repo](https://github.com/FORTH-ModelBasedTracker/MocapNET/tree/mnet4). Dive into the world of motion capture with ease!
+This version from the `tag mnet4` branch is sourced directly from the [official MocapNET repository](https://github.com/FORTH-ModelBasedTracker/MocapNET/tree/mnet4).
 
-## 🚀 Getting Started: Developer Installation
-
-### For Linux Users
+## 🚀 Getting Started: Developer Installation via docker (For Server Deployment Usage)
 
 To install MocapNET V4 on a Linux system:
 
+1. **Clone the MocapNET Repository**:
+   ```sh
+   git clone https://github.com/storytold/storyteller-ml/master/animation/MocapNET.git
+   ```
+
+2. **Deployment**:
 ```sh
-cd MocapNET/tree/mnet4/docker
+cd MocapNET/docker
 bash build_and_deploy.sh
 ```
 
 This script will build and run a Docker image, setting up the necessary environment for MocapNET V4.
 
-### For Windows Users
+______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+### 🚀 Getting Started: Main Installation Process (Run locally)
+
+For both Linux and Windows (via WSL), follow these steps:
+
+1. **Install Dependencies**:
+   ```sh
+   sudo apt-get install git build-essential cmake libopencv-dev libjpeg-dev libpng-dev libglew-dev libpthread-stubs0-dev
+   ```
+
+2. **Clone the MocapNET Repository**:
+   ```sh
+   git clone https://github.com/storytold/storyteller-ml/master/animation/MocapNET.git
+   ```
+
+3. **Navigate to MocapNET Directory**:
+   ```sh
+   cd MocapNET
+   ```
+
+4. **Run the Initialization Script**:
+   ```sh
+   ./initialize.sh
+   ```
+
+This will set up MocapNET V4 on your system, including all necessary dependencies.
+
+______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+### Additional Steps for Windows Users
 
 For Windows users, using the Windows Subsystem for Linux (WSL) is recommended:
 
 1. **Enable WSL on Windows**:
-   - Open PowerShell as Administrator and run: 
+   - Open PowerShell as Administrator and execute:
      ```powershell
      dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
      ```
    - Restart your computer when prompted.
 
 2. **Install a Linux Distribution from the Microsoft Store**:
-   - Select and install your preferred Linux distribution (e.g., Ubuntu, Debian, Fedora).
+   - Choose and install your preferred Linux distribution (e.g., Ubuntu, Debian, Fedora).
 
 3. **Set Up Your Linux Distribution**:
-   - Launch the Linux distribution and follow the on-screen instructions to set up your account.
+   - Launch the Linux distribution and complete the account setup.
 
 4. **Update and Upgrade Your Linux Distribution**:
-   - Run: `sudo apt update && sudo apt upgrade`
+   - Run `sudo apt update && sudo apt upgrade` in the Linux terminal.
 
-5. **Install Docker on WSL**:
-   - Follow the Docker installation instructions for your Linux distribution.
+For a detailed WSL setup guide, view [How to Set Up WSL](https://www.youtube.com/watch?v=1HzYU2_t3yc) on YouTube.
 
-6. **Install MocapNET V4**:
-   - Navigate to the `MocapNET/tree/mnet4/docker` directory.
-   - Run the `build_and_deploy.sh` script.
-
-For a detailed guide on setting up WSL, watch this YouTube tutorial: [How to Set Up WSL](https://www.youtube.com/watch?v=1HzYU2_t3yc)
+______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 ## 🎬 How to Use MocapNET V4
 
@@ -80,12 +109,15 @@ For further processing, such as generating a BVH file without face and toes bone
 ```sh
 ./GroundTruthDumper --from dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions/DAZFriendlyCGSPEED_ZXYAndHandsAxisBigHands.bvh --merge src/python/mnet4/out.bvh dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions//mergeDazFriendlyAndAddHead.profile --setPositionRotation 0 0 0 0 0 0 --bvh remade.bvh
 ```
+______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 ### Notes:
 
 - The output bvh file will be stored inside this directory ``MocapNET/src/python/mnet4`` with the filename ``out.bvh``
 
 - The converted bvh file will be stored in the root directory ``MocapNET`` with the filename ``remade.bvh``
+
+______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
 ### Command-Line Options Explained
 
