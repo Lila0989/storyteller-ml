@@ -64,7 +64,7 @@ Execute this command:
 python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2
 ```
 
-### Convert bvh to bvh without face and toes bones 
+### Convert the output bvh to generate bvh without face and toes bones
 Execute this command:
 
 ```sh
