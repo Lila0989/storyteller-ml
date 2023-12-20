@@ -46,4 +46,4 @@ RUN \
 USER ${user_name} 
 WORKDIR /home/${user_name}/
  
-RUN cd /home/${user_name}/workspace && git clone -b mnet4 https://github.com/FORTH-ModelBasedTracker/MocapNET && cd MocapNET/src/python/mnet4/ && ./setup.sh
+RUN cd /home/${user_name}/workspace && git clone -b mnet4 https://github.com/FORTH-ModelBasedTracker/MocapNET && cd MocapNET && ./initialize.sh
