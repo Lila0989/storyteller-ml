@@ -1,3 +1,4 @@
+
 # MocapNET V4
 Welcome to the MocapNET V4 documentation! 🎉
 
@@ -7,12 +8,45 @@ This snapshot from the `tag mnet4` branch is brought to you directly from the [o
 
 ## 🚀 Getting Started: Developer Installation
 
-To get up and running with MocapNET V4, follow these simple steps. This script will build and run a Docker image:
+### For Linux Users
+
+To install MocapNET V4 on a Linux system:
 
 ```sh
 cd MocapNET/tree/mnet4/docker
 bash build_and_deploy.sh
 ```
+
+This script will build and run a Docker image, setting up the necessary environment for MocapNET V4.
+
+### For Windows Users
+
+For Windows users, using the Windows Subsystem for Linux (WSL) is recommended:
+
+1. **Enable WSL on Windows**:
+   - Open PowerShell as Administrator and run: 
+     ```powershell
+     dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+     ```
+   - Restart your computer when prompted.
+
+2. **Install a Linux Distribution from the Microsoft Store**:
+   - Select and install your preferred Linux distribution (e.g., Ubuntu, Debian, Fedora).
+
+3. **Set Up Your Linux Distribution**:
+   - Launch the Linux distribution and follow the on-screen instructions to set up your account.
+
+4. **Update and Upgrade Your Linux Distribution**:
+   - Run: `sudo apt update && sudo apt upgrade`
+
+5. **Install Docker on WSL**:
+   - Follow the Docker installation instructions for your Linux distribution.
+
+6. **Install MocapNET V4**:
+   - Navigate to the `MocapNET/tree/mnet4/docker` directory.
+   - Run the `build_and_deploy.sh` script.
+
+For a detailed guide on setting up WSL, watch this YouTube tutorial: [How to Set Up WSL](https://www.youtube.com/watch?v=1HzYU2_t3yc)
 
 ## 🎬 How to Use
 
@@ -56,6 +90,5 @@ python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 
 - `--engine [engine_name]`: Choose a specific neural network backend.
 - `--from [filepath]`: Specify input source (video file or live feed).
 - `--profile`: Activate performance profiling.
-
 
 ## THIS README IS A W.I.P 
