@@ -257,8 +257,9 @@ class ApiHandler():
         pipeline.maybe_load_hifigan(hifigan_vocoder_checkpoint_path)
         pipeline.maybe_load_hifigan_super_resolution(hifigan_superres_vocoder_checkpoint_path)
 
-        if maybe_clear_synthesizer_checkpoint_path:
-            pipeline.uncache_tacotron_model(maybe_clear_synthesizer_checkpoint_path)
+
+        # if maybe_clear_synthesizer_checkpoint_path:
+        #     pipeline.uncache_tacotron_model(maybe_clear_synthesizer_checkpoint_path)
 
         pipeline.maybe_load_tacotron_model_to_cache(synthesizer_checkpoint_path)
 
