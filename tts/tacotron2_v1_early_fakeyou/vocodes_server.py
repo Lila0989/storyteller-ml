@@ -287,8 +287,11 @@ class ApiHandler():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8000)
+    parser.add_argument('--model-cache-limit', type=int, default=100)
+
     args = parser.parse_args()
 
+    pipeline.set_cache_limit(args.model_cache_limit)
     api = falcon.API(middleware=[MultipartMiddleware()])
     api.add_route('/', IndexHandler())
     api.add_route('/_status', StatusHandler())

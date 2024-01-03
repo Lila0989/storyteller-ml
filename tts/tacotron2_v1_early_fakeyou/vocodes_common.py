@@ -6,7 +6,7 @@ import json
 
 import numpy as np
 import torch
-
+import time
 from tacotron2.hparams import create_hparams
 from tacotron2.model import Tacotron2
 from tacotron2.layers import TacotronSTFT
@@ -221,6 +221,9 @@ class FakeYouTt2Pipeline:
     def __init__(self):
         # Cache of "path" => loaded model
         self.tacotron_model_cache = {}
+        self.tacotron_model_cache_size_limit = None
+        self.tacotron_model_cache_usage_tracker = {}
+        self.tacotron_model_cache_eviction_percent = 0.1
         self.waveglow = None
         self.waveglow_filename = None
 
@@ -232,6 +235,11 @@ class FakeYouTt2Pipeline:
         self.hifigan_super_resolution_denoiser = None
         self.hifigan_super_resolution_h = None
         self.hifigan_super_resolution_filename = None
+
+
+    # method to set cache limit
+    def set_cache_limit(self, limit):
+        self.tacotron_model_cache_size_limit = limit
 
     def maybe_load_hifigan(self, checkpoint_path):
         if not checkpoint_path or checkpoint_path == 'BOGUS_NOT_USED':
@@ -278,10 +286,26 @@ class FakeYouTt2Pipeline:
     def maybe_load_tacotron_model_to_cache(self, checkpoint_path):
         if checkpoint_path in self.tacotron_model_cache:
             LOGGER.info('Tacotron model already loaded into memory: {}'.format(checkpoint_path))
+            # update usage tracker with current timestamp
+            self.tacotron_model_cache_usage_tracker[checkpoint_path] = time.time()
             return
+    
+        if self.tacotron_model_cache_size_limit and len(self.tacotron_model_cache) >= self.tacotron_model_cache_size_limit:
+            # uncache at least a few least recently used models
+            num_to_uncache = int(self.tacotron_model_cache_size_limit * self.tacotron_model_cache_eviction_percent)
+            LOGGER.info('Cache limit reached, uncaching {} least recently used models'.format(num_to_uncache))
+            # find the oldest models
+            oldest_models = sorted(self.tacotron_model_cache_usage_tracker.items(), key=lambda x: x[1])[:num_to_uncache]
+            for model_path, _ in oldest_models:
+                self.uncache_tacotron_model(model_path)
+                # update usage tracker to remove the uncached model
+                self.tacotron_model_cache_usage_tracker.pop(model_path, None)
+
         LOGGER.info('Loading tacotron model into memory: {}'.format(checkpoint_path))
         model = load_tacotron_model(checkpoint_path)
         self.tacotron_model_cache[checkpoint_path] = model
+        # update usage tracker with current timestamp
+        self.tacotron_model_cache_usage_tracker[checkpoint_path] = time.time()
         LOGGER.info('Now {} synthesizer models in memory'.format(len(self.tacotron_model_cache)))
 
     def uncache_tacotron_model(self, checkpoint_path):
