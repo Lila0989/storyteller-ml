@@ -257,8 +257,9 @@ class ApiHandler():
         pipeline.maybe_load_hifigan(hifigan_vocoder_checkpoint_path)
         pipeline.maybe_load_hifigan_super_resolution(hifigan_superres_vocoder_checkpoint_path)
 
-        if maybe_clear_synthesizer_checkpoint_path:
-            pipeline.uncache_tacotron_model(maybe_clear_synthesizer_checkpoint_path)
+
+        # if maybe_clear_synthesizer_checkpoint_path:
+        #     pipeline.uncache_tacotron_model(maybe_clear_synthesizer_checkpoint_path)
 
         pipeline.maybe_load_tacotron_model_to_cache(synthesizer_checkpoint_path)
 
@@ -287,8 +288,11 @@ class ApiHandler():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8000)
+    parser.add_argument('--model-cache-limit', type=int, default=100)
+
     args = parser.parse_args()
 
+    pipeline.set_cache_limit(args.model_cache_limit)
     api = falcon.API(middleware=[MultipartMiddleware()])
     api.add_route('/', IndexHandler())
     api.add_route('/_status', StatusHandler())
