@@ -1,3 +1,34 @@
+import torch
+from time import  strftime
+import os, sys, time
+import platform
+
+print("Env vars:")
+print(os.environ)
+
+
+def print_gpu_info():
+    print('========================================')
+    print('Python interpreter', sys.executable)
+    print('PyTorch version', torch.__version__)
+    print('CUDA Available?', torch.cuda.is_available())
+    print('CUDA Device count', torch.cuda.device_count())
+    print('CUDA threads for parallelizing CPU operations', torch.get_num_threads())
+    print('CUDA architectures library was compiled for', torch.cuda.get_arch_list())
+
+    #try:
+    #    from tensorflow.python.client import device_lib
+    #    print('local devices', str(device_lib.list_local_devices()).replace("\n", "\n  "))
+    #except ImportError:
+    #    print('no tensorflow - cannot list devices')
+    #    pass
+    print('========================================', flush=True)
+
+
+print_gpu_info(
+
+)
+
 print("NLTK")
 import nltk
 nltk.download('punkt')
