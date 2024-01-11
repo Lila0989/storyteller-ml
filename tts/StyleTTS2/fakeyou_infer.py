@@ -6,7 +6,11 @@ import soundfile as sf
 from styletts2importable import compute_style, inference
 from tortoise.utils.text import split_and_recombine_text
 
-def clsynthesize(text, voice_path, vcsteps):
+def clsynthesize(text_file_path, voice_path, vcsteps):
+    # Load the text from the file
+    with open(text_file_path, 'r', encoding="utf-8") as file:
+        text = file.read()
+
     # Load the custom voice
     custom_voice = compute_style(voice_path)
 
@@ -22,13 +26,13 @@ def clsynthesize(text, voice_path, vcsteps):
 
 def main():
     parser = argparse.ArgumentParser(description='CLI for StyleTTS Voice Synthesis')
-    parser.add_argument('--text', type=str, required=True, help='Text to synthesize')
+    parser.add_argument('--input', type=str, required=True, help='Path to the text file')
     parser.add_argument('--voice', type=str, required=True, help='Path to the custom voice audio file')
     parser.add_argument('--vcsteps', type=int, required=True, help='Number of diffusion steps')
     parser.add_argument('--output', type=str, required=True, help='Output path for the synthesized audio file')
     args = parser.parse_args()
 
-    sample_rate, audio = clsynthesize(args.text, args.voice, args.vcsteps)
+    sample_rate, audio = clsynthesize(args.input, args.voice, args.vcsteps)
 
     # Save the synthesized audio to the specified output path
     sf.write(args.output, audio, sample_rate)
