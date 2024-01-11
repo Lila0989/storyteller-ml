@@ -1,31 +1,37 @@
-# Use ubuntu as the base image from the hub
-# then have to build this as a image.
+# Use NVIDIA CUDA with Ubuntu as the base image
 FROM nvidia/cuda:12.2.0-devel-ubuntu20.04
-# Optional: Set environment variables
+
+# Set environment variables
 ENV MY_ENV_VARIABLE=value
 ENV DEBIAN_FRONTEND=noninteractive
-# Optional: Run commands to set up the image
-RUN apt-get update && apt-get install -y curl
 
-    # Preconfigure package selections (as an example)
-RUN echo "package-name package-name/some-option select option-value" | debconf-set-selections && \ 
-    apt-get install -y software-properties-common
-RUN apt install software-properties-common -y
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt install python3.10 -y
-RUN apt-get install -y git
-RUN sudo apt install ffmpeg
-RUN sudo apt-get install espeak-ng
-# Clone the repository
+# Install necessary packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    software-properties-common \
+    git \
+    ffmpeg \
+    espeak-ng \
+    sudo \
+    python3.10 \
+    python3-pip
 
-# RUN pwd
-RUN pip3 install requirements.txt
+# Install git-lfs
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
+    && apt-get install git-lfs \
+    && git lfs install
 
-# Navigate to the cloned directory
-WORKDIR TestingDockerIO
-COPY StyleTTS2 . 
+# Create a directory for your project
+WORKDIR /TestingDockerIO
 
+# Copy only the necessary files from the host to the container
+COPY StyleTTS2 /TestingDockerIO/StyleTTS2
+COPY requirements.txt /TestingDockerIO
 
+# Install Python dependencies
+RUN pip3 install --upgrade pip && \
+    pip3 install -r requirements.txt
 
-# # Allow parameters to be passed
-ENTRYPOINT ["python3", "fakeyou_infer.py"]
+# Clone the Git LFS repository and move the Models directory
+RUN git lfs clone https://huggingface.co/yl4579/StyleTTS2-LibriTTS && \
+    mv StyleTTS2-LibriTTS/Models .
