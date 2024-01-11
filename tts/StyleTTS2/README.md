@@ -28,16 +28,16 @@ To use the script, follow these steps:
 5. Run the script with the following command:
 
    ```bash
-   python fakeyou_infer.py --text "Your text here" --voice path/to/custom_voice.wav --vcsteps 20 --output output.wav
+   python fakeyou_infer.py --input Path/to/textfile.txt --voice path/to/custom_voice.wav --vcsteps 20 --output output.wav
    ```
 
-   Replace `"Your text here"` with the text you want to synthesize, `path/to/custom_voice.wav` with the path to your custom voice audio file, `20` with the number of diffusion steps (you can adjust this value), and `output.wav` with the desired output audio file name.
+   Replace `Path/to/textfile.txt` with your text/prompt file to synthesize, `path/to/custom_voice.wav` with the path to your custom voice audio file, `20` with the number of diffusion steps (you can adjust this value), and `output.wav` with the desired output audio file name.
 
 4. After running the script, it will generate the synthesized audio and save it to the specified output path (`output.wav` in the example above).
 
 ## Parameters
 
-- `--text`: The text you want to synthesize.
+- `--input`: Path to the text file.
 - `--voice`: Path to the custom voice audio file.
 - `--vcsteps`: Number of diffusion steps (adjustable). 
 - `--output`: Path to save the synthesized audio.
@@ -47,7 +47,7 @@ To use the script, follow these steps:
 Here's an example of how to use the script:
 
 ```bash
-python fakeyou_infer.py --text "This is just a test of my voice" --voice voices/f-us-1.wav --vcsteps 20 --output output.wav
+python fakeyou_infer.py --input prompt.txt --voice voices/f-us-1.wav --vcsteps 20 --output output.wav
 ```
 
 
