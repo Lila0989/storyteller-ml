@@ -23,7 +23,7 @@ RUN pip3 install requirements.txt
 
 # Navigate to the cloned directory
 WORKDIR TestingDockerIO
-COPY styletts2 . 
+COPY StyleTTS2 . 
 
 
 
