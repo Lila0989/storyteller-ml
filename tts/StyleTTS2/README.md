@@ -1,7 +1,3 @@
-# StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models
-
-
-```markdown
 # FakeYou StyleTTS 2 Inference
 
 This script allows you to perform voice synthesis using the FakeYou StyleTTS 2 model. It takes a text input and a custom voice audio file as input and generates synthesized audio based on the provided text and voice.
@@ -55,7 +51,7 @@ python fakeyou_infer.py --text "This is just a test of my voice" --voice voices/
 ```
 
 
-
+# StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models
 
 ### Yinghao Aaron Li, Cong Han, Vinay S. Raghavan, Gavin Mischler, Nima Mesgarani
 
