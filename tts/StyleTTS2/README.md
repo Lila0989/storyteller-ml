@@ -1,5 +1,62 @@
 # StyleTTS 2: Towards Human-Level Text-to-Speech through Style Diffusion and Adversarial Training with Large Speech Language Models
 
+
+```markdown
+# FakeYou StyleTTS 2 Inference
+
+This script allows you to perform voice synthesis using the FakeYou StyleTTS 2 model. It takes a text input and a custom voice audio file as input and generates synthesized audio based on the provided text and voice.
+
+## Prerequisites
+
+Before using this script, make sure you have the following prerequisites installed:
+
+- Python 3.x
+- PyTorch (version 2.1.1+cu118 or compatible)
+
+You can set up a suitable Python environment with these dependencies.
+
+## Usage
+
+To use the script, follow these steps:
+
+1. Clone this repository to your local machine.
+
+2. cd StyleTTS2
+
+3. pip install -r requirements.txt
+
+3. git-lfs clone https://huggingface.co/yl4579/StyleTTS2-LibriTTS
+
+4. mv StyleTTS2-LibriTTS/Models .
+
+5. Run the script with the following command:
+
+   ```bash
+   python fakeyou_infer.py --text "Your text here" --voice path/to/custom_voice.wav --vcsteps 20 --output output.wav
+   ```
+
+   Replace `"Your text here"` with the text you want to synthesize, `path/to/custom_voice.wav` with the path to your custom voice audio file, `20` with the number of diffusion steps (you can adjust this value), and `output.wav` with the desired output audio file name.
+
+4. After running the script, it will generate the synthesized audio and save it to the specified output path (`output.wav` in the example above).
+
+## Parameters
+
+- `--text`: The text you want to synthesize.
+- `--voice`: Path to the custom voice audio file.
+- `--vcsteps`: Number of diffusion steps (adjustable). 
+- `--output`: Path to save the synthesized audio.
+
+## Example
+
+Here's an example of how to use the script:
+
+```bash
+python fakeyou_infer.py --text "This is just a test of my voice" --voice voices/f-us-1.wav --vcsteps 20 --output output.wav
+```
+
+
+
+
 ### Yinghao Aaron Li, Cong Han, Vinay S. Raghavan, Gavin Mischler, Nima Mesgarani
 
 > In this paper, we present StyleTTS 2, a text-to-speech (TTS) model that leverages style diffusion and adversarial training with large speech language models (SLMs) to achieve human-level TTS synthesis. StyleTTS 2 differs from its predecessor by modeling styles as a latent random variable through diffusion models to generate the most suitable style for the text without requiring reference speech, achieving efficient latent diffusion while benefiting from the diverse speech synthesis offered by diffusion models. Furthermore, we employ large pre-trained SLMs, such as WavLM, as discriminators with our novel differentiable duration modeling for end-to-end training, resulting in improved speech naturalness. StyleTTS 2 surpasses human recordings on the single-speaker LJSpeech dataset and matches it on the multispeaker VCTK dataset as judged by native English speakers. Moreover, when trained on the LibriTTS dataset, our model outperforms previous publicly available models for zero-shot speaker adaptation. This work achieves the first human-level TTS synthesis on both single and multispeaker datasets, showcasing the potential of style diffusion and adversarial training with large SLMs.
