@@ -21,12 +21,14 @@ RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.d
     && apt-get install git-lfs \
     && git lfs install
 
-# Create a directory for your project
+# Create a directory for our project
 WORKDIR /TestingDockerIO
 
 # Copy only the necessary files from the host to the container
 COPY StyleTTS2 /TestingDockerIO/StyleTTS2
-COPY requirements.txt /TestingDockerIO
+
+# Change working directory to StyleTTS2
+WORKDIR /TestingDockerIO/StyleTTS2
 
 # Install Python dependencies
 RUN pip3 install --upgrade pip && \
