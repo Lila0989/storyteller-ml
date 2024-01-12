@@ -34,8 +34,6 @@ import nltk
 nltk.download('punkt')
 print("SCIPY")
 from scipy.io.wavfile import write
-print("TORCH STUFF")
-import torch
 print("START")
 torch.manual_seed(0)
 torch.backends.cudnn.benchmark = False
@@ -81,7 +79,7 @@ def preprocess(wave):
     mel_tensor = (torch.log(1e-5 + mel_tensor.unsqueeze(0)) - mean) / std
     return mel_tensor
 
-def compute_style(path):
+def compute_style(path, save_npz=False, npz_path=None):
     wave, sr = librosa.load(path, sr=24000)
     audio, index = librosa.effects.trim(wave, top_db=30)
     if sr != 24000:
@@ -91,8 +89,13 @@ def compute_style(path):
     with torch.no_grad():
         ref_s = model.style_encoder(mel_tensor.unsqueeze(1))
         ref_p = model.predictor_encoder(mel_tensor.unsqueeze(1))
+        style_vector = torch.cat([ref_s, ref_p], dim=1)
 
-    return torch.cat([ref_s, ref_p], dim=1)
+    # Save style vector to NPZ file if requested
+    if save_npz and npz_path:
+        np.savez(npz_path, style_vector=style_vector.cpu().numpy())
+
+    return style_vector
 
 device = 'cpu'
 if torch.cuda.is_available():
