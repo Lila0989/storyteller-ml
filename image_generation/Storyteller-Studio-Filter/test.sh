@@ -1,14 +1,15 @@
 python3.10 main.py \
---prompt "This is a prompt" \
+--prompt "raiden mei, pantyhose, boots, single glove, earrings, dress, choker, tank top" \
 --negative-prompt "This is a negative prompt" \
---number-of-samples 20 \
---samplers "DPM++ 2M Karras" \
---width 512 \
---height 256 \
---cfg-scale 10 \
---seed 1234 \
---loRA-path "/path/to/loRA" \
---check-point "/path/to/checkpoint" \
---vae "/path/to/vae" \
+--number-of-samples 128 \
+--samplers "DPM++ 2M SDE Heun Karras" \
+--width 1024 \
+--height 1024 \
+--cfg-scale 8 \
+--seed 1 \
+--loRA-path "xs4vow.safetensors" \
+--check-point "waifuDiffusionBeta03_beta3.safetensors" \
+--vae "vaeFtEma560000Ema_original.pt" \
 --batch-size 1 \
---batch-count 1
+--batch-count 10
+
