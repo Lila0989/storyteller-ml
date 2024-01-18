@@ -1,6 +1,6 @@
 FROM tensorflow/tensorflow:latest-gpu
 
-ARG user_id="user"
+ARG user_id="1000"
 ARG root_psw="12345678"
 ARG user_psw="ok"
 ARG user_name=user

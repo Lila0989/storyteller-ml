@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }} 
 
       - name: Build image
-        run: cd animation/MocapNET/ && docker build . --file docker/Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+        run: cd animation/MocapNET-kasisnu/ && docker build . --file docker/Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Push image to GitHub Container Registry
         run: |
