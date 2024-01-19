@@ -104,7 +104,13 @@ Now you're ready to download and use a sample video:
 
 ### Convert Output BVH
 
-For further processing, such as generating a BVH file without face and toes bones, execute:
+Before running the conversion command, make sure you're in the root directory of MocapNET. You can do this by executing:
+
+```sh
+cd ../../..
+```
+
+Now, proceed with the BVH conversion:
 
 ```sh
 ./GroundTruthDumper --from dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions/DAZFriendlyCGSPEED_ZXYAndHandsAxisBigHands.bvh --merge src/python/mnet4/out.bvh dependencies/RGBDAcquisition/opengl_acquisition_shared_library/opengl_depth_and_color_renderer/Motions//mergeDazFriendlyAndAddHead.profile --setPositionRotation 0 0 0 0 0 0 --bvh remade.bvh
