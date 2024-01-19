@@ -97,10 +97,14 @@ Now you're ready to download and use a sample video:
    ```
 
 2. **Process the Video**:
-   Execute the following command to run MocapNET on the downloaded video:
-   ```sh
-   python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2
-   ```
+   - **For General Use**: Execute the following command to run MocapNET on the downloaded video:
+     ```sh
+     python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --save --plot --headless 2
+     ```
+   - **For Docker Demo**: In the Docker environment, use this simplified command. Note that `--plot` and `--save` arguments are removed as they are optional debugging arguments (scroll down to a list of available cli args):
+     ```sh
+     python3 -m mediapipeHolisticWebcamMocapNET --from shuffle.webm --ik 0.001 99 99 --smooth 60 10 --all --headless 2
+     ```
 
 ### Convert Output BVH
 
