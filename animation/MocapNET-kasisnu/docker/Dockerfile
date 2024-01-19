@@ -49,6 +49,8 @@ RUN python3.10 -m venv python \
 
 WORKDIR /model_code
 COPY . /model_code/MocapNET
+COPY ./runner.sh /model_code/runner.sh
+RUN chmod +x /model_code/runner.sh
 RUN cd /model_code/MocapNET && ./initialize.sh
 # RUN cd /home/${user_name}/workspace && git clone https://github.com/FORTH-ModelBasedTracker/MocapNET && cd MocapNET && ./initialize.sh --collab
 
