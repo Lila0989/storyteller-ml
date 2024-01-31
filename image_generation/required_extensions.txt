@@ -16,3 +16,5 @@ https://github.com/rgthree/rgthree-comfy
 https://github.com/giriss/comfy-image-saver
 https://github.com/kijai/ComfyUI-KJNodes
 https://github.com/Ttl/ComfyUi_NNLatentUpscale
+https://github.com/cubiq/ComfyUI_IPAdapter_plus
+https://github.com/cubiq/ComfyUI_essentials

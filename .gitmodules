@@ -16,6 +16,6 @@
 [submodule "animation/rerender-lora/deps/gmflow"]
 	path = animation/rerender-lora/deps/gmflow
 	url = https://github.com/haofeixu/gmflow.git
-[submodule "origin"]
+[submodule "image_generation/ComfyUI"]
 	path = image_generation/ComfyUI
-	url = https://github.com/comfyanonymous/ComfyUI.git
+	url = https://github.com/comfyanonymous/ComfyUI
