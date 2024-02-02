@@ -155,7 +155,8 @@ class StableDiffusionFE:
             raise ValueError("Model must be loaded before loading LoRA weights.")
 
         self.lora_path = lora_path
-        self.pipeline.load_lora_weights(lora_path)
+    
+        self.pipeline.load_lora_weights(lora_path,low_cpu_mem_usage=False, ignore_mismatched_sizes=True)
 
     def load_vae(self, vae_path: str) -> None:
         """
