@@ -2,3 +2,4 @@ numexpr
 numba
 opencv-python
 color_matcher
+mediapipe
