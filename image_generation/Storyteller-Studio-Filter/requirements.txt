@@ -34,6 +34,7 @@ trampoline==0.1.2
 imageio==2.33.1
 importlib-metadata==7.0.1
 zipp==3.17.0
+controlnet-aux==0.0.7
 --extra-index-url https://download.pytorch.org/whl/cu118 --trusted-host download.pytorch.org
 torch==2.1.0+cu118
 torchaudio==2.1.0+cu118
