@@ -16,6 +16,3 @@
 [submodule "animation/rerender-lora/deps/gmflow"]
 	path = animation/rerender-lora/deps/gmflow
 	url = https://github.com/haofeixu/gmflow.git
-[submodule "workflows/comfy/ComfyUI"]
-	path = workflows/comfy/ComfyUI
-	url = https://github.com/comfyanonymous/ComfyUI
