@@ -7,8 +7,22 @@ import signal
 
 import aiohttp
 
-current_script_dir = os.path.dirname(os.path.realpath(__file__))
-file_path = os.path.join(current_script_dir, 'prompt', 'prompt.json')
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Run Comfy')
+    parser.add_argument('--prompt', type=str, help='location of the prompt json', required=True)
+    return parser.parse_args()
+
+# current_script_dir = os.path.dirname(os.path.realpath(__file__))
+# file_path = os.path.join(current_script_dir, 'prompt', 'prompt.json')
+
+args = parse_args()
+
+file_path = args.prompt
+
+print(f'Loading prompt json from path: {file_path}')
+
 prompt = json.load(open(file_path))
 
 comfy_path = os.path.dirname(os.path.abspath(__file__))
