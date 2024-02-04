@@ -5,6 +5,8 @@
 name: Build SadTalker Docker Image
 on:
   push:
+    paths:
+      - 'animation/SadTalker/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

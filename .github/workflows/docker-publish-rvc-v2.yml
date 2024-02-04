@@ -5,6 +5,8 @@
 name: Build rvc-v2 Docker Image
 on:
   push:
+    paths:
+      - 'voice_conversion/rvc-v2-brandon/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

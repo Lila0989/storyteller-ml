@@ -5,6 +5,8 @@
 name: Build Tacotron2 v1 (early FakeYou) Docker Image
 on:
   push:
+    paths:
+      - 'tts/tacotron2_v1_early_fakeyou/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

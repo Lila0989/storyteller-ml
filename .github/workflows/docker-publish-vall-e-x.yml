@@ -5,6 +5,8 @@
 name: Build VALL-E-X Docker Image
 on:
   push:
+    paths:
+      - 'tts/VALL-E-X/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

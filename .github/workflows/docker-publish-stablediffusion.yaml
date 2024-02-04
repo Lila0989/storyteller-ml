@@ -5,6 +5,8 @@
 name: Build Stable Diffusion Docker Image
 on:
   push:
+    paths:
+      - 'image_generation/Storyteller-Studio-Filter/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

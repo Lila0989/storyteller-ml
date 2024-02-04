@@ -5,6 +5,8 @@
 name: Build StyleTTS2 Docker Image
 on:
   push:
+    paths:
+      - 'tts/StyleTTS2/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

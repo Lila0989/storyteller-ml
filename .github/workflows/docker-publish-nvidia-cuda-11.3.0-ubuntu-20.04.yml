@@ -5,6 +5,8 @@
 name: Build Nvidia CUDA 11.3.0 (Ubuntu 20.04)
 on:
   push:
+    paths:
+      - 'docker/nvidia-cuda-11.3.0-ubuntu-20.04/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

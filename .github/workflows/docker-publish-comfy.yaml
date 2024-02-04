@@ -5,6 +5,8 @@
 name: Build Comfy Docker Image
 on:
   push:
+    paths:
+      - 'workflows/comfy/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

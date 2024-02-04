@@ -5,6 +5,8 @@
 name: Build MocapNet Docker Image
 on:
   push:
+    paths:
+      - 'animation/MocapNET-kasisnu/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch

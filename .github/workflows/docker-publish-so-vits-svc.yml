@@ -5,6 +5,8 @@
 name: Build so-vits-svc Docker Image
 on:
   push:
+    paths:
+      - 'voice_conversion/so-vits-svc-paul/**'
     branches:
       # NB: Default-branch doesn't work, despite Github's documentation.
       #- $default-branch
