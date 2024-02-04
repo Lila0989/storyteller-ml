@@ -3,6 +3,7 @@ from time import  strftime
 import os, sys, time
 import platform
 
+
 print("Env vars:")
 print(os.environ)
 
