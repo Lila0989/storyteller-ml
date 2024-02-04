@@ -1,0 +1,267 @@
+** ComfyUI startup time: 2024-02-03 21:05:40.484447
+[2024-02-03 21:05] ** Platform: Linux
+[2024-02-03 21:05] ** Python version: 3.10.12 (main, Nov 20 2023, 15:14:05) [GCC 11.4.0]
+[2024-02-03 21:05] ** Python executable: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/bin/python3
+[2024-02-03 21:05] ** Log path: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/comfyui.log
+[2024-02-03 21:05] 
+Prestartup times for custom nodes:
+[2024-02-03 21:05]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/rgthree-comfy
+[2024-02-03 21:05]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Manager
+[2024-02-03 21:05] 
+[2024-02-03 21:05] ** ComfyUI startup time: 2024-02-03 21:05:40.485965
+[2024-02-03 21:05] ** Platform: Linux
+[2024-02-03 21:05] ** Python version: 3.10.12 (main, Nov 20 2023, 15:14:05) [GCC 11.4.0]
+[2024-02-03 21:05] ** Python executable: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/bin/python3
+[2024-02-03 21:05] ** Log path: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/comfyui.log
+[2024-02-03 21:05] 
+Prestartup times for custom nodes:
+[2024-02-03 21:05]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/rgthree-comfy
+[2024-02-03 21:05]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Manager
+[2024-02-03 21:05] 
+[2024-02-03 21:05] ****** User settings have been changed to be stored on the server instead of browser storage. ******
+[2024-02-03 21:05] ****** For multi-user setups add the --multi-user CLI argument to enable multiple user profiles. ******
+[2024-02-03 21:05] [36mEfficiency Nodes:[0m Attempting to add Control Net options to the 'HiRes-Fix Script' Node (comfyui_controlnet_aux add-on)...[92mSuccess![0m
+[2024-02-03 21:05] [93mEfficiency Nodes Warning:[0m Failed to import python package 'simpleeval'; related nodes disabled.
+[2024-02-03 21:05] 
+[2024-02-03 21:05] ### Loading: ComfyUI-Impact-Pack (V4.73.3)
+[2024-02-03 21:05] ### ComfyUI-Impact-Pack: Updating dependencies [0 -> 20]
+[2024-02-03 21:05] ### ComfyUI-Impact-Pack: Check dependencies
+[2024-02-03 21:05] ### ComfyUI-Impact-Pack: Updating subpack
+[2024-02-03 21:05] [Impact Pack] EXECUTE: ['/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/bin/python3', '-m', 'pip', 'install', 'GitPython'] in 'None'
+[2024-02-03 21:05] Collecting GitPython
+[2024-02-03 21:05]   Using cached GitPython-3.1.41-py3-none-any.whl (196 kB)
+[2024-02-03 21:05] Collecting gitdb<5,>=4.0.1
+[2024-02-03 21:05]   Using cached gitdb-4.0.11-py3-none-any.whl (62 kB)
+[2024-02-03 21:05] Collecting smmap<6,>=3.0.1
+[2024-02-03 21:05]   Using cached smmap-5.0.1-py3-none-any.whl (24 kB)
+[2024-02-03 21:05] Installing collected packages: smmap, gitdb, GitPython
+[2024-02-03 21:05] Successfully installed GitPython-3.1.41 gitdb-4.0.11 smmap-5.0.1
+[2024-02-03 21:05] [Impact Pack] EXECUTE: ['/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/bin/python3', 'install.py'] in '/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/impact_subpack'
+[2024-02-03 21:05] Downloading https://cdn-lfs.huggingface.co/repos/0d/db/0ddb8d3fcb6ee9737d9dd7e090e6c6cb6e40728d12307180160e7f654cb345de/e3893a92c5c1907136b6cc75404094db767c1e0cfefe1b43e87dad72af2e4c9f?response-content-disposition=attachment%3B+filename*%3DUTF-8%27%27face_yolov8m.pt%3B+filename%3D%22face_yolov8m.pt%22%3B&Expires=1707271547&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTcwNzI3MTU0N319LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5odWdnaW5nZmFjZS5jby9yZXBvcy8wZC9kYi8wZGRiOGQzZmNiNmVlOTczN2Q5ZGQ3ZTA5MGU2YzZjYjZlNDA3MjhkMTIzMDcxODAxNjBlN2Y2NTRjYjM0NWRlL2UzODkzYTkyYzVjMTkwNzEzNmI2Y2M3NTQwNDA5NGRiNzY3YzFlMGNmZWZlMWI0M2U4N2RhZDcyYWYyZTRjOWY%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qIn1dfQ__&Signature=gO2u6BHHN041QdWEenk3PJJ%7EhG3Tu7VRc1dirPXQpC8MBc4Ifs3Qb3Og0wDiJlsO14jRkodYAfxYQfZUfTnvbHLwVf9amr1BeVUDXdveTgReZG5do79je4MdE-OkcFscsctQFxjMWiPPFc96MWYDPsBloV8xos6YNYXTdPPB2efa19nFNFP56hwbjSbenkEE3Detf7j0m4ta%7ExwlvMDiUQArg8bJm27FQu-Kkj7JXg01Y9jR1exiBm7P9FXT4zLA0M2kIbB87CDsjN0Rc9c3cSMyg0GhqGu%7Enh404cPbY5Cp1HbDvEUoodC2rDQhqTbiUu-D1BIH4TKG7ICYjrV-Jw__&Key-Pair-Id=KVTP0A1DKRTAX to /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/models/ultralytics/bbox/face_yolov8m.pt
+
+[2024-02-03 21:05] [2024-02-03 21:05] 100%|██████████| 51996128/51996128 [00:00<00:00, 82768130.39it/s]
+[2024-02-03 21:05] Downloading https://cdn-lfs.huggingface.co/repos/0d/db/0ddb8d3fcb6ee9737d9dd7e090e6c6cb6e40728d12307180160e7f654cb345de/30878cea9870964d4a238339e9dcff002078bbbaa1a058b07e11c167f67eca1c?response-content-disposition=attachment%3B+filename*%3DUTF-8%27%27hand_yolov8s.pt%3B+filename%3D%22hand_yolov8s.pt%22%3B&Expires=1707267882&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTcwNzI2Nzg4Mn19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5odWdnaW5nZmFjZS5jby9yZXBvcy8wZC9kYi8wZGRiOGQzZmNiNmVlOTczN2Q5ZGQ3ZTA5MGU2YzZjYjZlNDA3MjhkMTIzMDcxODAxNjBlN2Y2NTRjYjM0NWRlLzMwODc4Y2VhOTg3MDk2NGQ0YTIzODMzOWU5ZGNmZjAwMjA3OGJiYmFhMWEwNThiMDdlMTFjMTY3ZjY3ZWNhMWM%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qIn1dfQ__&Signature=rSo6jzXkXXBX0UqUzGSLHwPnR-utKCLRx%7EZqDCu7P01C%7EXkHoOz6urAqNu4S1MR5dbozl4UA1S%7EikO95CdhqCEgUbavkbRIoemWUALHcqAMEDS4S52NRNvAriED2WcL0JcUHCxa3VYo8xBgYYFdyP7cj8H0LGDzJqNk9HH2wh2hkY0jwsilpD1XL2b5iawwTLuop6mqdsnwpxYfY1JHCUhSEJh3oDG-LgQiwqOY90sTdDlVkImP8Pr4jQy0KU29B%7EZcGuOrFPkFQm8ajy8ZfggEK2BJOYvWT501M125DVWmsw8xbXilLRAnvXTP276QFKHbMie5piQ0inwmcE-mRhw__&Key-Pair-Id=KVTP0A1DKRTAX to /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/models/ultralytics/bbox/hand_yolov8s.pt
+
+[2024-02-03 21:05] [2024-02-03 21:05] 100%|██████████| 22484536/22484536 [00:00<00:00, 76459125.60it/s]
+[2024-02-03 21:05] Downloading https://cdn-lfs.huggingface.co/repos/0d/db/0ddb8d3fcb6ee9737d9dd7e090e6c6cb6e40728d12307180160e7f654cb345de/1fd7e562f240a5debd48bf737753de6fb60c63f8664121bb522f090a885d8254?response-content-disposition=attachment%3B+filename*%3DUTF-8%27%27person_yolov8m-seg.pt%3B+filename%3D%22person_yolov8m-seg.pt%22%3B&Expires=1707268213&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTcwNzI2ODIxM319LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5odWdnaW5nZmFjZS5jby9yZXBvcy8wZC9kYi8wZGRiOGQzZmNiNmVlOTczN2Q5ZGQ3ZTA5MGU2YzZjYjZlNDA3MjhkMTIzMDcxODAxNjBlN2Y2NTRjYjM0NWRlLzFmZDdlNTYyZjI0MGE1ZGViZDQ4YmY3Mzc3NTNkZTZmYjYwYzYzZjg2NjQxMjFiYjUyMmYwOTBhODg1ZDgyNTQ%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qIn1dfQ__&Signature=furDvMunH-c4MWMYZA7AZeKyBE4gscdQeKgna6MFJmx4Lb5-TBs0LcIbMSEgTexlaK%7EUxNsFOeseZLI9rfnnVVYGS7MgyGNlucus60DQOIzR4x%7EtGChq-WtSiTmFX5p1gkc51ativvYWp2K-qyXO0Kminc6YHq1OpYFfWHguJ-V83LbQe61J1VPaUW%7ES2hZEV927r-tK81rSLRzQOB5NFTibMDrqXsV6yTyEaerjczsXsrAoPVr5ibHMhtAfV5gcIeIO5Nuc4nSXQgw75H4Xnf%7E5f6Uzi-wtiKKgHaDVdazTMqkdyWSggr-cxSnFag%7ETZW-nol6kTmbJ17uh084uGg__&Key-Pair-Id=KVTP0A1DKRTAX to /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/models/ultralytics/segm/person_yolov8m-seg.pt
+
+[2024-02-03 21:05] [2024-02-03 21:05] 100%|██████████| 54791722/54791722 [00:00<00:00, 90788474.85it/s]
+[2024-02-03 21:05] req_path: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/impact_subpack/requirements.txt
+[2024-02-03 21:05] [Impact Pack] EXECUTE: ['/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/bin/python3', '-m', 'pip', 'install', '-r', 'requirements.txt'] in '/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/impact_subpack'
+[2024-02-03 21:05] Collecting ultralytics!=8.0.177
+[2024-02-03 21:05]   Using cached ultralytics-8.1.9-py3-none-any.whl (709 kB)
+[2024-02-03 21:05] Requirement already satisfied: numpy>=1.22.2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.26.3)
+[2024-02-03 21:05] Collecting seaborn>=0.11.0
+[2024-02-03 21:05]   Using cached seaborn-0.13.2-py3-none-any.whl (294 kB)
+[2024-02-03 21:05] Requirement already satisfied: opencv-python>=4.6.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.9.0.80)
+[2024-02-03 21:05] Requirement already satisfied: matplotlib>=3.3.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.8.2)
+[2024-02-03 21:05] Requirement already satisfied: psutil in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (5.9.8)
+[2024-02-03 21:05] Collecting pandas>=1.1.4
+[2024-02-03 21:05]   Using cached pandas-2.2.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.0 MB)
+[2024-02-03 21:05] Requirement already satisfied: pillow>=7.1.2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (10.2.0)
+[2024-02-03 21:05] Requirement already satisfied: scipy>=1.4.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.12.0)
+[2024-02-03 21:05] Requirement already satisfied: torch>=1.8.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.2.0)
+[2024-02-03 21:05] Requirement already satisfied: tqdm>=4.64.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.66.1)
+[2024-02-03 21:05] Requirement already satisfied: requests>=2.23.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.31.0)
+[2024-02-03 21:05] Collecting py-cpuinfo
+[2024-02-03 21:05]   Using cached py_cpuinfo-9.0.0-py3-none-any.whl (22 kB)
+[2024-02-03 21:05] Collecting thop>=0.1.1
+[2024-02-03 21:05]   Using cached thop-0.1.1.post2209072238-py3-none-any.whl (15 kB)
+[2024-02-03 21:05] Requirement already satisfied: pyyaml>=5.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (6.0.1)
+[2024-02-03 21:05] Requirement already satisfied: torchvision>=0.9.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (0.17.0)
+[2024-02-03 21:05] Requirement already satisfied: kiwisolver>=1.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.4.5)
+[2024-02-03 21:05] Requirement already satisfied: contourpy>=1.0.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.2.0)
+[2024-02-03 21:05] Requirement already satisfied: python-dateutil>=2.7 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.8.2)
+[2024-02-03 21:05] Requirement already satisfied: cycler>=0.10 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (0.12.1)
+[2024-02-03 21:05] Requirement already satisfied: pyparsing>=2.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.1.1)
+[2024-02-03 21:05] Requirement already satisfied: fonttools>=4.22.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.47.2)
+[2024-02-03 21:05] Requirement already satisfied: packaging>=20.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (23.2)
+[2024-02-03 21:05] Collecting pytz>=2020.1
+[2024-02-03 21:05]   Using cached pytz-2024.1-py2.py3-none-any.whl (505 kB)
+[2024-02-03 21:05] Collecting tzdata>=2022.7
+[2024-02-03 21:05]   Using cached tzdata-2023.4-py2.py3-none-any.whl (346 kB)
+[2024-02-03 21:05] Requirement already satisfied: idna<4,>=2.5 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.6)
+[2024-02-03 21:05] Requirement already satisfied: urllib3<3,>=1.21.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.2.0)
+[2024-02-03 21:05] Requirement already satisfied: certifi>=2017.4.17 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2024.2.2)
+[2024-02-03 21:05] Requirement already satisfied: charset-normalizer<4,>=2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.3.2)
+[2024-02-03 21:05] Requirement already satisfied: typing-extensions>=4.8.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.9.0)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cuda-runtime-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-nvtx-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-curand-cu12==10.3.2.106 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (10.3.2.106)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cudnn-cu12==8.9.2.26 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (8.9.2.26)
+[2024-02-03 21:05] Requirement already satisfied: networkx in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.2.1)
+[2024-02-03 21:05] Requirement already satisfied: triton==2.2.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.2.0)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cublas-cu12==12.1.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.3.1)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cufft-cu12==11.0.2.54 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (11.0.2.54)
+[2024-02-03 21:05] Requirement already satisfied: filelock in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.13.1)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-nccl-cu12==2.19.3 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.19.3)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cuda-cupti-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: jinja2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.1.3)
+[2024-02-03 21:05] Requirement already satisfied: fsspec in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2023.12.2)
+[2024-02-03 21:05] Requirement already satisfied: sympy in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.12)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cusolver-cu12==11.4.5.107 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (11.4.5.107)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cusparse-cu12==12.1.0.106 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.0.106)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-nvjitlink-cu12 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from nvidia-cusolver-cu12==11.4.5.107->torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.3.101)
+[2024-02-03 21:05] Requirement already satisfied: six>=1.5 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from python-dateutil>=2.7->matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.16.0)
+[2024-02-03 21:05] Requirement already satisfied: MarkupSafe>=2.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from jinja2->torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.1.5)
+[2024-02-03 21:05] Requirement already satisfied: mpmath>=0.19 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from sympy->torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.3.0)
+[2024-02-03 21:05] Installing collected packages: pytz, py-cpuinfo, tzdata, pandas, seaborn, thop, ultralytics
+[2024-02-03 21:05] Successfully installed pandas-2.2.0 py-cpuinfo-9.0.0 pytz-2024.1 seaborn-0.13.2 thop-0.1.1.post2209072238 tzdata-2023.4 ultralytics-8.1.9
+[2024-02-03 21:05] req_path: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/impact_subpack/requirements.txt
+[2024-02-03 21:05] [Impact Pack] EXECUTE: ['/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/bin/python3', '-m', 'pip', 'install', '-r', 'requirements.txt'] in '/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/impact_subpack'
+[2024-02-03 21:05] Requirement already satisfied: ultralytics!=8.0.177 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from -r requirements.txt (line 1)) (8.1.9)
+[2024-02-03 21:05] Requirement already satisfied: matplotlib>=3.3.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.8.2)
+[2024-02-03 21:05] Requirement already satisfied: pyyaml>=5.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (6.0.1)
+[2024-02-03 21:05] Requirement already satisfied: seaborn>=0.11.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (0.13.2)
+[2024-02-03 21:05] Requirement already satisfied: pillow>=7.1.2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (10.2.0)
+[2024-02-03 21:05] Requirement already satisfied: requests>=2.23.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.31.0)
+[2024-02-03 21:05] Requirement already satisfied: py-cpuinfo in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (9.0.0)
+[2024-02-03 21:05] Requirement already satisfied: thop>=0.1.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (0.1.1.post2209072238)
+[2024-02-03 21:05] Requirement already satisfied: torch>=1.8.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.2.0)
+[2024-02-03 21:05] Requirement already satisfied: scipy>=1.4.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.12.0)
+[2024-02-03 21:05] Requirement already satisfied: psutil in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (5.9.8)
+[2024-02-03 21:05] Requirement already satisfied: opencv-python>=4.6.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.9.0.80)
+[2024-02-03 21:05] Requirement already satisfied: numpy>=1.22.2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.26.3)
+[2024-02-03 21:05] Requirement already satisfied: tqdm>=4.64.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.66.1)
+[2024-02-03 21:05] Requirement already satisfied: pandas>=1.1.4 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.2.0)
+[2024-02-03 21:05] Requirement already satisfied: torchvision>=0.9.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from ultralytics!=8.0.177->-r requirements.txt (line 1)) (0.17.0)
+[2024-02-03 21:05] Requirement already satisfied: contourpy>=1.0.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.2.0)
+[2024-02-03 21:05] Requirement already satisfied: packaging>=20.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (23.2)
+[2024-02-03 21:05] Requirement already satisfied: kiwisolver>=1.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.4.5)
+[2024-02-03 21:05] Requirement already satisfied: cycler>=0.10 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (0.12.1)
+[2024-02-03 21:05] Requirement already satisfied: python-dateutil>=2.7 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.8.2)
+[2024-02-03 21:05] Requirement already satisfied: fonttools>=4.22.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.47.2)
+[2024-02-03 21:05] Requirement already satisfied: pyparsing>=2.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.1.1)
+[2024-02-03 21:05] Requirement already satisfied: pytz>=2020.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from pandas>=1.1.4->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2024.1)
+[2024-02-03 21:05] Requirement already satisfied: tzdata>=2022.7 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from pandas>=1.1.4->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2023.4)
+[2024-02-03 21:05] Requirement already satisfied: idna<4,>=2.5 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.6)
+[2024-02-03 21:05] Requirement already satisfied: urllib3<3,>=1.21.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.2.0)
+[2024-02-03 21:05] Requirement already satisfied: certifi>=2017.4.17 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2024.2.2)
+[2024-02-03 21:05] Requirement already satisfied: charset-normalizer<4,>=2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from requests>=2.23.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.3.2)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cuda-cupti-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cusolver-cu12==11.4.5.107 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (11.4.5.107)
+[2024-02-03 21:05] Requirement already satisfied: filelock in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.13.1)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-nvtx-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: triton==2.2.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.2.0)
+[2024-02-03 21:05] Requirement already satisfied: jinja2 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.1.3)
+[2024-02-03 21:05] Requirement already satisfied: fsspec in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2023.12.2)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cudnn-cu12==8.9.2.26 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (8.9.2.26)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cublas-cu12==12.1.3.1 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.3.1)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cusparse-cu12==12.1.0.106 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.0.106)
+[2024-02-03 21:05] Requirement already satisfied: sympy in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.12)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cuda-runtime-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cufft-cu12==11.0.2.54 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (11.0.2.54)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-curand-cu12==10.3.2.106 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (10.3.2.106)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-nccl-cu12==2.19.3 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.19.3)
+[2024-02-03 21:05] Requirement already satisfied: typing-extensions>=4.8.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (4.9.0)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.1.105 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.1.105)
+[2024-02-03 21:05] Requirement already satisfied: networkx in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (3.2.1)
+[2024-02-03 21:05] Requirement already satisfied: nvidia-nvjitlink-cu12 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from nvidia-cusolver-cu12==11.4.5.107->torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (12.3.101)
+[2024-02-03 21:05] Requirement already satisfied: six>=1.5 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from python-dateutil>=2.7->matplotlib>=3.3.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.16.0)
+[2024-02-03 21:05] Requirement already satisfied: MarkupSafe>=2.0 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from jinja2->torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (2.1.5)
+[2024-02-03 21:05] Requirement already satisfied: mpmath>=0.19 in /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/lib/python3.10/site-packages (from sympy->torch>=1.8.0->ultralytics!=8.0.177->-r requirements.txt (line 1)) (1.3.0)
+[2024-02-03 21:05] req_path: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt
+[2024-02-03 21:05] [Impact Pack] EXECUTE: ['/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/venv/bin/python3', '-m', 'pip', 'install', '-r', '/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt'] in 'None'
+[2024-02-03 21:05] Collecting segment-anything
+[2024-02-03 21:05]   Using cached segment_anything-1.0-py3-none-any.whl (36 kB)
+[2024-02-03 21:05] Collecting scikit-image
+[2024-02-03 21:06]   Using cached scikit_image-0.22.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (14.7 MB)
+[2024-02-03 21:06] Collecting piexif
+[2024-02-03 21:06]   Using cached piexif-1.1.3-py2.py3-none-any.whl (20 kB)
+[2024-02-03 21:06] Requirement already satisfied: transformers in ./venv/lib/python3.10/site-packages (from -r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (4.37.2)
+[2024-02-03 21:06] Collecting opencv-python-headless
+[2024-02-03 21:06]   Using cached opencv_python_headless-4.9.0.80-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (49.6 MB)
+[2024-02-03 21:06] Requirement already satisfied: GitPython in ./venv/lib/python3.10/site-packages (from -r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 6)) (3.1.41)
+[2024-02-03 21:06] Requirement already satisfied: packaging>=21 in ./venv/lib/python3.10/site-packages (from scikit-image->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 2)) (23.2)
+[2024-02-03 21:06] Requirement already satisfied: networkx>=2.8 in ./venv/lib/python3.10/site-packages (from scikit-image->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 2)) (3.2.1)
+[2024-02-03 21:06] Requirement already satisfied: pillow>=9.0.1 in ./venv/lib/python3.10/site-packages (from scikit-image->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 2)) (10.2.0)
+[2024-02-03 21:06] Collecting lazy_loader>=0.3
+[2024-02-03 21:06]   Using cached lazy_loader-0.3-py3-none-any.whl (9.1 kB)
+[2024-02-03 21:06] Requirement already satisfied: imageio>=2.27 in ./venv/lib/python3.10/site-packages (from scikit-image->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 2)) (2.33.1)
+[2024-02-03 21:06] Collecting tifffile>=2022.8.12
+[2024-02-03 21:06]   Using cached tifffile-2024.1.30-py3-none-any.whl (224 kB)
+[2024-02-03 21:06] Requirement already satisfied: numpy>=1.22 in ./venv/lib/python3.10/site-packages (from scikit-image->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 2)) (1.26.3)
+[2024-02-03 21:06] Requirement already satisfied: scipy>=1.8 in ./venv/lib/python3.10/site-packages (from scikit-image->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 2)) (1.12.0)
+[2024-02-03 21:06] Requirement already satisfied: requests in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (2.31.0)
+[2024-02-03 21:06] Requirement already satisfied: tokenizers<0.19,>=0.14 in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (0.15.1)
+[2024-02-03 21:06] Requirement already satisfied: pyyaml>=5.1 in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (6.0.1)
+[2024-02-03 21:06] Requirement already satisfied: regex!=2019.12.17 in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (2023.12.25)
+[2024-02-03 21:06] Requirement already satisfied: huggingface-hub<1.0,>=0.19.3 in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (0.20.3)
+[2024-02-03 21:06] Requirement already satisfied: filelock in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (3.13.1)
+[2024-02-03 21:06] Requirement already satisfied: safetensors>=0.4.1 in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (0.4.2)
+[2024-02-03 21:06] Requirement already satisfied: tqdm>=4.27 in ./venv/lib/python3.10/site-packages (from transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (4.66.1)
+[2024-02-03 21:06] Requirement already satisfied: gitdb<5,>=4.0.1 in ./venv/lib/python3.10/site-packages (from GitPython->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 6)) (4.0.11)
+[2024-02-03 21:06] Requirement already satisfied: smmap<6,>=3.0.1 in ./venv/lib/python3.10/site-packages (from gitdb<5,>=4.0.1->GitPython->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 6)) (5.0.1)
+[2024-02-03 21:06] Requirement already satisfied: fsspec>=2023.5.0 in ./venv/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (2023.12.2)
+[2024-02-03 21:06] Requirement already satisfied: typing-extensions>=3.7.4.3 in ./venv/lib/python3.10/site-packages (from huggingface-hub<1.0,>=0.19.3->transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (4.9.0)
+[2024-02-03 21:06] Requirement already satisfied: certifi>=2017.4.17 in ./venv/lib/python3.10/site-packages (from requests->transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (2024.2.2)
+[2024-02-03 21:06] Requirement already satisfied: charset-normalizer<4,>=2 in ./venv/lib/python3.10/site-packages (from requests->transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (3.3.2)
+[2024-02-03 21:06] Requirement already satisfied: urllib3<3,>=1.21.1 in ./venv/lib/python3.10/site-packages (from requests->transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (2.2.0)
+[2024-02-03 21:06] Requirement already satisfied: idna<4,>=2.5 in ./venv/lib/python3.10/site-packages (from requests->transformers->-r /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack/requirements.txt (line 4)) (3.6)
+[2024-02-03 21:06] Installing collected packages: segment-anything, tifffile, piexif, opencv-python-headless, lazy_loader, scikit-image
+[2024-02-03 21:06] Successfully installed lazy_loader-0.3 opencv-python-headless-4.9.0.80 piexif-1.1.3 scikit-image-0.22.0 segment-anything-1.0 tifffile-2024.1.30
+[2024-02-03 21:06] ### ComfyUI-Impact-Pack: Check basic models
+[2024-02-03 21:06] Downloading https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth to /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/models/sams/sam_vit_b_01ec64.pth
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 375042383/375042383 [00:03<00:00, 111849469.49it/s]
+[2024-02-03 21:06] ### ComfyUI-Impact-Pack: onnx model directory created (/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/models/onnx)
+[2024-02-03 21:06] ### Loading: ComfyUI-Impact-Pack (Subpack: V0.4)
+[2024-02-03 21:06] [Impact Pack] Wildcards loading done.
+[2024-02-03 21:06] [AnimateDiffEvo] - [0;31mERROR[0m - No motion models found. Please download one and place in: ['/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved/models', '/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/models/animatediff_models']
+[2024-02-03 21:06] [34mWAS Node Suite: [0mCreated default conf file at `/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/was-node-suite-comfyui/was_suite_config.json`.[0m
+[2024-02-03 21:06] [34mWAS Node Suite: [0mOpenCV Python FFMPEG support is enabled[0m
+[2024-02-03 21:06] [34mWAS Node Suite [93mWarning: [0m`ffmpeg_bin_path` is not set in `/home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/was-node-suite-comfyui/was_suite_config.json` config file. Will attempt to use system ffmpeg binaries if available.[0m
+[2024-02-03 21:06] [34mWAS Node Suite: [0mFinished.[0m [32mLoaded[0m [0m211[0m [32mnodes successfully.[0m
+[2024-02-03 21:06] 
+	[3m[93m"Opportunities don't happen. You create them."[0m[3m - Chris Grosser[0m
+[2024-02-03 21:06] 
+[2024-02-03 21:06] [VideoHelperSuite] - [0;33mWARNING[0m - Failed to import imageio_ffmpeg
+[2024-02-03 21:06] [34mFizzleDorf Custom Nodes: [92mLoaded[0m
+[2024-02-03 21:06] 
+[2024-02-03 21:06] [92m[rgthree] Loaded 33 epic nodes.[0m
+[2024-02-03 21:06] [92m[rgthree] Will use rgthree's optimized recursive execution.[0m
+[2024-02-03 21:06] 
+[2024-02-03 21:06] Collecting requirements-parser
+[2024-02-03 21:06]   Using cached requirements_parser-0.5.0-py3-none-any.whl (18 kB)
+[2024-02-03 21:06] Collecting types-setuptools>=57.0.0
+[2024-02-03 21:06]   Using cached types_setuptools-69.0.0.20240125-py3-none-any.whl (51 kB)
+[2024-02-03 21:06] Installing collected packages: types-setuptools, requirements-parser
+[2024-02-03 21:06] Successfully installed requirements-parser-0.5.0 types-setuptools-69.0.0.20240125
+[2024-02-03 21:06] 
+[2024-02-03 21:06] Command executed successfully!
+[2024-02-03 21:06] [36;20m[comfy_mtb] | INFO -> loaded [96m53[0m nodes successfuly[0m
+[2024-02-03 21:06] [36;20m[comfy_mtb] | INFO -> Some nodes (12) could not be loaded. This can be ignored, but go to http://127.0.0.1:8188/mtb if you want more information.[0m
+[2024-02-03 21:06] /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/comfyui_controlnet_aux/node_wrappers/dwpose.py:26: UserWarning: DWPose: Onnxruntime not found or doesn't come with acceleration providers, switch to OpenCV with CPU device. DWPose might run very slowly
+  warnings.warn("DWPose: Onnxruntime not found or doesn't come with acceleration providers, switch to OpenCV with CPU device. DWPose might run very slowly")
+[2024-02-03 21:06] ### Loading: ComfyUI-Manager (V2.7)
+[2024-02-03 21:06] ### ComfyUI Revision: UNKNOWN (The currently installed ComfyUI is not a Git repository)
+[2024-02-03 21:06] 
+Import times for custom nodes:
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Logic
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUi_NNLatentUpscale
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/comfy-image-saver
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI_IPAdapter_plus
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Custom-Scripts
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/Derfuu_ComfyUI_ModdedNodes
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI_essentials
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI_FizzNodes
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Advanced-ControlNet
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/rgthree-comfy
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/comfyui_controlnet_aux
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved
+[2024-02-03 21:06]    0.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Manager
+[2024-02-03 21:06]    0.1 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-KJNodes
+[2024-02-03 21:06]    0.9 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/efficiency-nodes-comfyui
+[2024-02-03 21:06]    1.3 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/was-node-suite-comfyui
+[2024-02-03 21:06]    2.0 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/comfy_mtb
+[2024-02-03 21:06]   25.8 seconds: /home/bt/dev/storyteller/storyteller-ml/workflows/comfy/ComfyUI/custom_nodes/ComfyUI-Impact-Pack
+[2024-02-03 21:06] 
+[2024-02-03 21:06] Starting server
+[2024-02-03 21:06] 
+[2024-02-03 21:06] To see the GUI go to: http://127.0.0.1:8188
+[2024-02-03 21:06] [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/model-list.json
+[2024-02-03 21:06] [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/extension-node-map.json
+[2024-02-03 21:06] [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/alter-list.json
+[2024-02-03 21:06] [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/custom-node-list.json
