@@ -2,11 +2,26 @@ import argparse
 import os
 import pathlib
 import torch
+import sys
 
 # Note please use type hints.
 from stablediffusionfe import StableDiffusionFE
 import random
 import string
+
+def print_gpu_info():
+    print('========================================')
+    print('Python Interpreter', sys.executable)
+    print('Python Version', sys.version)
+    print('Python Version Info', sys.version_info)
+    print('PyTorch Version', torch.__version__)
+    print('CUDA Available?', torch.cuda.is_available())
+    print('CUDA Version', torch.version.cuda)
+    print('CUDA Device Count', torch.cuda.device_count())
+    print('CUDA architectures library was compiled for', torch.cuda.get_arch_list())
+    print('========================================', flush=True)
+
+print_gpu_info()
 
 def generate_random_string(length=6):
     # Choose from uppercase, lowercase letters and digits
