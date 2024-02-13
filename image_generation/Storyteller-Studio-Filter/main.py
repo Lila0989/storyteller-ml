@@ -150,10 +150,10 @@ def main():
     parser.add_argument("--samplers", type=str, required=False, help="Text input called samplers", choices=list(_au111_to_diffusers_samplers.keys()))
        
     # # ZDisket: We shoud really keep these static and instead use an upsampler afterwards instead
-    parser.add_argument("--width", required=False, help="Width value (power of 2, between 256 and 4096)")
-    parser.add_argument("--height", required=False, help="Height value (power of 2, between 256 and 4096)")
+    parser.add_argument("--width", type=int, required=False, help="Width value (power of 2, between 256 and 4096)")
+    parser.add_argument("--height", type=int,required=False, help="Height value (power of 2, between 256 and 4096)")
     
-    parser.add_argument("--cfg-scale", type=InputCheckers.check_cfg_scale, required=True, help="Integer input called CFG scale (range from 1-30)")
+    parser.add_argument("--cfg-scale",type=float,required=True, help="Integer input called CFG scale (range from 1-30 can be .5)")
     parser.add_argument("--seed", type=int, required=False, help="Seed value (integer of any value)")
     parser.add_argument("--loRA-path", type=InputCheckers.valid_path, required=False, help="Path object to the loRA")
     parser.add_argument("--check-point", type=InputCheckers.valid_path, required=True, help="Path object to the Check Point")

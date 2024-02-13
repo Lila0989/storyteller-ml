@@ -5,7 +5,7 @@ python3.10 main.py \
 --samplers "DPM++ 2M SDE Heun Karras" \
 --width 1024 \
 --height 1024 \
---cfg-scale 8 \
+--cfg-scale 8.5 \
 --seed 1 \
 --loRA-path "xs4vow.safetensors" \
 --check-point "waifuDiffusionBeta03_beta3.safetensors" \
