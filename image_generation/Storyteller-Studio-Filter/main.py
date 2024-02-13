@@ -149,9 +149,9 @@ def main():
     #parser.add_argument("--sampler", type=str, required=False, help="Text input called samplers", choices=_available_samplers)
     parser.add_argument("--samplers", type=str, required=False, help="Text input called samplers", choices=list(_au111_to_diffusers_samplers.keys()))
        
-    # ZDisket: We shoud really keep these static and instead use an upsampler afterwards instead
-    parser.add_argument("--width", type=InputCheckers.check_power_of_2, required=False, help="Width value (power of 2, between 256 and 4096)")
-    parser.add_argument("--height", type=InputCheckers.check_power_of_2, required=False, help="Height value (power of 2, between 256 and 4096)")
+    # # ZDisket: We shoud really keep these static and instead use an upsampler afterwards instead
+    parser.add_argument("--width", required=False, help="Width value (power of 2, between 256 and 4096)")
+    parser.add_argument("--height", required=False, help="Height value (power of 2, between 256 and 4096)")
     
     parser.add_argument("--cfg-scale", type=InputCheckers.check_cfg_scale, required=True, help="Integer input called CFG scale (range from 1-30)")
     parser.add_argument("--seed", type=int, required=False, help="Seed value (integer of any value)")
