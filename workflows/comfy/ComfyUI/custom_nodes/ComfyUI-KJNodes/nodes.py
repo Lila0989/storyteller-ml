@@ -393,6 +393,47 @@ class CreateFadeMaskAdvanced:
         if invert:
             return (1.0 - torch.cat(out, dim=0),)
         return (torch.cat(out, dim=0),)
+    
+class ScaleBatchPromptSchedule:
+    
+    RETURN_TYPES = ("STRING",)
+    FUNCTION = "scaleschedule"
+    CATEGORY = "KJNodes"
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                 "input_str": ("STRING", {"forceInput": True,"default": "0:(0.0),\n7:(1.0),\n15:(0.0)\n"}),
+                 "old_frame_count": ("INT", {"forceInput": True,"default": 1,"min": 1, "max": 4096, "step": 1}),
+                 "new_frame_count": ("INT", {"forceInput": True,"default": 1,"min": 1, "max": 4096, "step": 1}),
+                
+        },
+    } 
+    
+    def scaleschedule(self, old_frame_count, input_str, new_frame_count):
+        print("input_str:", input_str)
+        pattern = r'"(\d+)"\s*:\s*"(.*?)"(?:,|\Z)'
+        frame_strings = dict(re.findall(pattern, input_str))
+        
+        # Calculate the scaling factor
+        scaling_factor = (new_frame_count - 1) / (old_frame_count - 1)
+        
+        # Initialize a dictionary to store the new frame numbers and strings
+        new_frame_strings = {}
+        
+        # Iterate over the frame numbers and strings
+        for old_frame, string in frame_strings.items():
+            # Calculate the new frame number
+            new_frame = int(round(int(old_frame) * scaling_factor))
+            
+            # Store the new frame number and corresponding string
+            new_frame_strings[new_frame] = string
+        
+        # Format the output string
+        output_str = ', '.join([f'"{k}":"{v}"' for k, v in sorted(new_frame_strings.items())])
+        print(output_str)
+        return (output_str,)
 
 class CrossFadeImages:
     
@@ -1128,24 +1169,38 @@ class VRAM_Debug:
         freemem_after = comfy.model_management.get_free_memory()
         print(freemem_after)
         return (model, freemem_before, freemem_after)
-    
+
+class AnyType(str):
+  """A special class that is always equal in not equal comparisons. Credit to pythongosssss"""
+
+  def __ne__(self, __value: object) -> bool:
+    return False
+any = AnyType("*")
+
 class SomethingToString:
     @classmethod
     
     def INPUT_TYPES(s):
      return {
         "required": {
-        "input": ("*", {"forceinput": True, "default": ""}),
+        "input": (any, {}),
     },
+    "optional": {
+        "prefix": ("STRING", {"default": ""}),
+        "suffix": ("STRING", {"default": ""}),
+    }
     }
     RETURN_TYPES = ("STRING",)
     FUNCTION = "stringify"
     CATEGORY = "KJNodes"
 
-    def stringify(self, input):
+    def stringify(self, input, prefix="", suffix=""):
         if isinstance(input, (int, float, bool)):   
             stringified = str(input)
-            print(stringified)
+            if prefix:  # Check if prefix is not empty
+                stringified = prefix + stringified  # Add the prefix
+            if suffix:  # Check if suffix is not empty
+                stringified = stringified + suffix  # Add the suffix
         else:
             return
         return (stringified,)
@@ -2140,7 +2195,7 @@ class BatchCLIPSeg:
         model.to(device)  # Ensure the model is on the correct device
         images = images.to(device)
         processor = CLIPSegProcessor.from_pretrained("CIDAS/clipseg-rd64-refined")
-
+        pbar = comfy.utils.ProgressBar(images.shape[0])
         for image in images:
             image = (image* 255).type(torch.uint8)
             prompt = text
@@ -2165,7 +2220,7 @@ class BatchCLIPSeg:
 
             # Remove the extra dimensions
             resized_tensor = resized_tensor[0, 0, :, :]
-
+            pbar.update(1)
             out.append(resized_tensor)
           
         results = torch.stack(out).cpu()
@@ -2319,12 +2374,7 @@ class OffsetMask:
            
         return mask,
 
-class AnyType(str):
-  """A special class that is always equal in not equal comparisons. Credit to pythongosssss"""
 
-  def __ne__(self, __value: object) -> bool:
-    return False
-any = AnyType("*")
 class WidgetToString:
     @classmethod
     def IS_CHANGED(cls, **kwargs):
@@ -3266,13 +3316,14 @@ class OffsetMaskByNormalizedAmplitude:
         
         return offsetmask,
 
-
 class ImageTransformByNormalizedAmplitude:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
             "normalized_amp": ("NORMALIZED_AMPLITUDE",),
             "zoom_scale": ("FLOAT", { "default": 0.0, "min": -1.0, "max": 1.0, "step": 0.001, "display": "number" }),
+            "x_offset": ("INT", { "default": 0, "min": (1 -MAX_RESOLUTION), "max": MAX_RESOLUTION, "step": 1, "display": "number" }),
+            "y_offset": ("INT", { "default": 0, "min": (1 -MAX_RESOLUTION), "max": MAX_RESOLUTION, "step": 1, "display": "number" }),
             "cumulative": ("BOOLEAN", { "default": False }),
             "image": ("IMAGE",),
         }}
@@ -3281,7 +3332,7 @@ class ImageTransformByNormalizedAmplitude:
     FUNCTION = "amptransform"
     CATEGORY = "KJNodes"
 
-    def amptransform(self, image, normalized_amp, zoom_scale, cumulative):
+    def amptransform(self, image, normalized_amp, zoom_scale, cumulative, x_offset, y_offset):
         # Ensure normalized_amp is an array and within the range [0, 1]
         normalized_amp = np.clip(normalized_amp, 0.0, 1.0)
         transformed_images = []
@@ -3325,6 +3376,17 @@ class ImageTransformByNormalizedAmplitude:
             # Convert the tensor back to BxHxWxC format
             tensor_img = tensor_img.permute(1, 2, 0)
             
+            # Offset the image based on the amplitude
+            offset_amp = amp * 10  # Calculate the offset magnitude based on the amplitude
+            shift_x = min(x_offset * offset_amp, img.shape[1] - 1)  # Calculate the shift in x direction
+            shift_y = min(y_offset * offset_amp, img.shape[0] - 1)  # Calculate the shift in y direction
+
+            # Apply the offset to the image tensor
+            if shift_x != 0:
+                tensor_img = torch.roll(tensor_img, shifts=int(shift_x), dims=1)
+            if shift_y != 0:
+                tensor_img = torch.roll(tensor_img, shifts=int(shift_y), dims=0)
+
             # Add to the list
             transformed_images.append(tensor_img)
         
@@ -3460,7 +3522,7 @@ class GLIGENTextBoxApplyBatch:
             interpolated_coords = interpolate_coordinates_with_curves(coordinates_dict, batch_size)
         if interpolation == 'straight':
             interpolated_coords = interpolate_coordinates(coordinates_dict, batch_size)
-            
+
         plot_image_tensor = plot_to_tensor(coordinates_dict, interpolated_coords, 512, 512, height)
         for t in conditioning_to:
             n = [t[0], t[1].copy()]
@@ -3471,6 +3533,7 @@ class GLIGENTextBoxApplyBatch:
                 x_position, y_position = interpolated_coords[i] 
                 position_param = (cond_pooled, height // 8, width // 8, y_position // 8, x_position // 8)
                 position_params_batch[i].append(position_param)  # Append position_param to the correct sublist
+                print("x ",x_position, "y ", y_position)
             prev = []
             if "gligen" in n[1]:
                 prev = n[1]['gligen'][2]
@@ -3483,6 +3546,101 @@ class GLIGENTextBoxApplyBatch:
             c.append(n)
         
         return (c, plot_image_tensor,)
+
+class ImageUpscaleWithModelBatched:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { "upscale_model": ("UPSCALE_MODEL",),
+                              "images": ("IMAGE",),
+                              "per_batch": ("INT", {"default": 16, "min": 1, "max": 4096, "step": 1}),
+                              }}
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "upscale"
+
+    CATEGORY = "KJNodes"
+
+    def upscale(self, upscale_model, images, per_batch):
+        
+        device = comfy.model_management.get_torch_device()
+        upscale_model.to(device)
+        in_img = images.movedim(-1,-3).to(device)
+        
+        steps = in_img.shape[0]
+        pbar = comfy.utils.ProgressBar(steps)
+        t = []
+        
+        for start_idx in range(0, in_img.shape[0], per_batch):
+            sub_images = upscale_model(in_img[start_idx:start_idx+per_batch])
+            t.append(sub_images.cpu())
+            # Calculate the number of images processed in this batch
+            batch_count = sub_images.shape[0]
+            # Update the progress bar by the number of images processed in this batch
+            pbar.update(batch_count)
+        upscale_model.cpu()
+        
+        t = torch.cat(t, dim=0).permute(0, 2, 3, 1).cpu()
+
+        return (t,)    
+
+
+import torchvision
+from torch import nn
+from safetensors import safe_open
+
+class EfficientNetEncoder(nn.Module):
+    def __init__(self, c_latent=16):
+        super().__init__()
+        self.backbone = torchvision.models.efficientnet_v2_s(weights='DEFAULT').features.eval()
+        self.mapper = nn.Sequential(
+            nn.Conv2d(1280, c_latent, kernel_size=1, bias=False),
+            nn.BatchNorm2d(c_latent, affine=False),  # then normalize them to have mean 0 and std 1
+        )
+
+    def forward(self, x):
+        return self.mapper(self.backbone(x))
+    
+class EffnetEncode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { 
+                              "image": ("IMAGE",),
+                              }}
+    RETURN_TYPES = ("LATENT",)
+    FUNCTION = "encode"
+
+    CATEGORY = "KJNodes"
+
+    def encode(self, image):
+        device = comfy.model_management.get_torch_device()
+
+        image = image.permute(0, 3, 1, 2).to(device)
+        effnet_preprocess = torchvision.transforms.Compose([
+            torchvision.transforms.Normalize(
+                mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+            )
+        ])
+        image = effnet_preprocess(image)
+        effnet = EfficientNetEncoder()
+
+        effnet_checkpoint = os.path.join(folder_paths.models_dir,"vae", "Stable-cascade","effnet_encoder.safetensors")
+        if not os.path.exists(effnet_checkpoint):
+            try:
+                from huggingface_hub import snapshot_download
+                download_to = os.path.join(folder_paths.models_dir,'vae', "Stable-cascade")
+                snapshot_download(repo_id="stabilityai/stable-cascade", allow_patterns=["effnet_encoder.safetensors"], 
+                                    local_dir=download_to, local_dir_use_symlinks=False)
+            except:
+                raise Exception("Model not found and download failed. (https://huggingface.co/stabilityai/stable-cascade, effnet_encoder.safetensors)")
+
+        effnet_state_dict = {}
+        with safe_open(effnet_checkpoint, framework="pt", device="cpu") as f:
+            for key in f.keys():
+                effnet_state_dict[key] = f.get_tensor(key)
+
+        effnet.load_state_dict(effnet_state_dict if 'state_dict' not in effnet_checkpoint else effnet_checkpoint['state_dict'])
+        effnet.eval().requires_grad_(False).to(device)
+        t = effnet(image).cpu()
+        return ({"samples":t}, )  
 
 
 NODE_CLASS_MAPPINGS = {
@@ -3548,7 +3706,10 @@ NODE_CLASS_MAPPINGS = {
     "GetLatentsFromBatchIndexed": GetLatentsFromBatchIndexed,
     "StringConstant": StringConstant,
     "GLIGENTextBoxApplyBatch": GLIGENTextBoxApplyBatch,
-    "CondPassThrough": CondPassThrough
+    "CondPassThrough": CondPassThrough,
+    "ImageUpscaleWithModelBatched": ImageUpscaleWithModelBatched,
+    "ScaleBatchPromptSchedule": ScaleBatchPromptSchedule,
+    "EffnetEncode": EffnetEncode
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "INTConstant": "INT Constant",
@@ -3612,5 +3773,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "GetLatentsFromBatchIndexed": "GetLatentsFromBatchIndexed",
     "StringConstant": "StringConstant",
     "GLIGENTextBoxApplyBatch": "GLIGENTextBoxApplyBatch",
-    "CondPassThrough": "CondPassThrough"
+    "CondPassThrough": "CondPassThrough",
+    "ImageUpscaleWithModelBatched": "ImageUpscaleWithModelBatched",
+    "ScaleBatchPromptSchedule": "ScaleBatchPromptSchedule",
+    "EffnetEncode": "EffnetEncode"
 }

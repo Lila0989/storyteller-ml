@@ -16,6 +16,13 @@ export var LogLevel;
     LogLevel[LogLevel["INFO"] = 4] = "INFO";
     LogLevel[LogLevel["DEBUG"] = 5] = "DEBUG";
 })(LogLevel || (LogLevel = {}));
+const LogLevelKeyToLogLevel = {
+    IMPORTANT: LogLevel.IMPORTANT,
+    ERROR: LogLevel.ERROR,
+    WARN: LogLevel.WARN,
+    INFO: LogLevel.INFO,
+    DEBUG: LogLevel.DEBUG,
+};
 const LogLevelToMethod = {
     [LogLevel.IMPORTANT]: "log",
     [LogLevel.ERROR]: "error",
@@ -24,13 +31,13 @@ const LogLevelToMethod = {
     [LogLevel.DEBUG]: "debug",
 };
 const LogLevelToCSS = {
-    [LogLevel.IMPORTANT]: "font-weight:bold; color:blue;",
+    [LogLevel.IMPORTANT]: "font-weight: bold; color: blue;",
     [LogLevel.ERROR]: "",
     [LogLevel.WARN]: "",
-    [LogLevel.INFO]: "",
-    [LogLevel.DEBUG]: "font-style: italic;",
+    [LogLevel.INFO]: "font-style: italic; color: blue;",
+    [LogLevel.DEBUG]: "font-style: italic; color: #333;",
 };
-let GLOBAL_LOG_LEVEL = LogLevel.DEBUG;
+let GLOBAL_LOG_LEVEL = LogLevel.ERROR;
 class Logger {
     log(level, message, ...args) {
         var _a;
@@ -69,6 +76,9 @@ class LogSession {
     info(message, ...args) {
         this.log(LogLevel.INFO, message, ...args);
     }
+    infoParts(message, ...args) {
+        return this.logParts(LogLevel.INFO, message, ...args);
+    }
     error(message, ...args) {
         this.log(LogLevel.ERROR, message, ...args);
     }
@@ -78,11 +88,12 @@ class LogSession {
 }
 class Rgthree extends EventTarget {
     constructor() {
+        var _a;
         super();
         this.api = api;
         this.settingsDialog = null;
         this.progressBarEl = null;
-        this.queueNodeId = null;
+        this.queueNodeIds = null;
         this.ctrlKey = false;
         this.altKey = false;
         this.metaKey = false;
@@ -97,6 +108,8 @@ class Rgthree extends EventTarget {
         this.canvasCurrentlyCopyingToClipboard = false;
         this.canvasCurrentlyCopyingToClipboardWithMultipleNodes = false;
         this.initialGraphToPromptSerializedWorkflowBecauseComfyUIBrokeStuff = null;
+        const logLevel = (_a = LogLevelKeyToLogLevel[CONFIG_SERVICE.getConfigValue("log_level")]) !== null && _a !== void 0 ? _a : GLOBAL_LOG_LEVEL;
+        this.setLogLevel(logLevel);
         window.addEventListener("keydown", (e) => {
             this.handleKeydown(e);
         });
@@ -161,6 +174,14 @@ class Rgthree extends EventTarget {
             const fontSize = Math.max(10, Number(height) - 10);
             this.progressBarEl.style.fontSize = `${fontSize}px`;
             this.progressBarEl.style.fontWeight = fontSize <= 12 ? "bold" : "normal";
+            if (CONFIG_SERVICE.getConfigValue("features.progress_bar.position") === "bottom") {
+                this.progressBarEl.style.bottom = `0px`;
+                this.progressBarEl.style.top = `auto`;
+            }
+            else {
+                this.progressBarEl.style.top = `0px`;
+                this.progressBarEl.style.bottom = `auto`;
+            }
         }
         else {
             (_a = this.progressBarEl) === null || _a === void 0 ? void 0 : _a.remove();
@@ -270,18 +291,18 @@ class Rgthree extends EventTarget {
             },
         ];
     }
-    async queueOutputNode(nodeId) {
+    async queueOutputNodes(nodeIds) {
         var _a;
         try {
-            this.queueNodeId = nodeId;
+            this.queueNodeIds = nodeIds;
             await app.queuePrompt();
         }
         catch (e) {
-            const [n, v] = this.logParts(LogLevel.ERROR, `There was an error queuing node #${nodeId}`, e);
+            const [n, v] = this.logParts(LogLevel.ERROR, `There was an error queuing nodes ${nodeIds}`, e);
             (_a = console[n]) === null || _a === void 0 ? void 0 : _a.call(console, ...v);
         }
         finally {
-            this.queueNodeId = null;
+            this.queueNodeIds = null;
         }
     }
     recursiveAddNodes(nodeId, oldOutput, newOutput) {
@@ -325,14 +346,22 @@ class Rgthree extends EventTarget {
         app.graphToPrompt = async function () {
             rgthree.dispatchEvent(new CustomEvent("graph-to-prompt"));
             let promise = graphToPrompt.apply(app, [...arguments]);
-            const result = await promise;
-            if (rgthree.queueNodeId != null) {
-                const oldOutput = result.output;
-                const newOutput = rgthree.recursiveAddNodes(String(rgthree.queueNodeId), oldOutput, {});
-                result.output = newOutput;
-            }
+            await promise;
             rgthree.dispatchEvent(new CustomEvent("graph-to-prompt-end"));
             return promise;
+        };
+        const apiQueuePrompt = api.queuePrompt;
+        api.queuePrompt = async function (index, prompt) {
+            var _a;
+            if (((_a = rgthree.queueNodeIds) === null || _a === void 0 ? void 0 : _a.length) && prompt.output) {
+                const oldOutput = prompt.output;
+                let newOutput = {};
+                for (const queueNodeId of rgthree.queueNodeIds) {
+                    rgthree.recursiveAddNodes(String(queueNodeId), oldOutput, newOutput);
+                }
+                prompt.output = newOutput;
+            }
+            return apiQueuePrompt.apply(app, [index, prompt]);
         };
         const clean = app.clean;
         app.clean = function () {

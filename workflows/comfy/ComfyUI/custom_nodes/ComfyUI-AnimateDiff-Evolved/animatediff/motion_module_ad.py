@@ -15,7 +15,7 @@ from comfy.utils import repeat_to_batch_size
 import comfy.ops
 import comfy.model_management
 
-from .context import ContextOptions, get_context_weights, get_context_windows
+from .context import ContextFuseMethod, ContextOptions, get_context_weights, get_context_windows
 from .utils_motion import CrossAttentionMM, MotionCompatibilityError, extend_to_batch_size, prepare_mask_batch
 from .utils_model import BetaSchedules, ModelTypeSD
 from .logger import logger
@@ -31,6 +31,7 @@ def zero_module(module):
 class AnimateDiffFormat:
     ANIMATEDIFF = "AnimateDiff"
     HOTSHOTXL = "HotshotXL"
+    ANIMATELCM = "AnimateLCM"
 
 
 class AnimateDiffVersion:
@@ -58,6 +59,14 @@ def is_hotshotxl(mm_state_dict: dict[str, Tensor]) -> bool:
     return False
 
 
+def is_animatelcm(mm_state_dict: dict[str, Tensor]) -> bool:
+    # use lack of ANY pos_encoder keys to determine if animatelcm model
+    for key in mm_state_dict.keys():
+        if "pos_encoder" in key:
+            return False
+    return True
+
+
 def get_down_block_max(mm_state_dict: dict[str, Tensor]) -> int:
     # keep track of biggest down_block count in module
     biggest_block = 0
@@ -81,11 +90,14 @@ def has_mid_block(mm_state_dict: dict[str, Tensor]):
     return False
 
 
-def get_position_encoding_max_len(mm_state_dict: dict[str, Tensor], mm_name: str) -> int:
+def get_position_encoding_max_len(mm_state_dict: dict[str, Tensor], mm_name: str, mm_format: str) -> Union[int, None]:
     # use pos_encoder.pe entries to determine max length - [1, {max_length}, {320|640|1280}]
     for key in mm_state_dict.keys():
         if key.endswith("pos_encoder.pe"):
             return mm_state_dict[key].size(1) # get middle dim
+    # AnimateLCM models should have no pos_encoder entries, and assumed to be 64
+    if mm_format == AnimateDiffFormat.ANIMATELCM:
+        return 64
     raise MotionCompatibilityError(f"No pos_encoder.pe found in mm_state_dict - {mm_name} is not a valid AnimateDiff motion module!")
 
 
@@ -98,6 +110,11 @@ def find_hotshot_module_num(key: str) -> Union[int, None]:
 
 
 def normalize_ad_state_dict(mm_state_dict: dict[str, Tensor], mm_name: str) -> Tuple[dict[str, Tensor], AnimateDiffInfo]:
+    # from pathlib import Path
+    # with open(Path(__file__).parent.parent.parent / f"keys_{mm_name}.txt", "w") as afile:
+    #     for key, value in mm_state_dict.items():
+    #         afile.write(f"{key}:\t{value.shape}\n")
+    
     # remove all non-temporal keys (in case model has extra stuff in it)
     for key in list(mm_state_dict.keys()):
         if "temporal" not in key:
@@ -115,11 +132,13 @@ def normalize_ad_state_dict(mm_state_dict: dict[str, Tensor], mm_name: str) -> T
     mm_format = AnimateDiffFormat.ANIMATEDIFF
     if is_hotshotxl(mm_state_dict):
         mm_format = AnimateDiffFormat.HOTSHOTXL
+    if is_animatelcm(mm_state_dict):
+        mm_format = AnimateDiffFormat.ANIMATELCM
     # determine the model's version
     mm_version = AnimateDiffVersion.V1
     if has_mid_block(mm_state_dict):
         mm_version = AnimateDiffVersion.V2
-    elif sd_type==ModelTypeSD.SD1_5 and get_position_encoding_max_len(mm_state_dict, mm_name)==32:
+    elif sd_type==ModelTypeSD.SD1_5 and get_position_encoding_max_len(mm_state_dict, mm_name, mm_format)==32:
         mm_version = AnimateDiffVersion.V3
     info = AnimateDiffInfo(sd_type=sd_type, mm_format=mm_format, mm_version=mm_version, mm_name=mm_name)
     # convert to AnimateDiff format, if needed
@@ -157,7 +176,8 @@ class AnimateDiffModel(nn.Module):
         self.down_blocks: Iterable[MotionModule] = nn.ModuleList([])
         self.up_blocks: Iterable[MotionModule] = nn.ModuleList([])
         self.mid_block: Union[MotionModule, None] = None
-        self.encoding_max_len = get_position_encoding_max_len(mm_state_dict, mm_info.mm_name)
+        self.encoding_max_len = get_position_encoding_max_len(mm_state_dict, mm_info.mm_name, mm_info.mm_format)
+        self.has_position_encoding = self.encoding_max_len is not None
         # determine ops to use (to support fp8 properly)
         if comfy.model_management.unet_manual_cast(comfy.model_management.unet_dtype(), comfy.model_management.get_torch_device()) is None:
             ops = comfy.ops.disable_weight_init
@@ -170,20 +190,31 @@ class AnimateDiffModel(nn.Module):
             layer_channels = (320, 640, 1280, 1280)
         # fill out down/up blocks and middle block, if present
         for c in layer_channels:
-            self.down_blocks.append(MotionModule(c, temporal_position_encoding_max_len=self.encoding_max_len, block_type=BlockType.DOWN, ops=ops))
+            self.down_blocks.append(MotionModule(c, temporal_position_encoding=self.has_position_encoding,
+                                                 temporal_position_encoding_max_len=self.encoding_max_len, block_type=BlockType.DOWN, ops=ops))
         for c in reversed(layer_channels):
-            self.up_blocks.append(MotionModule(c, temporal_position_encoding_max_len=self.encoding_max_len, block_type=BlockType.UP, ops=ops))
+            self.up_blocks.append(MotionModule(c, temporal_position_encoding=self.has_position_encoding,
+                                               temporal_position_encoding_max_len=self.encoding_max_len, block_type=BlockType.UP, ops=ops))
         if has_mid_block(mm_state_dict):
-            self.mid_block = MotionModule(1280, temporal_position_encoding_max_len=self.encoding_max_len, block_type=BlockType.MID, ops=ops)
+            self.mid_block = MotionModule(1280, temporal_position_encoding=self.has_position_encoding,
+                                          temporal_position_encoding_max_len=self.encoding_max_len, block_type=BlockType.MID, ops=ops)
         self.AD_video_length: int = 24
 
     def get_device_debug(self):
         return self.down_blocks[0].motion_modules[0].temporal_transformer.proj_in.weight.device
 
+    def is_length_valid_for_encoding_max_len(self, length: int):
+        if self.encoding_max_len is None:
+            return True
+        return length <= self.encoding_max_len
+
     def get_best_beta_schedule(self, log=False) -> str:
         to_return = None
         if self.mm_info.sd_type == ModelTypeSD.SD1_5:
-            to_return = BetaSchedules.SQRT_LINEAR
+            if self.mm_info.mm_format == AnimateDiffFormat.ANIMATELCM:
+                to_return = BetaSchedules.LCM  # while LCM_100 is the intended schedule, I find LCM to have much less flicker
+            else:
+                to_return = BetaSchedules.SQRT_LINEAR
         elif self.mm_info.sd_type == ModelTypeSD.SDXL:
             if self.mm_info.mm_format == AnimateDiffFormat.HOTSHOTXL:
                 to_return = BetaSchedules.LINEAR
@@ -352,22 +383,28 @@ class AnimateDiffModel(nn.Module):
 
 
 class MotionModule(nn.Module):
-    def __init__(self, in_channels, temporal_position_encoding_max_len=24, block_type: str=BlockType.DOWN, ops=comfy.ops.disable_weight_init):
+    def __init__(self,
+            in_channels,
+            temporal_position_encoding=True,
+            temporal_position_encoding_max_len=24,
+            block_type: str=BlockType.DOWN,
+            ops=comfy.ops.disable_weight_init
+        ):
         super().__init__()
         if block_type == BlockType.MID:
             # mid blocks contain only a single VanillaTemporalModule
-            self.motion_modules: Iterable[VanillaTemporalModule] = nn.ModuleList([get_motion_module(in_channels, temporal_position_encoding_max_len, ops=ops)])
+            self.motion_modules: Iterable[VanillaTemporalModule] = nn.ModuleList([get_motion_module(in_channels, temporal_position_encoding, temporal_position_encoding_max_len, ops=ops)])
         else:
             # down blocks contain two VanillaTemporalModules
             self.motion_modules: Iterable[VanillaTemporalModule] = nn.ModuleList(
                 [
-                    get_motion_module(in_channels, temporal_position_encoding_max_len, ops=ops),
-                    get_motion_module(in_channels, temporal_position_encoding_max_len, ops=ops)
+                    get_motion_module(in_channels, temporal_position_encoding, temporal_position_encoding_max_len, ops=ops),
+                    get_motion_module(in_channels, temporal_position_encoding, temporal_position_encoding_max_len, ops=ops)
                 ]
             )
             # up blocks contain one additional VanillaTemporalModule
             if block_type == BlockType.UP: 
-                self.motion_modules.append(get_motion_module(in_channels, temporal_position_encoding_max_len, ops=ops))
+                self.motion_modules.append(get_motion_module(in_channels, temporal_position_encoding, temporal_position_encoding_max_len, ops=ops))
     
     def set_video_length(self, video_length: int, full_length: int):
         for motion_module in self.motion_modules:
@@ -398,8 +435,8 @@ class MotionModule(nn.Module):
             motion_module.reset_temp_vars()
 
 
-def get_motion_module(in_channels, temporal_position_encoding_max_len, ops=comfy.ops.disable_weight_init):
-    return VanillaTemporalModule(in_channels=in_channels, temporal_position_encoding_max_len=temporal_position_encoding_max_len, ops=ops)
+def get_motion_module(in_channels, temporal_position_encoding, temporal_position_encoding_max_len, ops=comfy.ops.disable_weight_init):
+    return VanillaTemporalModule(in_channels=in_channels, temporal_position_encoding=temporal_position_encoding, temporal_position_encoding_max_len=temporal_position_encoding_max_len, ops=ops)
 
 
 class VanillaTemporalModule(nn.Module):
@@ -776,11 +813,9 @@ class TemporalTransformerBlock(nn.Module):
             hidden_states = rearrange(hidden_states, "(b f) d c -> b f d c", f=video_length)
             value_final = torch.zeros_like(hidden_states)
             count_final = torch.zeros_like(hidden_states)
+            # bias_final = [0.0] * video_length
             batched_conds = hidden_states.size(1) // video_length
             for sub_idxs in views:
-                weights = get_context_weights(len(sub_idxs), view_options.fuse_method) * batched_conds
-                weights_tensor = torch.Tensor(weights).to(device=hidden_states.device).unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
-
                 sub_hidden_states = rearrange(hidden_states[:, sub_idxs], "b f d c -> (b f) d c")
                 for attention_block, norm in zip(self.attention_blocks, self.norms):
                     norm_hidden_states = norm(sub_hidden_states).to(sub_hidden_states.dtype)
@@ -797,14 +832,35 @@ class TemporalTransformerBlock(nn.Module):
                     )
                 sub_hidden_states = rearrange(sub_hidden_states, "(b f) d c -> b f d c", f=len(sub_idxs))
 
+                # if view_options.fuse_method == ContextFuseMethod.RELATIVE:
+                #     for pos, idx in enumerate(sub_idxs):
+                #         # bias is the influence of a specific index in relation to the whole context window
+                #         bias = 1 - abs(idx - (sub_idxs[0] + sub_idxs[-1]) / 2) / ((sub_idxs[-1] - sub_idxs[0] + 1e-2) / 2)
+                #         bias = max(1e-2, bias)
+                #         # take weighted averate relative to total bias of current idx
+                #         bias_total = bias_final[idx]
+                #         prev_weight = torch.tensor([bias_total / (bias_total + bias)],
+                #                                    dtype=value_final.dtype, device=value_final.device).unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+                #         #prev_weight = torch.cat([prev_weight]*value_final.shape[1], dim=1)
+                #         new_weight = torch.tensor([bias / (bias_total + bias)],
+                #                                    dtype=value_final.dtype, device=value_final.device).unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+                #         #new_weight = torch.cat([new_weight]*value_final.shape[1], dim=1)
+                #         test = value_final[:, idx:idx+1, :, :]
+                #         value_final[:, idx:idx+1, :, :] = value_final[:, idx:idx+1, :, :] * prev_weight + sub_hidden_states[:, pos:pos+1, : ,:] * new_weight
+                #         bias_final[idx] = bias_total + bias
+                # else:
+                weights = get_context_weights(len(sub_idxs), view_options.fuse_method) * batched_conds
+                weights_tensor = torch.Tensor(weights).to(device=hidden_states.device).unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
                 value_final[:, sub_idxs] += sub_hidden_states * weights_tensor
                 count_final[:, sub_idxs] += weights_tensor
             
-            # get weighted average of sub_hidden_states
+            # get weighted average of sub_hidden_states, if fuse method requires it
+            # if view_options.fuse_method != ContextFuseMethod.RELATIVE:
             hidden_states = value_final / count_final
             hidden_states = rearrange(hidden_states, "b f d c -> (b f) d c")
             del value_final
             del count_final
+            # del bias_final
 
         hidden_states = self.ff(self.ff_norm(hidden_states)) + hidden_states
 

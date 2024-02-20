@@ -6,6 +6,7 @@ import typing
 from comfy.model_management import get_torch_device
 import re
 from functools import cmp_to_key
+from packaging import version
 
 MODEL_TYPE = pathlib.Path(__file__).parent.name
 CKPT_NAME_VER_DICT = {
@@ -19,14 +20,13 @@ CKPT_NAME_VER_DICT = {
     "rife47.pth": "4.7",
     "rife48.pth": "4.7",
     "rife49.pth": "4.7",
+    "sudo_rife4_269.662_testV1_scale1.pth": "4.0"
     #Arch 4.10 doesn't work due to state dict mismatch
     #TODO: Investigating and fix it
     #"rife410.pth": "4.10",
     #"rife411.pth": "4.10",
     #"rife412.pth": "4.10"
 }
-ver_re = re.compile(r'\d+')
-ver_cmp_key = cmp_to_key(lambda a,b: int(ver_re.search(a)[0]) > int(ver_re.search(b)[0]))
 
 class RIFE_VFI:
     @classmethod
@@ -34,7 +34,7 @@ class RIFE_VFI:
         return {
             "required": {
                 "ckpt_name": (
-                    sorted(list(CKPT_NAME_VER_DICT.keys()), key=ver_cmp_key),
+                    sorted(list(CKPT_NAME_VER_DICT.keys()), key=lambda ckpt_name: version.parse(CKPT_NAME_VER_DICT[ckpt_name])),
                     {"default": "rife47.pth"}
                 ),
                 "frames": ("IMAGE", ),
@@ -45,8 +45,7 @@ class RIFE_VFI:
                 "scale_factor": ([0.25, 0.5, 1.0, 2.0, 4.0], {"default": 1.0})
             },
             "optional": {
-                "optional_interpolation_states": ("INTERPOLATION_STATES", ),
-                "cache_in_fp16": ("BOOLEAN", {"default": True})
+                "optional_interpolation_states": ("INTERPOLATION_STATES", )
             }
         }
     
@@ -64,7 +63,7 @@ class RIFE_VFI:
         ensemble = False,
         scale_factor = 1.0,
         optional_interpolation_states: InterpolationStateList = None,
-        cache_in_fp16: bool = True
+        **kwargs
     ):
         """
         Perform video frame interpolation using a given checkpoint model.
@@ -103,6 +102,6 @@ class RIFE_VFI:
         args = [interpolation_model, scale_list, fast_mode, ensemble]
         out = postprocess_frames(
             generic_frame_loop(frames, clear_cache_after_n_frames, multiplier, return_middle_frame, *args, 
-                               interpolation_states=optional_interpolation_states, dtype=torch.float16 if cache_in_fp16 else torch.float32)
+                               interpolation_states=optional_interpolation_states, dtype=torch.float32)
         )
         return (out,)

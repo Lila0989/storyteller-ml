@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import re
 
-from .ScheduleFuncs import addWeighted, check_is_number, parse_weight, prepare_prompt, SDXLencode, reverseConcatenation
+from .ScheduleFuncs import *
 
 def prepare_batch_prompt(prompt_series, max_frames, frame_idx, prompt_weight_1=0, prompt_weight_2=0, prompt_weight_3=0,
                          prompt_weight_4=0):  # calculate expressions from the text input and return a string
@@ -19,9 +19,9 @@ def prepare_batch_prompt(prompt_series, max_frames, frame_idx, prompt_weight_1=0
     for match in regex.finditer(prompt_parsed):
         matched_string = match.group(0)
         parsed_string = matched_string.replace('t', f'{frame_idx}').replace("pw_a", f"{prompt_weight_1}").replace("pw_b",
-                                                                                                                 f"{prompt_weight_2}").replace(
-            "pw_c", f"{prompt_weight_3}").replace("pw_d", f"{prompt_weight_4}").replace("max_f", f"{max_f}").replace('`',
-                                                                                                                     '')  # replace t, max_f and `` respectively
+                                                    f"{prompt_weight_2}").replace("pw_c", f"{prompt_weight_3}").replace("pw_d",
+                                                    f"{prompt_weight_4}").replace("max_f",
+                                                    f"{max_f}").replace('`', '')  # replace t, max_f and `` respectively
         parsed_value = numexpr.evaluate(parsed_string)
         prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
     return prompt_parsed.strip()
@@ -67,6 +67,8 @@ def interpolate_prompt_series(animation_prompts, max_frames, start_frame, pre_te
 
     max_f = max_frames  # needed for numexpr even though it doesn't look like it's in use.
     parsed_animation_prompts = {}
+
+
     for key, value in animation_prompts.items():
         if check_is_number(key):  # default case 0:(1 + t %5), 30:(5-t%2)
             parsed_animation_prompts[key] = value
@@ -101,16 +103,16 @@ def interpolate_prompt_series(animation_prompts, max_frames, start_frame, pre_te
     next_key = 0
 
     if type(prompt_weight_1) in {int, float}:
-        prompt_weight_1 = tuple([prompt_weight_1] * max_frames)
+       prompt_weight_1 = tuple([prompt_weight_1] * max_frames)
 
     if type(prompt_weight_2) in {int, float}:
-        prompt_weight_2 = tuple([prompt_weight_2] * max_frames)
+       prompt_weight_2 = tuple([prompt_weight_2] * max_frames)
 
     if type(prompt_weight_3) in {int, float}:
-        prompt_weight_3 = tuple([prompt_weight_3] * max_frames)
+       prompt_weight_3 = tuple([prompt_weight_3] * max_frames)
 
     if type(prompt_weight_4) in {int, float}:
-        prompt_weight_4 = tuple([prompt_weight_4] * max_frames)
+       prompt_weight_4 = tuple([prompt_weight_4] * max_frames)
 
     # For every keyframe prompt except the last
     for i in range(0, len(sorted_prompts) - 1):
@@ -150,7 +152,7 @@ def interpolate_prompt_series(animation_prompts, max_frames, start_frame, pre_te
     index_offset = 0
     # Evaluate the current and next prompt's expressions
     for i in range(start_frame, len(cur_prompt_series)):
-        cur_prompt_series[i] = prepare_batch_prompt(cur_prompt_series[i], max_frames, i, float(prompt_weight_1[0]),
+        cur_prompt_series[i] = prepare_batch_prompt(cur_prompt_series[i], max_frames, i, prompt_weight_1[i],
                                                     prompt_weight_2[i], prompt_weight_3[i], prompt_weight_4[i])
         nxt_prompt_series[i] = prepare_batch_prompt(nxt_prompt_series[i], max_frames, i, prompt_weight_1[i],
                                                     prompt_weight_2[i], prompt_weight_3[i], prompt_weight_4[i])
@@ -167,16 +169,10 @@ def interpolate_prompt_series(animation_prompts, max_frames, start_frame, pre_te
     # if it is an in-between frame and the prompts differ, composable diffusion will be performed.
     return (cur_prompt_series, nxt_prompt_series, weight_series)
 
+
 def BatchPoolAnimConditioning(cur_prompt_series, nxt_prompt_series, weight_series, clip):
     pooled_out = []
     cond_out = []
-
-    def pad_with_clip_tokens(tensor, target_length):
-        pad_token = clip.cond_stage_model.clip_l.special_tokens['pad']
-        tokens_to_pad = clip.tokenize(pad_token)
-        tokens_to_pad = tokens_to_pad.unsqueeze(0).expand(1, target_length, tokens_to_pad.shape[2])
-        tokens_to_pad = tokens_to_pad.to(tensor.device)
-        return torch.cat([tensor, tokens_to_pad], dim=1)
 
     for i in range(len(cur_prompt_series)):
         tokens = clip.tokenize(str(cur_prompt_series[i]))
@@ -187,7 +183,6 @@ def BatchPoolAnimConditioning(cur_prompt_series, nxt_prompt_series, weight_serie
             cond_from, pooled_from = clip.encode_from_tokens(tokens, return_pooled=True)
         else:
             cond_from, pooled_from = torch.zeros_like(cond_to), torch.zeros_like(pooled_to)
-            pooled_from = pad_with_clip_tokens(pooled_from, cond_to.shape[1])
 
         interpolated_conditioning = addWeighted([[cond_to, {"pooled_output": pooled_to}]],
                                                 [[cond_from, {"pooled_output": pooled_from}]],
@@ -196,13 +191,15 @@ def BatchPoolAnimConditioning(cur_prompt_series, nxt_prompt_series, weight_serie
         interpolated_cond = interpolated_conditioning[0][0]
         interpolated_pooled = interpolated_conditioning[0][1].get("pooled_output", pooled_from)
 
-        pooled_out.append(interpolated_pooled)
         cond_out.append(interpolated_cond)
+        pooled_out.append(interpolated_pooled)
 
     final_pooled_output = torch.cat(pooled_out, dim=0)
     final_conditioning = torch.cat(cond_out, dim=0)
 
     return [[final_conditioning, {"pooled_output": final_pooled_output}]]
+
+
 
 
 

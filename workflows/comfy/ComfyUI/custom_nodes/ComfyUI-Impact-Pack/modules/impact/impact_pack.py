@@ -237,8 +237,10 @@ class DetailerForEach:
             else:
                 cropped_mask = None
 
-            if wildcard_chooser is not None:
+            if wildcard_chooser is not None and wmode != "LAB":
                 seg_seed, wildcard_item = wildcard_chooser.get(seg)
+            elif wildcard_chooser is not None and wmode == "LAB":
+                seg_seed, wildcard_item = None, wildcard_chooser.get(seg)
             else:
                 seg_seed, wildcard_item = None, None
 
@@ -272,7 +274,7 @@ class DetailerForEach:
                 # Convert enhanced_pil_alpha to RGBA mode
                 enhanced_image_alpha = tensor_convert_rgba(enhanced_image)
                 new_seg_image = enhanced_image.numpy()  # alpha should not be applied to seg_image
-                
+
                 # Apply the mask
                 mask = tensor_resize(mask, *tensor_get_size(enhanced_image))
                 tensor_putalpha(enhanced_image_alpha, mask)
@@ -780,6 +782,30 @@ class DenoiseScheduleHookProvider:
         return (hook, )
 
 
+class StepsScheduleHookProvider:
+    schedules = ["simple"]
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {
+                     "schedule_for_iteration": (s.schedules,),
+                     "target_steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
+                    },
+                }
+
+    RETURN_TYPES = ("PK_HOOK",)
+    FUNCTION = "doit"
+
+    CATEGORY = "ImpactPack/Upscale"
+
+    def doit(self, schedule_for_iteration, target_steps):
+        hook = None
+        if schedule_for_iteration == "simple":
+            hook = hooks.SimpleStepsScheduleHook(target_steps)
+
+        return (hook, )
+
+
 class DetailerHookCombine:
     @classmethod
     def INPUT_TYPES(s):
@@ -1104,7 +1130,7 @@ class IterativeLatentUpscale:
             new_h = h*upscale_factor
             core.update_node_status(unique_id, f"Final step | x{upscale_factor:.2f}", 1.0)
             print(f"IterativeLatentUpscale[Final]: {new_w:.1f}x{new_h:.1f} (scale:{upscale_factor:.2f}) ")
-            step_info = steps, steps
+            step_info = steps-1, steps
             current_latent = upscaler.upscale_shape(step_info, current_latent, new_w, new_h, temp_prefix)
 
         core.update_node_status(unique_id, "", None)
@@ -1451,7 +1477,7 @@ class SegsBitwiseAndMask:
 
     def doit(self, segs, mask):
         return (core.segs_bitwise_and_mask(segs, mask), )
-    
+
 
 class SegsBitwiseAndMaskForEach:
     @classmethod
@@ -1626,7 +1652,7 @@ class SubtractMask:
                         "mask2": ("MASK", ),
                       }
                 }
-    
+
     RETURN_TYPES = ("MASK",)
     FUNCTION = "doit"
 
@@ -1757,7 +1783,7 @@ class ImageReceiver:
                 return hash(image_data)
             else:
                 return hash(image)
-                
+
 
 from server import PromptServer
 

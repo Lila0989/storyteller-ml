@@ -32,6 +32,14 @@ export enum LogLevel {
   DEBUG,
 }
 
+const LogLevelKeyToLogLevel: { [key: string]: LogLevel } = {
+  IMPORTANT: LogLevel.IMPORTANT,
+  ERROR: LogLevel.ERROR,
+  WARN: LogLevel.WARN,
+  INFO: LogLevel.INFO,
+  DEBUG: LogLevel.DEBUG,
+};
+
 type ConsoleLogFns = "log" | "error" | "warn" | "debug" | "info";
 const LogLevelToMethod: { [key in LogLevel]: ConsoleLogFns } = {
   [LogLevel.IMPORTANT]: "log",
@@ -41,14 +49,14 @@ const LogLevelToMethod: { [key in LogLevel]: ConsoleLogFns } = {
   [LogLevel.DEBUG]: "debug",
 };
 const LogLevelToCSS: { [key in LogLevel]: string } = {
-  [LogLevel.IMPORTANT]: "font-weight:bold; color:blue;",
+  [LogLevel.IMPORTANT]: "font-weight: bold; color: blue;",
   [LogLevel.ERROR]: "",
   [LogLevel.WARN]: "",
-  [LogLevel.INFO]: "",
-  [LogLevel.DEBUG]: "font-style: italic;",
+  [LogLevel.INFO]: "font-style: italic; color: blue;",
+  [LogLevel.DEBUG]: "font-style: italic; color: #333;",
 };
 
-let GLOBAL_LOG_LEVEL = LogLevel.DEBUG;
+let GLOBAL_LOG_LEVEL = LogLevel.ERROR;
 
 /** A basic wrapper around logger. */
 class Logger {
@@ -113,6 +121,10 @@ class LogSession {
     this.log(LogLevel.INFO, message, ...args);
   }
 
+  infoParts(message?: string, ...args: any[]) {
+    return this.logParts(LogLevel.INFO, message, ...args);
+  }
+
   error(message?: string, ...args: any[]) {
     this.log(LogLevel.ERROR, message, ...args);
   }
@@ -145,7 +157,7 @@ class Rgthree extends EventTarget {
   private progressBarEl: RgthreeProgressBar | null = null;
 
   /** Stores a node id that we will use to queu only that output node (with `queueOutputNode`). */
-  private queueNodeId: number | null = null;
+  private queueNodeIds: number[] | null = null;
 
   /** Are any functional keys pressed in this given moment? */
   ctrlKey = false;
@@ -170,6 +182,11 @@ class Rgthree extends EventTarget {
 
   constructor() {
     super();
+
+    const logLevel =
+      LogLevelKeyToLogLevel[CONFIG_SERVICE.getConfigValue("log_level")] ?? GLOBAL_LOG_LEVEL;
+    this.setLogLevel(logLevel);
+
     window.addEventListener("keydown", (e) => {
       this.handleKeydown(e);
     });
@@ -246,6 +263,13 @@ class Rgthree extends EventTarget {
       const fontSize = Math.max(10, Number(height) - 10);
       this.progressBarEl.style.fontSize = `${fontSize}px`;
       this.progressBarEl.style.fontWeight = fontSize <= 12 ? "bold" : "normal";
+      if (CONFIG_SERVICE.getConfigValue("features.progress_bar.position") === "bottom") {
+        this.progressBarEl.style.bottom = `0px`;
+        this.progressBarEl.style.top = `auto`;
+      } else {
+        this.progressBarEl.style.top = `0px`;
+        this.progressBarEl.style.bottom = `auto`;
+      }
     } else {
       this.progressBarEl?.remove();
     }
@@ -393,17 +417,21 @@ class Rgthree extends EventTarget {
 
   /**
    * Wraps an `app.queuePrompt` call setting a specific node id that we will inspect and change the
-   * serialized graph when set (below, in our `graphToPrompt` override).
+   * serialized graph right before being sent (below, in our `api.queuePrompt` override).
    */
-  async queueOutputNode(nodeId: number) {
+  async queueOutputNodes(nodeIds: number[]) {
     try {
-      this.queueNodeId = nodeId;
+      this.queueNodeIds = nodeIds;
       await app.queuePrompt();
-    } catch(e) {
-      const [n, v] = this.logParts(LogLevel.ERROR, `There was an error queuing node #${nodeId}`, e);
+    } catch (e) {
+      const [n, v] = this.logParts(
+        LogLevel.ERROR,
+        `There was an error queuing nodes ${nodeIds}`,
+        e,
+      );
       console[n]?.(...v);
     } finally {
-      this.queueNodeId = null;
+      this.queueNodeIds = null;
     }
   }
 
@@ -423,7 +451,6 @@ class Rgthree extends EventTarget {
     }
     return newOutput;
   }
-
 
   /**
    * Initialize a bunch of hooks into ComfyUI and/or LiteGraph itself so we can either keep state or
@@ -464,16 +491,25 @@ class Rgthree extends EventTarget {
     app.graphToPrompt = async function () {
       rgthree.dispatchEvent(new CustomEvent("graph-to-prompt"));
       let promise = graphToPrompt.apply(app, [...arguments]);
-      const result = (await promise as ComfyApiPrompt);
-      // If queueNodeId is set, then we wonly want to queue one node. We'll capture that and rewrite
-      // the api format, 'output' field.
-      if (rgthree.queueNodeId != null) {
-        const oldOutput = result.output;
-        const newOutput = rgthree.recursiveAddNodes(String(rgthree.queueNodeId), oldOutput, {});
-        result.output = newOutput;
-      }
+      await promise;
       rgthree.dispatchEvent(new CustomEvent("graph-to-prompt-end"));
       return promise;
+    };
+
+    // Override the queuePrompt for api to intercept the prompt output and, if queueNodeIds is set,
+    // then we only want to queue those nodes, by rewriting the api format (prompt 'output' field)
+    // so only those are evaluated.
+    const apiQueuePrompt = api.queuePrompt as Function;
+    api.queuePrompt = async function (index: number, prompt: ComfyApiPrompt) {
+      if (rgthree.queueNodeIds?.length && prompt.output) {
+        const oldOutput = prompt.output;
+        let newOutput = {};
+        for (const queueNodeId of rgthree.queueNodeIds) {
+          rgthree.recursiveAddNodes(String(queueNodeId), oldOutput, newOutput);
+        }
+        prompt.output = newOutput;
+      }
+      return apiQueuePrompt.apply(app, [index, prompt]);
     };
 
     // Hook into a clean call; allow us to clear and rgthree messages.

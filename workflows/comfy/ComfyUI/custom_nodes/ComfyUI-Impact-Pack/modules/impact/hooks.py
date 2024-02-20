@@ -109,11 +109,14 @@ class SimpleCfgScheduleHook(PixelKSampleHook):
         super().__init__()
         self.target_cfg = target_cfg
 
-    def pre_ksample(self, model, seed, steps, cfg, sampler_name, scheduler, positive, negative, upscaled_latent,
-                    denoise):
-        progress = self.cur_step / self.total_step
-        gap = self.target_cfg - cfg
-        current_cfg = cfg + gap * progress
+    def pre_ksample(self, model, seed, steps, cfg, sampler_name, scheduler, positive, negative, upscaled_latent, denoise):
+        if self.total_step > 1:
+            progress = self.cur_step / (self.total_step - 1)
+            gap = self.target_cfg - cfg
+            current_cfg = int(cfg + gap * progress)
+        else:
+            current_cfg = self.target_cfg
+
         return model, seed, steps, current_cfg, sampler_name, scheduler, positive, negative, upscaled_latent, denoise
 
 
@@ -122,12 +125,31 @@ class SimpleDenoiseScheduleHook(PixelKSampleHook):
         super().__init__()
         self.target_denoise = target_denoise
 
-    def pre_ksample(self, model, seed, steps, cfg, sampler_name, scheduler, positive, negative, upscaled_latent,
-                    denoise):
-        progress = self.cur_step / self.total_step
-        gap = self.target_denoise - denoise
-        current_denoise = denoise + gap * progress
+    def pre_ksample(self, model, seed, steps, cfg, sampler_name, scheduler, positive, negative, upscaled_latent, denoise):
+        if self.total_step > 1:
+            progress = self.cur_step / (self.total_step - 1)
+            gap = self.target_denoise - denoise
+            current_denoise = denoise + gap * progress
+        else:
+            current_denoise = self.target_denoise
+
         return model, seed, steps, cfg, sampler_name, scheduler, positive, negative, upscaled_latent, current_denoise
+
+
+class SimpleStepsScheduleHook(PixelKSampleHook):
+    def __init__(self, target_steps):
+        super().__init__()
+        self.target_steps = target_steps
+
+    def pre_ksample(self, model, seed, steps, cfg, sampler_name, scheduler, positive, negative, upscaled_latent, denoise):
+        if self.total_step > 1:
+            progress = self.cur_step / (self.total_step - 1)
+            gap = self.target_steps - steps
+            current_steps = int(steps + gap * progress)
+        else:
+            current_steps = self.target_steps
+
+        return model, seed, current_steps, cfg, sampler_name, scheduler, positive, negative, upscaled_latent, denoise
 
 
 class DetailerHook(PixelKSampleHook):
@@ -147,9 +169,14 @@ class SimpleDetailerDenoiseSchedulerHook(DetailerHook):
         self.target_denoise = target_denoise
 
     def pre_ksample(self, model, seed, steps, cfg, sampler_name, scheduler, positive, negative, latent, denoise):
-        progress = self.cur_step / self.total_step
-        gap = self.target_denoise - denoise
-        current_denoise = denoise + gap * progress
+        if self.total_step > 1:
+            progress = self.cur_step / (self.total_step - 1)
+            gap = self.target_denoise - denoise
+            current_denoise = denoise + gap * progress
+        else:
+            # ignore hook if total cycle <= 1
+            current_denoise = denoise
+
         return model, seed, steps, cfg, sampler_name, scheduler, positive, negative, latent, current_denoise
 
 

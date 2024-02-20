@@ -162,8 +162,7 @@ def set_model_patch_replace(model, patch_kwargs, key):
     if "attn2" not in to["patches_replace"]:
         to["patches_replace"]["attn2"] = {}
     if key not in to["patches_replace"]["attn2"]:
-        patch = CrossAttentionPatch(**patch_kwargs)
-        to["patches_replace"]["attn2"][key] = patch
+        to["patches_replace"]["attn2"][key] = CrossAttentionPatch(**patch_kwargs)
     else:
         to["patches_replace"]["attn2"][key].set_new_condition(**patch_kwargs)
 
@@ -426,7 +425,7 @@ class IPAdapter(nn.Module):
 
 class CrossAttentionPatch:
     # forward for patching
-    def __init__(self, weight, ipadapter, number, cond, uncond, weight_type, mask=None, sigma_start=0.0, sigma_end=1.0, unfold_batch=False):
+    def __init__(self, weight, ipadapter, number, cond, uncond, weight_type="original", mask=None, sigma_start=0.0, sigma_end=1.0, unfold_batch=False):
         self.weights = [weight]
         self.ipadapters = [ipadapter]
         self.conds = [cond]
@@ -441,7 +440,7 @@ class CrossAttentionPatch:
         self.k_key = str(self.number*2+1) + "_to_k_ip"
         self.v_key = str(self.number*2+1) + "_to_v_ip"
     
-    def set_new_condition(self, weight, ipadapter, number, cond, uncond, weight_type, mask=None, sigma_start=0.0, sigma_end=1.0, unfold_batch=False):
+    def set_new_condition(self, weight, ipadapter, number, cond, uncond, weight_type="original", mask=None, sigma_start=0.0, sigma_end=1.0, unfold_batch=False):
         self.weights.append(weight)
         self.ipadapters.append(ipadapter)
         self.conds.append(cond)
@@ -455,7 +454,8 @@ class CrossAttentionPatch:
     def __call__(self, n, context_attn2, value_attn2, extra_options):
         org_dtype = n.dtype
         cond_or_uncond = extra_options["cond_or_uncond"]
-        sigma = extra_options["sigmas"][0].item() if 'sigmas' in extra_options else 999999999.9
+        sigma = extra_options["sigmas"][0] if 'sigmas' in extra_options else None
+        sigma = sigma.item() if sigma is not None else 999999999.9
 
         # extra options for AnimateDiff
         ad_params = extra_options['ad_params'] if "ad_params" in extra_options else None
@@ -719,7 +719,7 @@ class IPAdapterApply:
                         face = insightface.get(face_img[i])
                         if face:
                             face_embed.append(torch.from_numpy(face[0].normed_embedding).unsqueeze(0))
-                            face_clipvision.append(NPToTensor(insightface_face_align.norm_crop(face_img[i], landmark=face[0].kps, image_size=224)))
+                            face_clipvision.append(NPToTensor(insightface_face_align.norm_crop(face_img[i], landmark=face[0].kps, image_size=256)))
 
                             if 640 not in size:
                                 print(f"\033[33mINFO: InsightFace detection resolution lowered to {size}.\033[0m")
