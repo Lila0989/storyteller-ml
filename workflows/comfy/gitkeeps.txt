@@ -1,0 +1,2 @@
+custom_nodes/comfy_mtb/extern/GFPGAN/
+custom_nodes/comfy_mtb/extern/frame_interpolation/
