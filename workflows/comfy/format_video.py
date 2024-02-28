@@ -51,8 +51,8 @@ def process_video(input_video, max_resolution, start_ms, end_ms, framerate):
     width, height = get_video_resolution(input_video)
     print(f"Original resolution: {width}x{height}")
 
-    new_width, new_height = calculate_new_resolution(width, height, max_resolution)
-    print(f"New resolution: {new_width}x{new_height}")
+    # new_width, new_height = calculate_new_resolution(width, height, max_resolution)
+    # print(f"New resolution: {new_width}x{new_height}")
 
     start_time = format_timestamp(start_ms)
     duration_ms = end_ms - start_ms
@@ -69,7 +69,7 @@ def process_video(input_video, max_resolution, start_ms, end_ms, framerate):
         '-i', input_video,
         '-ss', start_time,
         '-t', duration,
-        '-vf', f'scale={new_width}:{new_height}',
+        # '-vf', f'scale={new_width}:{new_height}',
         '-r', str(framerate),
         '-c:v', 'libx264', '-preset', 'fast', '-crf', '22',
         '-c:a', 'aac', '-b:a', '128k',
@@ -80,14 +80,16 @@ def process_video(input_video, max_resolution, start_ms, end_ms, framerate):
     print(f"Video processed successfully. Output saved as {output_video}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 6:
-        print("Usage: python script.py <input_video> <max_resolution> <start_ms> <end_ms> <framerate>")
+    if len(sys.argv) < 5:
+        # print("Usage: python script.py <input_video> <max_resolution> <start_ms> <end_ms> <framerate>")
+        print("Usage: python script.py <input_video> <start_ms> <end_ms> <framerate>")
         sys.exit(1)
 
     input_video = sys.argv[1]
-    max_resolution = sys.argv[2]
-    start_ms = int(sys.argv[3])
-    end_ms = int(sys.argv[4])
-    framerate = float(sys.argv[5])
+    # max_resolution = sys.argv[2]
+    max_resolution = None
+    start_ms = int(sys.argv[2])
+    end_ms = int(sys.argv[3])
+    framerate = float(sys.argv[4])
 
     process_video(input_video, max_resolution, start_ms, end_ms, framerate)
