@@ -1,3 +1,0 @@
-numba
-colour-science
-rembg
