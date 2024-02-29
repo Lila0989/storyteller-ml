@@ -19,3 +19,4 @@ while IFS= read -r directory; do
         echo "Directory '$directory' not found or line is empty."
     fi
 done < ../gitkeeps.txt
+
