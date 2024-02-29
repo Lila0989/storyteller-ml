@@ -10,3 +10,5 @@ rembg[gpu]
 timm
 addict
 yapf
+deepdiff
+pynvml

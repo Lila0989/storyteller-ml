@@ -20,3 +20,5 @@ https://github.com/cubiq/ComfyUI_IPAdapter_plus
 https://github.com/cubiq/ComfyUI_essentials
 https://github.com/storyicon/comfyui_segment_anything
 https://github.com/Jcd1230/rembg-comfyui-node
+https://github.com/crystian/ComfyUI-Crystools
+https://github.com/Fannovel16/ComfyUI-Video-Matting
