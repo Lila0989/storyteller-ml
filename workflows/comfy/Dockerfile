@@ -42,6 +42,7 @@ COPY --chown=appuser:appgroup ./ComfyUI /app/ComfyUI
 COPY --chown=appuser:appgroup ./docker_requirements.txt /app/docker_requirements.txt
 COPY --chown=appuser:appgroup ./required_requirements.txt /app/required_requirements.txt
 COPY --chown=appuser:appgroup ./format_video.py /app/format_video.py
+COPY --chown=appuser:appgroup ./fakeyou_watermark.png /app/fakeyou_watermark.png
 
 # install requirements
 RUN curl -sS "https://bootstrap.pypa.io/get-pip.py" | python3.10
