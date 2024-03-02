@@ -46,7 +46,3 @@ RUN chmod -R 777 /app
 
 # protobuf use python implementation (weird error without)
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
-
-EXPOSE 8188
-
-USER appuser

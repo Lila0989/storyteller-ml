@@ -2,6 +2,9 @@ import subprocess
 import json
 import os
 
+# set cwd to script location
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 json_file_path = 'repos.json'
 venv_python = os.path.join('ComfyUI', 'venv', 'Scripts' if os.name == 'nt' else 'bin', 'python')
 
@@ -37,7 +40,7 @@ def setup_repo(repo_info):
 
 
 def setup_venv_and_install_requirements():
-    run_command("python -m venv ComfyUI/venv")
+    run_command("python3 -m venv ComfyUI/venv")
     print('=============# Installing ComfyUI Requirements #=============')
     run_command(f"{venv_python} -m pip install -r ComfyUI/requirements.txt")
     print('=============# Installing extension missing requirements #=============')
