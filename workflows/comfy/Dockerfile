@@ -40,6 +40,8 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
 COPY --chown=appuser:appgroup install.py /app/install.py
 COPY --chown=appuser:appgroup repos.json /app/repos.json
+COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
+COPY --chown=appuser:appgroup format_video.py /app/format_video.py
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
 
 RUN chmod -R 777 /app
