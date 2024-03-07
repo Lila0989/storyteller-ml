@@ -1,0 +1,127 @@
+[
+    {
+        "url": "https://github.com/comfyanonymous/ComfyUI.git",
+        "commit": "00425563c07171f478e7809d3b89cc3df770ebbd",
+        "folder": "ComfyUI"
+    },
+    {
+        "url": "https://github.com/ltdrdata/ComfyUI-Manager.git",
+        "commit": "a31c528906759783ef2863c2e1590fd4d61cbbbf",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Manager"
+    },
+    {
+        "url": "https://github.com/ltdrdata/ComfyUI-Impact-Pack.git",
+        "commit": "8b35530cfb3658aaa2715c8619379ca20a94c5a6",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Impact-Pack"
+    },
+    {
+        "url": "https://github.com/Fannovel16/comfyui_controlnet_aux.git",
+        "commit": "920a7ff9deac386ff3a3d17782fa876c51554cda",
+        "folder": "ComfyUI/custom_nodes/comfyui_controlnet_aux"
+    },
+    {
+        "url": "https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git",
+        "commit": "5e11679995c68f33891c306a393915feefe234b5",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation"
+    },
+    {
+        "url": "https://github.com/jags111/efficiency-nodes-comfyui.git",
+        "commit": "f6d01dc5449e2cc6e29da92b3b337e49c0dce112",
+        "folder": "ComfyUI/custom_nodes/efficiency-nodes-comfyui"
+    },
+    {
+        "url": "https://github.com/Derfuu/Derfuu_ComfyUI_ModdedNodes.git",
+        "commit": "2ace4c463d5b2063de35e46ebb9bd3f10e2d34b4",
+        "folder": "ComfyUI/custom_nodes/Derfuu_ComfyUI_ModdedNodes"
+    },
+    {
+        "url": "https://github.com/WASasquatch/was-node-suite-comfyui.git",
+        "commit": "6c3fed70655b737dc9b59da1cadb3c373c08d8ed",
+        "folder": "ComfyUI/custom_nodes/was-node-suite-comfyui"
+    },
+    {
+        "url": "https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git",
+        "commit": "b4a9cebf24b50c4b538945ae86c17a9dc24052a8",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Custom-Scripts"
+    },
+    {
+        "url": "https://github.com/melMass/comfy_mtb.git",
+        "commit": "b7c85824582d2eed994ec1ff451e33d75911595d",
+        "folder": "ComfyUI/custom_nodes/comfy_mtb"
+    },
+    {
+        "url": "https://github.com/FizzleDorf/ComfyUI_FizzNodes.git",
+        "commit": "2ad19c1c3ad424b732fa0bc16ffb02284676a5da",
+        "folder": "ComfyUI/custom_nodes/ComfyUI_FizzNodes"
+    },
+    {
+        "url": "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git",
+        "commit": "9c0fe542c62b55591253f4bcdd33c34a1b24331e",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Advanced-ControlNet"
+    },
+    {
+        "url": "https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved.git",
+        "commit": "12c9879ebbbf2cc2a87dae8609ad365384313072",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved"
+    },
+    {
+        "url": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git",
+        "commit": "f94597739f20dac331f9918a245149b6b00a60f2",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite"
+    },
+    {
+        "url": "https://github.com/theUpsider/ComfyUI-Logic.git",
+        "commit": "fb8897351f715ea75eebf52e74515b6d07c693b8",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Logic"
+    },
+    {
+        "url": "https://github.com/rgthree/rgthree-comfy.git",
+        "commit": "9021670e9ff887d40e031334fc9f3e92c599d161",
+        "folder": "ComfyUI/custom_nodes/rgthree-comfy"
+    },
+    {
+        "url": "https://github.com/giriss/comfy-image-saver.git",
+        "commit": "65e6903eff274a50f8b5cd768f0f96baf37baea1",
+        "folder": "ComfyUI/custom_nodes/comfy-image-saver"
+    },
+    {
+        "url": "https://github.com/kijai/ComfyUI-KJNodes.git",
+        "commit": "e9fcd376a6c06915bb596c189815edef380a98f5",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-KJNodes"
+    },
+    {
+        "url": "https://github.com/Ttl/ComfyUi_NNLatentUpscale.git",
+        "commit": "08105da31dbd7a54569661e135835e73bd8064b0",
+        "folder": "ComfyUI/custom_nodes/ComfyUi_NNLatentUpscale"
+    },
+    {
+        "url": "https://github.com/cubiq/ComfyUI_IPAdapter_plus.git",
+        "commit": "6a411dcb2c6c3b91a3aac97adfb080a77ade7d38",
+        "folder": "ComfyUI/custom_nodes/ComfyUI_IPAdapter_plus"
+    },
+    {
+        "url": "https://github.com/cubiq/ComfyUI_essentials.git",
+        "commit": "85a1937eea238c6e6e59991813656faa0da82fff",
+        "folder": "ComfyUI/custom_nodes/ComfyUI_essentials"
+    },
+    {
+        "url": "https://github.com/storyicon/comfyui_segment_anything.git",
+        "commit": "681d977c2cc244de729fd9e08145ff365c609262",
+        "folder": "ComfyUI/custom_nodes/comfyui_segment_anything"
+    },
+    {
+        "url": "https://github.com/Jcd1230/rembg-comfyui-node.git",
+        "commit": "fac7df6c3f42e158a2829b511b37f13e4cc834eb",
+        "folder": "ComfyUI/custom_nodes/rembg-comfyui-node"
+    },
+    {
+        "url": "https://github.com/crystian/ComfyUI-Crystools.git",
+        "commit": "8c257748b98f59357ac20cebd4b4b67c0a9e53fe",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Crystools"
+    },
+    {
+        "url": "https://github.com/Fannovel16/ComfyUI-Video-Matting.git",
+        "commit": "178bf956ddb817d065b1b073ec04582ad60335bb",
+        "folder": "ComfyUI/custom_nodes/ComfyUI-Video-Matting"
+    }
+]

@@ -37,25 +37,12 @@ RUN apt-get update \
 
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 # Copy files to container
-COPY --chown=appuser:appgroup ./ComfyLauncher /app/ComfyLauncher
-COPY --chown=appuser:appgroup ./ComfyUI /app/ComfyUI
-COPY --chown=appuser:appgroup ./docker_requirements.txt /app/docker_requirements.txt
-COPY --chown=appuser:appgroup ./required_requirements.txt /app/required_requirements.txt
-COPY --chown=appuser:appgroup ./format_video.py /app/format_video.py
-COPY --chown=appuser:appgroup ./fakeyou_watermark.png /app/fakeyou_watermark.png
-
-# install requirements
-RUN curl -sS "https://bootstrap.pypa.io/get-pip.py" | python3.10
-# install known requirements for ComfyUI
-RUN pip install -r /app/ComfyUI/requirements.txt
-# install the detected requirements & ignore errors
-RUN cat /app/docker_requirements.txt | xargs -n 1 -L 1 pip install || true
-# install the extra requirements (manually written)
-RUN pip install -r /app/required_requirements.txt
+COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
+COPY --chown=appuser:appgroup install.py /app/install.py
+COPY --chown=appuser:appgroup repos.json /app/repos.json
+COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
 
 RUN chmod -R 777 /app
 
-# set environment var
+# protobuf use python implementation (weird error without)
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
-
-USER appuser
