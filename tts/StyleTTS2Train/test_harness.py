@@ -2,7 +2,6 @@ import wandb
 from pathlib import Path
 from collections import defaultdict
 
-
 class TestHarness:
     def __init__(self):
         # # start a new wandb run to track this script
