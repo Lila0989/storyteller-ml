@@ -100,7 +100,7 @@ class TestHarness:
             ref_text = comp[1]
             
             base_path = "TestHarnessV2"
-            print(f"{char_name}|{file_name}|{ref_text}")
+            
             if char_name in characters:
                 characters[char_name].append(CharacterData(char_name=char_name,file_name=file_name,full_path= base_path + full_path,ref_text=ref_text))
             else:

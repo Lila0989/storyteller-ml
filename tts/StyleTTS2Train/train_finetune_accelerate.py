@@ -13,8 +13,11 @@ import click
 import shutil
 import warnings
 
+# Import this here
+from test_harness import TestHarness
+harness = TestHarness()
 
-
+    
 warnings.simplefilter('ignore')
 # from torch.utils.tensorboard import SummaryWriter
 
@@ -597,7 +600,7 @@ def main(config_path):
                 # writer.add_scalar('train/diff_loss', loss_diff, iters)
                 # writer.add_scalar('train/d_loss_slm', d_loss_slm, iters)
                 # writer.add_scalar('train/gen_loss_slm', loss_gen_lm, iters)
-
+               
                 accelerator.log({'train/mel_loss': float(running_loss / log_interval),
                                  'train/gen_loss': float(loss_gen_all),
                                  'train/d_loss': float(d_loss),
@@ -764,16 +767,21 @@ def main(config_path):
                 }
 
             accelerator.wait_for_everyone()
+            
             if accelerator.is_main_process:
                 save_path = osp.join(log_dir, 'epoch_2nd_%05d.pth' % epoch)
                 torch.save(state, save_path)
-                                
+                
+                harness.test(save_path)
+                                     
                 # run inference and check the current epoch.
 
             # if estimate sigma, save the estimated simga
             if model_params.diffusion.dist.estimate_sigma_data:
                 config['model_params']['diffusion']['dist']['sigma_data'] = float(np.mean(running_std))
-
+                
+               
+                 
                 with open(osp.join(log_dir, osp.basename(config_path)), 'w') as outfile:
                     yaml.dump(config, outfile, default_flow_style=True)
     accelerator.end_training()
