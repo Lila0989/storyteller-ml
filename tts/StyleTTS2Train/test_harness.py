@@ -4,6 +4,7 @@ from collections import defaultdict
 from style_tts2 import StyleTTS2
 import torch
 import torchaudio
+
 class CharacterData:
     def __init__(self,full_path,char_name,file_name,ref_text) -> None:
         self.char_name = char_name
@@ -26,7 +27,6 @@ class TestHarness:
         self.test_text = ["This is!","Hello world testing!""This is a slightly... longer test.""This is a longer test, of style TTS Two!", "This should be a lengthy sentence."]
         self.test_characters = self.get_characters()
 
-        
     def log_values(self,loss_gen_all, d_loss, loss_ce, loss_dur, loss_lm, loss_norm_rec, 
                    loss_F0_rec, loss_sty, loss_diff, d_loss_slm, loss_gen_lm, iters, epoch, step, 
                    log_interval, running_loss,train_list_len,batch_size):
@@ -63,12 +63,10 @@ class TestHarness:
         count = 0
         for char_name in char_name_ls.keys():
             char_sample = char_name_ls[char_name]
-            
             for sample in char_sample:
                 s_ref = Path(sample.full_path)
                 s_ref = model.compute_style(s_ref)
                 for i,text in enumerate(self.test_text):
-                    # we shouldn't set the embedding scale high on some text / input audio lengths it will break the audio
                     mono_wav = model.STinference(text=text,
                                         ref_text=sample.ref_text,
                                         ref_s=s_ref,
@@ -115,8 +113,6 @@ class TestHarness:
 
 if __name__ == "__main__":
     harness = TestHarness()
-    #harness.sample_ood_voice(file="testing.wav",sample_rate=24000,character="Raiden",caption="What I just Said")
-    #harness.sample_list_of_characters(file_path="./output/")
     harness.test("Models/LibriTTS/epochs_2nd_00020.pth")
 
   
