@@ -45,7 +45,7 @@ from Modules.diffusion.sampler import DiffusionSampler, ADPM2Sampler, KarrasSche
 from Utils.PLBERT.util import load_plbert
         
 class StyleTTS2():
-    def __init__(self):
+    def __init__(self,check_point:str):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.to_mel = torchaudio.transforms.MelSpectrogram(
             n_mels=80, n_fft=2048, win_length=1200, hop_length=300)
@@ -64,7 +64,6 @@ class StyleTTS2():
         self.pitch_extractor = load_F0_models(F0_path)
 
         # load BERT model
-
         BERT_path = self.config.get('PLBERT_dir', False)
         self.plbert = load_plbert(BERT_path)
         
@@ -72,8 +71,9 @@ class StyleTTS2():
         self.model = build_model(self.model_params , self.text_aligner, self.pitch_extractor, self.plbert)
         _ = [self.model[key].eval() for key in self.model]
         _ = [self.model[key].to(self.device) for key in self.model]
-        
-        params_whole = torch.load("Models/LibriTTS/epochs_2nd_00020.pth", map_location=self.device)
+            
+        params_whole = torch.load(check_point, map_location=self.device)
+        #params_whole = torch.load("Models/LibriTTS/epochs_2nd_00020.pth", map_location=self.device)
         # params_whole = torch.load("Models/LJSpeech/epoch_2nd_00100.pth", map_location='cpu')
         params = params_whole['net']
 
@@ -354,10 +354,9 @@ class StyleTTS2():
 
 from pathlib import Path
 import time
-start_t = time.time()
-print(f'Took: {time.time()-start_t:.2f}s') 
+
 def main():
-    model = StyleTTS2()
+    model = StyleTTS2(check_point="Models/LibriTTS/epochs_2nd_00020.pth")
     ref_text = "Didn't really have a body... I just kind of melted into shadows and creeped around on floors and walls, but now... I have this new job, and I just had to proove my self by bringing back a mortal soul."
     ref_s = Path("TestHarness/ds/698.wav")
     ref_s = model.compute_style(ref_s)
@@ -370,5 +369,16 @@ def main():
     
     #output_wav = model.STinference(text, ref_s, ref_text, diffusion_steps=10, alpha=0.4, beta=0.7, embedding_scale=1.5)
     torchaudio.save("./test.wav", torch.tensor(output_wav).repeat(2,1), 24000)
+    
+def testbug():
+    model = StyleTTS2(check_point="Models/LibriTTS/epochs_2nd_00020.pth")
+    ref_s = Path("TestHarnessV2/goku/381.wav")
+    ref_s = model.compute_style(ref_s)
+    
+    ref_text = "I thought that would do more damage than that. Has awakened the legendary warrior that lived in my heart! I am Goku and I am a Super Saiyan! So your finally going to fight with hundred percent of your strength."
+    # if embedding scale is too high it could produce a lot of noise.
+    output_wav = model.STinference("This is.", ref_s, ref_text, diffusion_steps=10, alpha=0.45, beta=0.6, embedding_scale=1.0)
+    torchaudio.save("./test.wav", torch.tensor(output_wav).repeat(2,1), 24000)
 if __name__ == "__main__":
-    main()
+    #main()
+    testbug()

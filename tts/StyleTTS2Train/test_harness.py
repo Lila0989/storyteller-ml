@@ -1,7 +1,15 @@
 import wandb
 from pathlib import Path
 from collections import defaultdict
+from style_tts2 import StyleTTS2
 
+class CharacterData:
+    def __init__(self,full_path,char_name,file_name,ref_text) -> None:
+        self.char_name = char_name
+        self.file_name = file_name
+        self.ref_text = ref_text
+        self.full_path = full_path
+        
 class TestHarness:
     def __init__(self):
         # # start a new wandb run to track this script
@@ -14,10 +22,9 @@ class TestHarness:
             }
         )
         
-        self.test_text = []
+        self.test_text = ["This is!","Hello world testing!""This is a slightly... longer test.""This is a longer test, of style TTS Two!", "This should be a lengthy sentence."]
         self.test_characters = []
-        self.callback = None
-        self.current_checkpoint = ""
+
         
     def log_values(self,loss_gen_all, d_loss, loss_ce, loss_dur, loss_lm, loss_norm_rec, 
                    loss_F0_rec, loss_sty, loss_diff, d_loss_slm, loss_gen_lm, iters, epoch, step, 
@@ -49,37 +56,15 @@ class TestHarness:
         return saved_path
     
     def test(self,check_point:Path):
-        self.test_text = TestHarness.get_lines_from_file("TestHarness/test.txt")
-        self.test_characters = TestHarness.get_files_by_folder("TestHarness/")
-        
-        for char_name in self.test_characters.keys():
-            for ls in self.test_characters[char_name]:
-                for path in ls:
-                    for text in self.test_text: 
-                        self._next_check_point_inference(path,text,check_point,self.callback)
-    
-        
-    def sample_list_of_characters(self,file_path:str="output/",sample_rate=24000):
-        # Open the text file and read the folder names
-        folder_name_and_file_name = []
-        with open(file_path, 'r') as file:
-            folder_names = [line.strip() for line in file]
+        model = StyleTTS2()
 
-        # Iterate over each folder name
-        for folder_name in folder_names:
-            # Create a Path object for the folder
-            folder_path = Path(folder_name)
+        model.STinference(text="",ref_text="",)
+        for char_name in self.test_characters.keys():
+            ls = self.test_characters[char_name]
             
-            # Check if the folder path exists and is a directory
-            if folder_path.exists() and folder_path.is_dir():
-                # List all files in the folder
-                for file in folder_path.iterdir(): 
-                    if file.is_file():
-                        folder_name_and_file_name.append(Path("{folder_name}/{f}"))
-            else:
-                print(f"Folder {folder_name} does not exist or is not a directory.")
-        
-        return folder_name_and_file_name
+            for sample in ls:
+                s_ref = model.compute_style(sample.full_path)
+                
     
     @staticmethod
     def get_lines_from_file(file_path):
@@ -87,32 +72,28 @@ class TestHarness:
             lines = f.readlines()
             lines = [line.strip() for line in lines]
             return lines           
-          
+    
     @staticmethod
-    def get_files_by_folder(folder_path):
-        """
-        Structure each folder as 
-        Traverses the directory specified by folder_path and produces a dictionary with keys
-        as folder names and values as lists of file paths associated with each folder.
-
-        :param folder_path: The path to the folder to traverse.
-        :return: A dictionary where each key is a folder name and each value is a list of file paths in that folder.
-        """
-        root_path = Path(folder_path)
-        files_by_folder = defaultdict(list)
-
-        for file in root_path.rglob('*'):
-            if file.is_file():
-                # Create a key with the name of the parent folder
-                folder_name = file.parent.relative_to(root_path).as_posix()
-                if folder_name == '':
-                    folder_name = '.'  # Represent the root folder
-                # Append the file path to the list of files for this folder
-                files_by_folder[folder_name].append(str(file))
-
-        # Convert defaultdict to a regular dict for the final output
-        return dict(files_by_folder)
-
+    def get_characters():
+        characters = dict()
+        lines = TestHarness.get_lines_from_file("TestHarnessV2/info.txt")
+        
+        for line in lines:
+            comp = line.split("|")
+            full_path = comp[0]
+            pieces = full_path.split("/")
+            char_name = pieces[1]
+            file_wav = pieces[2]
+            ref_text = comp[1]
+            
+            print(f"{full_path}|{char_name}| {file_wav} | {ref_text}")
+            
+            if char_name in characters:
+                characters[char_name].append(CharacterData(char_name=char_name,file_name=file_wav,full_path=full_path,ref_text=ref_text))
+            else:
+                characters[char_name] = []    
+                characters[char_name].append(CharacterData(char_name=char_name,file_name=file_wav,full_path=full_path,ref_text=ref_text))
+        return characters
     def done(self):
         wandb.finish()
 
@@ -120,6 +101,7 @@ if __name__ == "__main__":
     harness = TestHarness()
     #harness.sample_ood_voice(file="testing.wav",sample_rate=24000,character="Raiden",caption="What I just Said")
     #harness.sample_list_of_characters(file_path="./output/")
-
-    print(TestHarness.get_files_by_folder("TestHarness/"))
+  
     print(TestHarness.get_lines_from_file("TestHarness/test.txt"))
+    
+    TestHarness.get_characters()
