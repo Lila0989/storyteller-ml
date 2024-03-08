@@ -60,14 +60,13 @@ class TestHarness:
         model = StyleTTS2(check_point)
 
         char_name_ls = TestHarness.get_characters()
-        
+        count = 0
         for char_name in char_name_ls.keys():
             char_sample = char_name_ls[char_name]
             
             for sample in char_sample:
                 s_ref = Path(sample.full_path)
                 s_ref = model.compute_style(s_ref)
-
                 for i,text in enumerate(self.test_text):
                     # we shouldn't set the embedding scale high on some text / input audio lengths it will break the audio
                     mono_wav = model.STinference(text=text,
@@ -75,7 +74,10 @@ class TestHarness:
                                         ref_s=s_ref,
                                         diffusion_steps=10,alpha=0.45, beta=0.6, embedding_scale=1.0)
                     stereo_wav = torch.tensor(mono_wav).repeat(2,1)
-                    torchaudio.save(f"{char_name}|{sample.file_name}",stereo_wav,sample_rate=24000)
+                    path = f"./test/{char_name}|{i}-text|{sample.file_name}"
+                    torchaudio.save(path,stereo_wav,sample_rate=24000)
+                    self.sample_ood_voice(file=path,sample_rate=24000,character=char_name,caption=f"Text: {text} | Reference Text:{sample.ref_text}")
+                    
             count += 1
             if count == top:
                 break
