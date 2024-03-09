@@ -4,6 +4,10 @@
 d0ea889aa827b0c87e50ca44b302b030ccaf95e2 
 https://dagshub.com/StyleTTS/StyleTTS2/commits/main
 
+To run: 
+accelerate launch --mixed_precision=fp16 --num_processes=1 train_finetune_accelerate.py --config_path ./Configs/config_harness.yml # use your own config but ensure you use train_finetune_accelerate.py
+
+Should be accessible in our weights and biases account.
 With a test harness that will be able easily observe the results to weights and biases.
 Use python 3.10.12
 
