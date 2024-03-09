@@ -48,7 +48,15 @@ class TestHarness:
                 'step':step,
                 'total_steps':train_list_len//batch_size
             })
-    
+        
+    def log_eval(self,mel_loss,dur_loss,F0_loss,epoch):
+        wandb.log({
+            'eval/mel_loss':mel_loss,
+            'eval/dur_loss':dur_loss,
+            'eval/F0_loss':F0_loss,
+            'epoch':epoch+1
+        })
+        
     def sample_ood_voice(self,file:str="testing.wav",sample_rate=24000,character:str="character_name",caption:str="What is supposed to be said"):
         wandb.log({character: wandb.Audio(file, sample_rate=sample_rate, caption=caption)})
 

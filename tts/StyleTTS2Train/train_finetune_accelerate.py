@@ -613,6 +613,9 @@ def main(config_path):
                                  'train/d_loss_slm': float(d_loss_slm),
                                  'train/gen_loss_slm': float(loss_gen_lm),
                                  'epoch': int(epoch) + 1}, step=iters)
+                
+                
+                
 
                 running_loss = 0
 
@@ -738,7 +741,7 @@ def main(config_path):
             # writer.add_scalar('eval/mel_loss', loss_test / iters_test, epoch + 1)
             # writer.add_scalar('eval/dur_loss', loss_test / iters_test, epoch + 1)
             # writer.add_scalar('eval/F0_loss', loss_f / iters_test, epoch + 1)
-
+            harness.log_eval(mel_loss=float(loss_test / iters_test),dur_loss=float(loss_test / iters_test),F0_loss=float(loss_f / iters_test),epoch)
             accelerator.log({'eval/mel_loss': float(loss_test / iters_test),
                              'eval/dur_loss': float(loss_test / iters_test),
                              'eval/F0_loss': float(loss_f / iters_test)}, step=epoch + 1)
