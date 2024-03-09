@@ -46,6 +46,8 @@ handler = StreamHandler()
 handler.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
+from test_harness import TestHarness
+harness = TestHarness()
 
 @click.command()
 @click.option('-p', '--config_path', default='Configs/config_ft.yml', type=str)
@@ -559,6 +561,13 @@ def main(config_path):
                 writer.add_scalar('train/gen_loss_slm', loss_gen_lm, iters)
                 
                 running_loss = 0
+                step_total = len(train_list)//batch_size
+                train_list_len = len(train_list)
+                step = i+1
+                
+                harness.log_values(loss_gen_all, d_loss, loss_ce, loss_dur, loss_lm, loss_norm_rec, 
+                   loss_F0_rec, loss_sty, loss_diff, d_loss_slm, loss_gen_lm, iters, epoch, step, 
+                   log_interval, running_loss,train_list_len,batch_size)
                 
                 print('Time elasped:', time.time()-start_time)
             
@@ -680,6 +689,7 @@ def main(config_path):
         writer.add_scalar('eval/dur_loss', loss_test / iters_test, epoch + 1)
         writer.add_scalar('eval/F0_loss', loss_f / iters_test, epoch + 1)
         
+        harness.log_eval(mel_loss=float(loss_test / iters_test),dur_loss=float(loss_test / iters_test),F0_loss=float(loss_f / iters_test),epoch=epoch)
         
         if (epoch + 1) % save_freq == 0 :
             if (loss_test / iters_test) < best_loss:
@@ -694,7 +704,8 @@ def main(config_path):
             }
             save_path = osp.join(log_dir, 'epoch_2nd_%05d.pth' % epoch)
             torch.save(state, save_path)
-
+            
+            harness.test(save_path)
             # if estimate sigma, save the estimated simga
             if model_params.diffusion.dist.estimate_sigma_data:
                 config['model_params']['diffusion']['dist']['sigma_data'] = float(np.mean(running_std))
