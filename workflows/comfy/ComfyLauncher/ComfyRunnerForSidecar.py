@@ -5,7 +5,7 @@ import json
 import time
 
 SERVER_IP = os.environ.get("SERVER_IP", "127.0.0.1:8188")
-TIMEOUT_SECONDS = os.environ.get("TIMEOUT_SECONDS", 1000)
+TIMEOUT_SECONDS = int(os.environ.get("TIMEOUT_SECONDS", 1000))
 PROMPT_ENDPOINT = f"http://{SERVER_IP}/prompt"
 
 def parse_args():
