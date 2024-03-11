@@ -3,8 +3,8 @@ save_freq: 5
 log_interval: 10
 device: "cuda"
 epochs: 50 # number of finetuning epoch (1 hour of data)
-batch_size: 8
-max_len: 400 # maximum number of frames
+batch_size: 2
+max_len: 1000 # maximum number of frames
 pretrained_model: "Models/LibriTTS/epochs_2nd_00020.pth"
 second_stage_load_pretrained: true # set to true if the pre-trained model is for 2nd stage
 load_only_params: true # set to true if do not want to load epoch numbers and optimizer parameters
@@ -15,10 +15,10 @@ ASR_path: "Utils/ASR/epoch_00080.pth"
 PLBERT_dir: 'Utils/PLBERT/'
 
 data_params:
-  train_data: "Data/train_harness.txt"
-  val_data: "Data/val_harness.txt"
+  train_data: "Data/phonemized_train_harness.txt"
+  val_data: "Data/phonemized_val_harness.txt"
   root_path: ""
-  OOD_data: "Data/OOD_harness.txt"
+  OOD_data: "Data/phonemized_OOD_harness.txt"
   min_length: 50 # sample until texts with this size are obtained for OOD texts
 
 preprocess_params:

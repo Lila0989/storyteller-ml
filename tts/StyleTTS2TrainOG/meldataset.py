@@ -41,7 +41,7 @@ class TextCleaner:
             try:
                 indexes.append(self.word_index_dictionary[char])
             except KeyError:
-                print(text)
+                print(f"Key Error: {text}")
         return indexes
 
 np.random.seed(1)
@@ -139,6 +139,8 @@ class FilePathDataset(torch.utils.data.Dataset):
         wave_path, text, speaker_id = data
         speaker_id = int(speaker_id)
         wave, sr = sf.read(osp.join(self.root_path, wave_path))
+        
+        
         if wave.shape[-1] == 2:
             wave = wave[:, 0].squeeze()
         if sr != 24000:
@@ -153,7 +155,7 @@ class FilePathDataset(torch.utils.data.Dataset):
         text.append(0)
         
         text = torch.LongTensor(text)
-
+        
         return wave, text, speaker_id
 
     def _load_data(self, data):

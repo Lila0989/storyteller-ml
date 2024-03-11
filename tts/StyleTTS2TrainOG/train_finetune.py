@@ -110,6 +110,7 @@ def main(config_path):
                                       num_workers=0,
                                       device=device,
                                       dataset_config={})
+
     
     # load pretrained ASR model
     ASR_config = config.get('ASR_config', False)
@@ -259,6 +260,7 @@ def main(config_path):
 
         for i, batch in enumerate(train_dataloader):
             waves = batch[0]
+            
             batch = [b.to(device) for b in batch[1:]]
             texts, input_lengths, ref_texts, ref_lengths, mels, mel_input_length, ref_mels = batch
             with torch.no_grad():
