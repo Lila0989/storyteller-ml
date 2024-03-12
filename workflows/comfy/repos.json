@@ -30,11 +30,6 @@
         "folder": "ComfyUI/custom_nodes/efficiency-nodes-comfyui"
     },
     {
-        "url": "https://github.com/Derfuu/Derfuu_ComfyUI_ModdedNodes.git",
-        "commit": "2ace4c463d5b2063de35e46ebb9bd3f10e2d34b4",
-        "folder": "ComfyUI/custom_nodes/Derfuu_ComfyUI_ModdedNodes"
-    },
-    {
         "url": "https://github.com/WASasquatch/was-node-suite-comfyui.git",
         "commit": "6c3fed70655b737dc9b59da1cadb3c373c08d8ed",
         "folder": "ComfyUI/custom_nodes/was-node-suite-comfyui"
