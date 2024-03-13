@@ -52,4 +52,3 @@
 /YamiYugi/20.wav|This has created an opening! In a duel, no one should ever hold back. I will not hold back! Here I go!
 /YamiYugi/216.wav|Is it a new monster? Of course, if I can't master every monster. You're not going to give it to me for free?
 /YamiYugi/252.wav|I activate, Magical Hats! I activate, Chain Destruction! Big mistake! I'm sending your attack right back at you!
-/dasmr/698.wav |Didn't really have a body... I just kind of melted into shadows and creeped around on floors and walls, but now... I have this new job, and I just had to proove my self by bringing back a mortal soul.

@@ -29,7 +29,7 @@ from Modules.slmadv import SLMAdversarialLoss
 from Modules.diffusion.sampler import DiffusionSampler, ADPM2Sampler, KarrasSchedule
 
 from optimizers import build_optimizer
-
+from test_harness import TestHarness     
 # simple fix for dataparallel that allows access to class attributes
 class MyDataParallel(torch.nn.DataParallel):
     def __getattr__(self, name):
@@ -706,7 +706,7 @@ def main(config_path):
             }
             save_path = osp.join(log_dir, 'epoch_2nd_%05d.pth' % epoch)
             torch.save(state, save_path)
-            
+            print(f"Testing Now: {save_path}")
             harness.test(save_path)
             # if estimate sigma, save the estimated simga
             if model_params.diffusion.dist.estimate_sigma_data:
@@ -715,6 +715,11 @@ def main(config_path):
                 with open(osp.join(log_dir, osp.basename(config_path)), 'w') as outfile:
                     yaml.dump(config, outfile, default_flow_style=True)
 
-                            
+     #main()
+                          
 if __name__=="__main__":
-    main()
+    harness = TestHarness()
+    config = yaml.safe_load(open('Configs/config_harness.yml'))
+    log_dir = config['log_dir']
+    save_path = osp.join(log_dir, 'epochs_2nd_%05d.pth' % 20)
+    harness.test(save_path)

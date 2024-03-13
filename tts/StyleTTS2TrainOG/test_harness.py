@@ -58,15 +58,21 @@ class TestHarness:
         })
         
     def sample_ood_voice(self,file:str="testing.wav",sample_rate=24000,character:str="character_name",caption:str="What is supposed to be said"):
+        print(f"Uploading {file} {character} {caption}")
         wandb.log({character: wandb.Audio(file, sample_rate=sample_rate, caption=caption)})
+        
+    def sample_pathes(self,audio_files):
+        len(audio_files)
+        wandb.log({"audio_samples":audio_files})
 
     def _next_check_point_inference(self,file_input,text,checkpoint_name:str,callback):
         saved_path = callback(file_input,text,checkpoint_name)
         return saved_path
     
-    def test(self,check_point:Path,top=1):
+    def test(self,check_point:Path,top=20):
         model = StyleTTS2(check_point)
-
+        sample_rate = 24000
+        audio_objs = []
         char_name_ls = TestHarness.get_characters()
         count = 0
         for char_name in char_name_ls.keys():
@@ -81,12 +87,14 @@ class TestHarness:
                                         diffusion_steps=10,alpha=0.45, beta=0.6, embedding_scale=1.0)
                     stereo_wav = torch.tensor(mono_wav).repeat(2,1)
                     path = f"./test/{char_name}|{i}-text|{sample.file_name}"
-                    torchaudio.save(path,stereo_wav,sample_rate=24000)
-                    self.sample_ood_voice(file=path,sample_rate=24000,character=char_name,caption=f"Text: {text} | Reference Text:{sample.ref_text}")
-                    
+                    torchaudio.save(path,stereo_wav,sample_rate=sample_rate)
+                    audio_obj = wandb.Audio(path, sample_rate=sample_rate, caption=f"{char_name}|ref:{sample.ref_text}")
+                    audio_objs.append(audio_obj)
             count += 1
             if count == top:
                 break
+        self.sample_pathes(audio_objs)
+        #self.sample_ood_voice(file=path,sample_rate=24000,character=char_name,caption=f"Text: {text} | Reference Text:{sample.ref_text}",epoch=epoch)
     @staticmethod
     def get_lines_from_file(file_path):
         with open(file_path,'r') as f:
