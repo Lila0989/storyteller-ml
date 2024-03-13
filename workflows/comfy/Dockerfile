@@ -43,6 +43,7 @@ COPY --chown=appuser:appgroup repos.json /app/repos.json
 COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
 COPY --chown=appuser:appgroup format_video.py /app/format_video.py
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
+COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
 
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel requests argparse
 
