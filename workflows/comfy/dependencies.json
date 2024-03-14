@@ -10,6 +10,7 @@
   {
     "location": "ComfyUI/models/checkpoints/Duskfall_InkPunk-v208.safetensors",
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/Duskfall_InkPunk-v208.safetensors"
+  },
   {
     "location": "ComfyUI/models/embeddings/easynegative.safetensors",
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/easynegative.safetensors"
