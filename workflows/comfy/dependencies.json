@@ -8,8 +8,8 @@
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/badhandv4.pt"
   },
   {
-    "location": "ComfyUI/models/checkpoints/Duskfall_InkPunk-v208.safetensors",
-    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/Duskfall_InkPunk-v208.safetensors"
+    "location": "ComfyUI/models/checkpoints/animemix_v10.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/animemix_v10.safetensors"
   },
   {
     "location": "ComfyUI/models/embeddings/easynegative.safetensors",
