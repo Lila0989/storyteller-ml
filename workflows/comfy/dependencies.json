@@ -28,6 +28,10 @@
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/AnimeSoft_v30RetroStyle.safetensors"
   },
   {
+    "location": "ComfyUI/models/checkpoints/flat2DAnimerge_v30.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/flat2DAnimerge_v30.safetensors"
+  },
+  {
     "location": "ComfyUI/models/checkpoints/animemix_v10.safetensors",
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/animemix_v10.safetensors"
   },
