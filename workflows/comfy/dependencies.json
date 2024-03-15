@@ -96,7 +96,7 @@
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/osenayanMix_v45.safetensors"
   },
   {
-    "location": "ComfyUI/models/checkpoints/animemix_v3_offset.safetensors",
+    "location": "ComfyUI/models/loras/animemix_v3_offset.safetensors",
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/animemix_v3_offset.safetensors"
   },
   {
