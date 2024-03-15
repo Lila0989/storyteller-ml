@@ -65,7 +65,7 @@
   },
   {
     "location": "ComfyUI/models/checkpoints/jojoDiffusion_test.ckpt",
-    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/jojoDiffusion_test.ckpts"
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/jojoDiffusion_test.ckpt"
   },
   {
     "location": "ComfyUI/models/checkpoints/majicmixFantasy_v30.safetensors",
