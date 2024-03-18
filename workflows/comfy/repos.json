@@ -1,10 +1,5 @@
 [
     {
-        "url": "https://github.com/comfyanonymous/ComfyUI.git",
-        "commit": "eda87043862f743b0a0467735f8531f7c4709b3a",
-        "folder": "ComfyUI"
-    },
-    {
         "url": "https://github.com/ltdrdata/ComfyUI-Manager.git",
         "commit": "6c553d1228978352767f4914c4dd7787b00f6769",
         "folder": "ComfyUI/custom_nodes/ComfyUI-Manager"
