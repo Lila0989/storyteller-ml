@@ -1,0 +1,126 @@
+[
+  {
+    "location": "ComfyUI/models/loras/v3_sd15_adapter.ckpt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/v3_sd15_adapter.ckpt"
+  },
+  {
+    "location": "ComfyUI/models/embeddings/badhandv4.pt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/badhandv4.pt"
+  },
+  {
+    "location": "ComfyUI/models/embeddings/easynegative.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/easynegative.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/v3_sd15_sparsectrl_scribble.ckpt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/v3_sd15_sparsectrl_scribble.ckpt"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v11f1e_sd15_tile.bin",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v11f1e_sd15_tile.bin"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v11p_sd15_softedge.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v11p_sd15_softedge.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v11p_sd15s2_lineart_anime.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v11p_sd15s2_lineart_anime.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v11p_sd15_lineart.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v11p_sd15_lineart.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v11f1p_sd15_depth.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v11f1p_sd15_depth.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v11p_sd15_openpose.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v11p_sd15_openpose.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/animatediff_controlnet.ckpt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/animatediff_controlnet.ckpt"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v2p_sd15_mediapipe_face.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v2p_sd15_mediapipe_face.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/ControlNetHED.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/ControlNetHED.pth"
+  },
+  {
+    "location": "ComfyUI/models/ipadapter/ip-adapter_sd15_light.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/ip-adapter_sd15_light.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/model.safetensors"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved/models/v3_sd15_mm.ckpt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/v3_sd15_mm.ckpt"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/hr16/DWPose-TorchScript-BatchSize5/dw-ll_ucoco_384_bs5.torchscript.pt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/dw-ll_ucoco_384_bs5.torchscript.pt"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/yzd-v/DWPose/yolox_l.onnx",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/yolox_l.onnx"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/LiheYoung/Depth-Anything/checkpoints/depth_anything_vitl14.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/depth_anything_vitl14.pth"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/lllyasviel/Annotators/sk_model2.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/sk_model2.pth"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/lllyasviel/Annotators/sk_model.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/sk_model.pth"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/lllyasviel/Annotators/netG.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/netG.pth"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/lllyasviel/Annotators/ControlNetHED.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/ControlNetHED.pth"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/ckpts/rife/rife47.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/rife47.pth"
+  },
+  {
+    "location": "ComfyUI/input/example.png",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/example.png"
+  },
+  {
+    "location": "ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved/models/sd15_t2v_beta_motion.ckpt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/sd15_t2v_beta_motion.ckpt"
+  },
+  {
+    "location": "ComfyUI/models/loras/LCM_LoRA_Weights_SD15.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/LCM_LoRA_Weights_SD15.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/controlnet/control_v11p_sd15_canny.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/control_v11p_sd15_canny.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/grounding-dino/GroundingDINO_SwinT_OGC.cfg.py",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/GroundingDINO_SwinT_OGC.py"
+  },
+  {
+    "location": "ComfyUI/models/grounding-dino/groundingdino_swint_ogc.pth",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/groundingdino_swint_ogc.pth"
+  },
+  {
+    "location": "ComfyUI/models/vae/vae-ft-mse-840000-ema-pruned.ckpt",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/vae-ft-mse-840000-ema-pruned.ckpt"
+  }
+]
