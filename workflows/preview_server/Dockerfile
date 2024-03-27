@@ -40,6 +40,7 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
 COPY --chown=appuser:appgroup install.py /app/install.py
 COPY --chown=appuser:appgroup repos.json /app/repos.json
+COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
 COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.txt
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
 COPY --chown=appuser:appgroup preview_server.py /app/preview_server.py
