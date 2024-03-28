@@ -28,6 +28,7 @@ COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/home/salt/clone/storyteller/storyteller-ml/workflows/comfy/ComfyUI")
 SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 60))
 STYLE_LOCK = os.environ.get("STYLE_LOCK", None)
+PREVIEW_WORKFLOW_NAME = os.environ.get("PREVIEW_WORKFLOW_NAME", None)
 
 style_to_filename = {
     "anime_2_5d": "1_2.5d_anime_model.json",
@@ -117,7 +118,7 @@ async def process_video(video_path: str, style_filename, positive_prompt=None, n
     mappings_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "mappings"
 
     style_json = json.load(open(styles_directory / style_filename))
-    workflow_json = json.load(open(workflow_directory / style_json["workflow_api_name"]))
+    workflow_json = json.load(open(workflow_directory / PREVIEW_WORKFLOW_NAME))
     mapping_json = json.load(open(mappings_directory / style_json["mapping_name"]))
 
     json_mods = style_json["modifications"]
