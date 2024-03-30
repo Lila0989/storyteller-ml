@@ -51,6 +51,28 @@ style_to_filename = {
 
 allowed_keys = ["style", "positive_prompt", "negative_prompt"]
 
+# CORS header for which websites can import this content in a frame.
+# This *technically* shouldn't be required, but the XHR requests are 
+# being made from a controlled frame.
+#
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors
+#
+# NB(bt,2024-03-30): The *.netlify.app is dangerous.
+CORS_FRAME_ANCESTORS = [
+    "frame-ancestors 'self'",
+    "https://fakeyou.com",
+    "https://*.fakeyou.com",
+    "https://storyteller.ai",
+    "https://*.storyteller.ai",
+    "https://*.netlify.app",
+    "http://*.fakeyou.com:7000",
+    "http://*.fakeyou.com:7001",
+    "http://*.fakeyou.com:7002",
+    "http://*.storyteller.ai:7000",
+    "http://*.storyteller.ai:7001",
+    "http://*.storyteller.ai:7002",
+    ";",
+]
 
 def validate_request(request):
     try:
@@ -108,7 +130,15 @@ async def preview_request(request: str = Form(...), video: UploadFile = File(...
         # Process video and generate preview
         preview_image_path = await process_video(video_filename, style_filename, positive_prompt, negative_prompt)
 
-    return FileResponse(preview_image_path, media_type='image/jpeg')
+    headers = {
+        # NB(bt,2024-03-30): This is potentially dangerous
+        # A better approach would be to check the request host against a filter and only 
+        # permit our own domains, localhost, and netlify preview deploy URLs.
+        "Access-Control-Allow-Origin": "*",
+        "Content-Security-Policy": CORS_FRAME_ANCESTORS,
+    }
+
+    return FileResponse(preview_image_path, media_type='image/jpeg', headers=headers)
 
 
 async def process_video(video_path: str, style_filename, positive_prompt=None, negative_prompt=None) -> Path:
