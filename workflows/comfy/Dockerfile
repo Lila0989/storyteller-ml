@@ -44,6 +44,8 @@ COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
 COPY --chown=appuser:appgroup format_video.py /app/format_video.py
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
 COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
+COPY --chown=appuser:appgroup storyteller_watermark.png /app/storyteller_watermark.png
+COPY --chown=appuser:appgroup fakeyou_watermark.png /app/fakeyou_watermark.png
 
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel requests argparse
 
