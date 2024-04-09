@@ -15,6 +15,8 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import FileResponse
 import requests
 from jsonpath_ng import jsonpath, parse
+from moviepy.editor import ImageClip
+import magic
 
 app = FastAPI()
 lock = asyncio.Lock()  # Create an asyncio lock
@@ -25,10 +27,11 @@ PROMPT_ENDPOINT = f"http://{SERVER_IP}/prompt"
 V2V_WORKFLOWS_DIRECTORY = os.environ.get("V2V_WORKFLOWS_DIRECTORY",
                                          "/home/salt/clone/storyteller/V2V-StylesList/V2VWorkflows/")
 COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
-                                      "/home/salt/clone/storyteller/storyteller-ml/workflows/comfy/ComfyUI")
+                                      "/home/salt/clone/storyteller/storyteller-ml/workflows/preview_server/ComfyUI")
 SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 60))
 STYLE_LOCK = os.environ.get("STYLE_LOCK", None)
 PREVIEW_WORKFLOW_NAME = os.environ.get("PREVIEW_WORKFLOW_NAME", None)
+MAPPING_NAME = os.environ.get("MAPPING_NAME", "mapping_two.json")
 
 style_to_filename = {
     "anime_2_5d": "1_2.5d_anime_model.json",
@@ -109,33 +112,52 @@ def signal_handler(signum, frame):
 
 
 @app.post("/preview/")
-async def preview_request(request: str = Form(...), video: UploadFile = File(...)):
+async def preview_request(request: str = Form(...), input_file: UploadFile = File(...)):
     request = validate_request(request)
     if STYLE_LOCK:
         if request["style"] != STYLE_LOCK:
             raise HTTPException(status_code=400, detail=f"This endpoint is for '{STYLE_LOCK}' style only")
-    async with lock:  # Acquire the lock
+
+    async with lock:
         try:
             style_filename = style_to_filename[request["style"]]
             positive_prompt = request.get("positive_prompt", None)
             negative_prompt = request.get("negative_prompt", None)
-            # Save uploaded video to a temporary directory
-            video_filename = f"temp_videos/{uuid.uuid4()}.mp4"  # Use a unique filename
-            Path("temp_videos").mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
-            with open(video_filename, "wb") as buffer:
-                shutil.copyfileobj(video.file, buffer)
+
+            temp_filename = f"temp_files/{uuid.uuid4()}"
+            Path(temp_filename).parent.mkdir(parents=True, exist_ok=True)
+            with open(temp_filename, "wb") as buffer:
+                shutil.copyfileobj(input_file.file, buffer)
+
+            mime_type = magic.from_file(temp_filename, mime=True)
+
+            if 'video' in mime_type:
+                input_filename = f"{temp_filename}.mp4"
+            elif 'image' in mime_type:
+                input_filename = f"{temp_filename}.{mime_type.split('/')[-1]}"
+            else:
+                raise HTTPException(status_code=400, detail="Unsupported file type")
+
+            Path(temp_filename).rename(input_filename)
+
+            if 'image' in mime_type:
+                clip = ImageClip(input_filename)
+                fps = 24
+                clip_duration = 1 / fps
+                clip = clip.set_duration(clip_duration)
+                input_filename = f"temp_videos/{uuid.uuid4()}.mp4"
+                clip.write_videofile(input_filename, fps=fps)
+
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to save video: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
-        # Process video and generate preview
-        preview_image_path = await process_video(video_filename, style_filename, positive_prompt, negative_prompt)
+        # Process video (or image converted to video) and generate preview
+        preview_image_path = await process_video(input_filename, style_filename, positive_prompt, negative_prompt)
 
+    csp_frame_ancestors_value = ' '.join(CORS_FRAME_ANCESTORS[:-1])
     headers = {
-        # NB(bt,2024-03-30): This is potentially dangerous
-        # A better approach would be to check the request host against a filter and only 
-        # permit our own domains, localhost, and netlify preview deploy URLs.
-        "Access-Control-Allow-Origin": "*",
-        "Content-Security-Policy": CORS_FRAME_ANCESTORS,
+        "Access-Control-Allow-Origin": "*",  # Be cautious with this setting in production environments.
+        "Content-Security-Policy": f"frame-ancestors {csp_frame_ancestors_value}",
     }
 
     return FileResponse(preview_image_path, media_type='image/jpeg', headers=headers)
@@ -149,7 +171,8 @@ async def process_video(video_path: str, style_filename, positive_prompt=None, n
 
     style_json = json.load(open(styles_directory / style_filename))
     workflow_json = json.load(open(workflow_directory / PREVIEW_WORKFLOW_NAME))
-    mapping_json = json.load(open(mappings_directory / style_json["mapping_name"]))
+    # mapping_json = json.load(open(mappings_directory / style_json["mapping_name"]))
+    mapping_json = json.load(open(mappings_directory / MAPPING_NAME))
 
     json_mods = style_json["modifications"]
     jsonpath_mods = get_jsonpath_mods(json_mods, mapping_json, pos_in=positive_prompt, neg_in=negative_prompt)
