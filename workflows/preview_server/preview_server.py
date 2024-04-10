@@ -333,6 +333,6 @@ if __name__ == "__main__":
         print(f"Server failed to start in {SERVER_START_TIMEOUT} seconds")
         exit(1)
     print("ComfyUI server running, starting FastAPI server")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
     # cleanup
     terminate_process(comfyui_process)
