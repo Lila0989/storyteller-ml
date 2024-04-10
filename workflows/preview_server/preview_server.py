@@ -145,7 +145,7 @@ async def preview_request(request: str = Form(...), input_file: UploadFile = Fil
                 fps = 24
                 clip_duration = 1 / fps
                 clip = clip.set_duration(clip_duration)
-                input_filename = f"temp_videos/{uuid.uuid4()}.mp4"
+                input_filename = f"temp_files/{uuid.uuid4()}.mp4"
                 clip.write_videofile(input_filename, fps=fps)
 
         except Exception as e:
