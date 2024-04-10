@@ -10,13 +10,13 @@ import os
 import json
 import random
 from typing import Dict, Any, Optional
+import mimetypes
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import FileResponse
 import requests
 from jsonpath_ng import jsonpath, parse
 from moviepy.editor import ImageClip
-import magic
 
 app = FastAPI()
 lock = asyncio.Lock()  # Create an asyncio lock
@@ -129,7 +129,7 @@ async def preview_request(request: str = Form(...), input_file: UploadFile = Fil
             with open(temp_filename, "wb") as buffer:
                 shutil.copyfileobj(input_file.file, buffer)
 
-            mime_type = magic.from_file(temp_filename, mime=True)
+            mime_type, _ = mimetypes.guess_type(temp_filename)
 
             if 'video' in mime_type:
                 input_filename = f"{temp_filename}.mp4"
