@@ -129,7 +129,7 @@ async def preview_request(request: str = Form(...), input_file: UploadFile = Fil
             with open(temp_filename, "wb") as buffer:
                 shutil.copyfileobj(input_file.file, buffer)
 
-            mime_type, _ = mimetypes.guess_type(temp_filename)
+            mime_type, _ = mimetypes.guess_type(input_file.filename)
 
             if 'video' in mime_type:
                 input_filename = f"{temp_filename}.mp4"
