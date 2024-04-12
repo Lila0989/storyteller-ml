@@ -115,7 +115,7 @@ def main():
         print("Skipping repository setup as repos json is not provided")
 
 
-    initialize_comfyui()
+    #initialize_comfyui()
     if args.source and args.dependencies_json:
         install_dependencies(args.dependencies_json, args.source, args.concurrency)
     else:
