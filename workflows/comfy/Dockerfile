@@ -39,7 +39,6 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel requests argparse
 
-RUN chmod -R 777 /app
 WORKDIR /app
 
 # Copy files to container
@@ -47,6 +46,7 @@ COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_com
 COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
 COPY --chown=appuser:appgroup format_video.py /app/format_video.py
 COPY --chown=appuser:appgroup install.py /app/install.py
+RUN chmod -R 777 /app
 
 # download & install comfy ui and its dependencies
 RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit eda87043862f743b0a0467735f8531f7c4709b3a
