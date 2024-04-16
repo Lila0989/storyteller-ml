@@ -100,7 +100,7 @@
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/animemix_v3_offset.safetensors"
   },
   {
-    "location": "ComfyUI/models/checkpoints/pixel_f2.safetensors",
+    "location": "ComfyUI/models/loras/pixel_f2.safetensors",
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/pixel_f2.safetensors"
   },
   {
