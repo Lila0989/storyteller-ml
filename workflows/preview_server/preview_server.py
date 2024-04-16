@@ -64,6 +64,8 @@ allowed_keys = ["style", "positive_prompt", "negative_prompt"]
 # NB(bt,2024-03-30): The *.netlify.app is dangerous.
 CORS_FRAME_ANCESTORS = [
     "frame-ancestors 'self'",
+    "https://studio.storyteller.ai",
+    "https://storytellerstudio.netlify.app",
     "https://fakeyou.com",
     "https://*.fakeyou.com",
     "https://storyteller.ai",
