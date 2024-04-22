@@ -12,27 +12,68 @@ import random
 from typing import Dict, Any, Optional
 import mimetypes
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Request
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Request, Response
 import requests
 from jsonpath_ng import jsonpath, parse
 from moviepy.editor import ImageClip
+from fastapi.middleware.cors import CORSMiddleware
+import urllib
+import websockets
 
+# CORS header for which websites can import this content in a frame.
+# This *technically* shouldn't be required, but the XHR requests are 
+# being made from a controlled frame.
+#
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors
+#
+# NB(bt,2024-03-30): The *.netlify.app is dangerous.
+CORS_WHITELIST_ORIGINS = [
+    "https://studio.storyteller.ai",
+    "https://storytellerstudio.netlify.app",
+    "https://branch-name--storytellerstudio.netlify.app",
+    "https://deploy-preview-123--storytellerstudio.netlify.app",
+    "https://pipeline-gottagofast.netlify.app",
+    "https://branch-whatever--pipeline-gottagofast.netlify.app",
+    "https://fakeyou.com",
+    "https://*.fakeyou.com",
+    "https://storyteller.ai",
+    "https://*.storyteller.ai",
+    "https://*.netlify.app",
+    "http://*.fakeyou.com:7000",
+    "http://*.fakeyou.com:7001",
+    "http://*.fakeyou.com:7002",
+    "http://*.storyteller.ai:7000",
+    "http://*.storyteller.ai:7001",
+    "http://*.storyteller.ai:7002",
+]
+
+
+# TODO(kasisnu): Remove ugly globals
 app = FastAPI()
-lock = asyncio.Lock()  # Create an asyncio lock
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_WHITELIST_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 SERVER_IP = os.environ.get("SERVER_IP", "127.0.0.1:8188")
 TIMEOUT_SECONDS = os.environ.get("TIMEOUT_SECONDS", 1000)
 PROMPT_ENDPOINT = f"http://{SERVER_IP}/prompt"
 V2V_WORKFLOWS_DIRECTORY = os.environ.get("V2V_WORKFLOWS_DIRECTORY",
-                                         "/home/salt/clone/storyteller/V2V-StylesList/V2VWorkflows/")
+                                         "/home/kasisnu/go/src/github.com/storytold/V2V-StylesList/V2VWorkflows/")
 COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
-                                      "/home/salt/clone/storyteller/storyteller-ml/workflows/preview_server/ComfyUI")
+                                      "/home/kasisnu/go/src/github.com/comfyanonymous/ComfyUI")
 SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 60))
 STYLE_LOCK = os.environ.get("STYLE_LOCK", None)
-PREVIEW_WORKFLOW_NAME = os.environ.get("PREVIEW_WORKFLOW_NAME", None)
+PREVIEW_WORKFLOW_NAME = os.environ.get("PREVIEW_WORKFLOW_NAME", 'workflow_api_instantpreview.json')
 MAPPING_NAME = os.environ.get("MAPPING_NAME", "mapping_two.json")
 AUTH_URL = os.environ.get("AUTH_URL", "https://api.fakeyou.com/v1/session")
+
+# websocket.enableTrace(True)
+client_id = str(uuid.uuid4())
+
 
 style_to_filename = {
     "anime_2_5d": "1_2.5d_anime_model.json",
@@ -55,30 +96,6 @@ style_to_filename = {
 
 allowed_keys = ["style", "positive_prompt", "negative_prompt"]
 
-# CORS header for which websites can import this content in a frame.
-# This *technically* shouldn't be required, but the XHR requests are 
-# being made from a controlled frame.
-#
-# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors
-#
-# NB(bt,2024-03-30): The *.netlify.app is dangerous.
-CORS_FRAME_ANCESTORS = [
-    "frame-ancestors 'self'",
-    "https://studio.storyteller.ai",
-    "https://storytellerstudio.netlify.app",
-    "https://fakeyou.com",
-    "https://*.fakeyou.com",
-    "https://storyteller.ai",
-    "https://*.storyteller.ai",
-    "https://*.netlify.app",
-    "http://*.fakeyou.com:7000",
-    "http://*.fakeyou.com:7001",
-    "http://*.fakeyou.com:7002",
-    "http://*.storyteller.ai:7000",
-    "http://*.storyteller.ai:7001",
-    "http://*.storyteller.ai:7002",
-    ";",
-]
 
 
 def can_use_vst(cookies):
@@ -148,6 +165,7 @@ def signal_handler(signum, frame):
     exit(0)
 
 
+
 @app.post("/preview/")
 async def preview_request(request_obj: Request, request: str = Form(...), input_file: UploadFile = File(...)):
     cookies = request_obj.cookies
@@ -159,53 +177,42 @@ async def preview_request(request_obj: Request, request: str = Form(...), input_
     if STYLE_LOCK:
         if request["style"] != STYLE_LOCK:
             raise HTTPException(status_code=400, detail=f"This endpoint is for '{STYLE_LOCK}' style only")
+    try:
+        request_style = request["style"]
+        style_filename = style_to_filename[request["style"]]
+        positive_prompt = request.get("positive_prompt", None)
+        negative_prompt = request.get("negative_prompt", None)
+        mime_type = input_file.content_type
+        input_filename_ext = ''
+        if 'video' in mime_type:
+            input_filename_ext = ".mp4"
+        elif 'image' in mime_type:
+            input_filename_ext = ".jpeg"
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file type")
 
-    async with lock:
-        try:
-            style_filename = style_to_filename[request["style"]]
-            positive_prompt = request.get("positive_prompt", None)
-            negative_prompt = request.get("negative_prompt", None)
+        temp_filename = f"temp_files/{uuid.uuid4()}{input_filename_ext}"
+        Path(temp_filename).parent.mkdir(parents=True, exist_ok=True)
+        with open(temp_filename, "wb") as buffer:
+            shutil.copyfileobj(input_file.file, buffer)
+        if 'image' in mime_type:
+            clip = ImageClip(temp_filename)
+            fps = 24
+            clip_duration = 1 / fps
+            clip = clip.set_duration(clip_duration)
+            input_filename = f"temp_files/{uuid.uuid4()}.mp4"
+            clip.write_videofile(input_filename, fps=fps)
 
-            temp_filename = f"temp_files/{uuid.uuid4()}"
-            Path(temp_filename).parent.mkdir(parents=True, exist_ok=True)
-            with open(temp_filename, "wb") as buffer:
-                shutil.copyfileobj(input_file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
-            mime_type, _ = mimetypes.guess_type(input_file.filename)
+    # Process video (or image converted to video) and generate preview
+    preview_image_path = await process_video(request_style, input_filename, style_filename, positive_prompt, negative_prompt)
 
-            if 'video' in mime_type:
-                input_filename = f"{temp_filename}.mp4"
-            elif 'image' in mime_type:
-                input_filename = f"{temp_filename}.{mime_type.split('/')[-1]}"
-            else:
-                raise HTTPException(status_code=400, detail="Unsupported file type")
-
-            Path(temp_filename).rename(input_filename)
-
-            if 'image' in mime_type:
-                clip = ImageClip(input_filename)
-                fps = 24
-                clip_duration = 1 / fps
-                clip = clip.set_duration(clip_duration)
-                input_filename = f"temp_files/{uuid.uuid4()}.mp4"
-                clip.write_videofile(input_filename, fps=fps)
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
-
-        # Process video (or image converted to video) and generate preview
-        preview_image_path = await process_video(input_filename, style_filename, positive_prompt, negative_prompt)
-
-    csp_frame_ancestors_value = ' '.join(CORS_FRAME_ANCESTORS[:-1])
-    headers = {
-        "Access-Control-Allow-Origin": "*",  # Be cautious with this setting in production environments.
-        "Content-Security-Policy": f"frame-ancestors {csp_frame_ancestors_value}",
-    }
-
-    return FileResponse(preview_image_path, media_type='image/jpeg', headers=headers)
+    return Response(preview_image_path, media_type='image/jpeg')
 
 
-async def process_video(video_path: str, style_filename, positive_prompt=None, negative_prompt=None) -> Path:
+async def process_video(request_style: str, video_path: str, style_filename, positive_prompt=None, negative_prompt=None) -> Path:
     # generate random seed (otherwise video will cache completely and not generate a new output)
     styles_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "styles"
     workflow_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "workflows"
@@ -213,7 +220,6 @@ async def process_video(video_path: str, style_filename, positive_prompt=None, n
 
     style_json = json.load(open(styles_directory / style_filename))
     workflow_json = json.load(open(workflow_directory / PREVIEW_WORKFLOW_NAME))
-    # mapping_json = json.load(open(mappings_directory / style_json["mapping_name"]))
     mapping_json = json.load(open(mappings_directory / MAPPING_NAME))
 
     json_mods = style_json["modifications"]
@@ -229,54 +235,23 @@ async def process_video(video_path: str, style_filename, positive_prompt=None, n
         pass
 
     input_video_path = Path(COMFY_ROOT_DIRECTORY) / "input/input.mp4"
-    preview_image_path = Path(COMFY_ROOT_DIRECTORY) / "output/vid2vid/SparseImagePreview_00001_.png"
     shutil.move(video_path, input_video_path)
-    if os.path.exists(preview_image_path):
-        os.remove(preview_image_path)
-
-    response = requests.get(PROMPT_ENDPOINT, timeout=5)
-    if response.status_code == 200:
-        print("Server is healthy")
-    else:
-        print("Server is unhealthy")
-        print(f"Status code: {response.status_code}")
-        print(f"Response: {response.text}")
-        raise HTTPException(status_code=500, detail="Server is unhealthy")
-
-    # make sure there are no jobs already
-    queue_json = response.json()
-    if queue_json["exec_info"]["queue_remaining"]:
-        print("There are jobs in the queue already. Exiting...")
-        raise HTTPException(status_code=500, detail="There are jobs in the queue already (this shouldn't happen)")
-    else:
-        print("Queue is empty")
-
-    p = {"prompt": json_prompt}
+    p = {"prompt": json_prompt, "client_id": client_id, "extra_data": {"style": request_style}}
     data = json.dumps(p).encode('utf-8')
+    execution_start_time = time.perf_counter()
     response = requests.post(PROMPT_ENDPOINT, data=data)
     if response.status_code == 200:
         print("Job enqueued successfully")
     else:
-        print("Job failed to queue")
-        print(f"Status code: {response.status_code}")
-        print(f"Response: {response.text}")
         raise HTTPException(status_code=500, detail=f"Failed to queue job")
+    prompt_id = response.json()["prompt_id"]
+    async with websockets.connect("ws://{}/ws?clientId={}".format(SERVER_IP, client_id)) as ws:
+        images = await get_images(ws, prompt_id, '1517')
+        current_time = time.perf_counter()
+        execution_time = current_time - execution_start_time
+        print('request executed in {:.2f} seconds'.format(execution_time))
+        return images['1517'][0]
 
-    start_time = time.time()
-    while True:
-        response = requests.get(PROMPT_ENDPOINT, timeout=5)
-        queue_json = response.json()
-        if queue_json["exec_info"]["queue_remaining"]:
-            pass
-        else:
-            print("Job is done")
-            break
-        if time.time() - start_time > TIMEOUT_SECONDS:
-            print("Timeout reached and job didn't finish!")
-            raise HTTPException(status_code=500, detail="Timeout reached and job didn't finish!")
-        time.sleep(1)
-
-    return preview_image_path
 
 
 def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], pos_in: Optional[str] = None,
@@ -346,17 +321,57 @@ def apply_jsonpath_mods(jsonpath_mods: Dict[str, Any], workflow_json: Dict[str, 
     return workflow_json
 
 
+def get_image(filename, subfolder, folder_type):
+    data = {"filename": filename, "subfolder": subfolder, "type": folder_type}
+    url_values = urllib.parse.urlencode(data)
+    with urllib.request.urlopen("http://{}/view?{}".format(SERVER_IP, url_values)) as response:
+        return response.read()
+
+
+
+def get_history(prompt_id):
+    with urllib.request.urlopen("http://{}/history/{}".format(SERVER_IP, prompt_id)) as response:
+        return json.loads(response.read())
+
+async def get_images(ws, prompt_id, filter_node_id=None):
+    output_images = {}
+    while True:
+        out = await ws.recv()
+        if isinstance(out, str):
+            message = json.loads(out)
+            if message['type'] == 'executing':
+                data = message['data']
+                if data['node'] is None and data['prompt_id'] == prompt_id:
+                    break #Execution is done
+        else:
+            continue #previews are binary data
+
+    history = get_history(prompt_id)[prompt_id]
+    for o in history['outputs']:
+        for node_id in history['outputs']:
+            if filter_node_id is not None and node_id != filter_node_id:
+                continue
+            node_output = history['outputs'][node_id]
+            images_output = []
+            if 'images' in node_output:
+                for image in node_output['images']:
+                    image_data = get_image(image['filename'], image['subfolder'], image['type'])
+                    images_output.append(image_data)
+            output_images[node_id] = images_output
+
+    return output_images
+
+
+
 if __name__ == "__main__":
     import uvicorn
-    import asyncio
-
     # install ComfyUI
-    os.system("python3 install.py")
+    # os.system("python3 install.py")
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+    comfyui_process = subprocess.Popen(["venv/bin/python", "main.py", "--highvram"], cwd=COMFY_ROOT_DIRECTORY)
 
-    comfyui_process = subprocess.Popen(["venv/bin/python", "main.py"], cwd=COMFY_ROOT_DIRECTORY)
 
     # block until comfyUI server is up
     start_time = time.time()

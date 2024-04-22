@@ -106,7 +106,7 @@ WORKDIR models/tts
 # NB: Setuptools fix: https://github.com/tensorflow/tensorflow/issues/34302#issuecomment-554450289
 RUN python3.6 -m pip install --upgrade pip setuptools \
   && python3.6 -m pip install -r requirements-tacotron-python36.txt \
-  && python3.6 -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113 
+  && python3.6 -m pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113 && python3.6 -m pip cache purge
 
 # Final image
 #  FROM ubuntu:xenial
@@ -140,7 +140,7 @@ RUN apt-get install -y libespeak-ng1
 RUN python3 --version
 
 # TODO: Use venv to do this instead.
-RUN pip3 install gdown
+RUN pip3 install gdown && pip3 cache purge
 
 # NB(echelon,2022-07-14): Run a newer version of pytorch which will support RTX3090.
 #  Fixes bug, "NVIDIA GeForce RTX 3080 with CUDA capability sm_86 is not compatible with the current PyTorch installation."
