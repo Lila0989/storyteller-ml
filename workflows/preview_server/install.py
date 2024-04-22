@@ -4,6 +4,10 @@ import json
 import os
 from pathlib import Path
 import requests
+from multiprocessing import Pool
+
+
+
 
 # set cwd to script location
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -54,33 +58,39 @@ def run_comfyui_setup():
     run_command(f"{venv_python} initialize_comfy_extensions.py")
 
 
+
+def install_dependency(dep):
+    location = dep['location']
+    url = dep['url']
+
+    # Convert the location to a Path object and create parent directories if they don't exist
+    path = Path(location)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    if path.is_file():
+        print(f"{path} is already installed")
+        return
+
+    # Download the file
+    response = requests.get(url)
+    if response.status_code == 200:
+        # Write the content to the file in the specified location
+        with open(path, 'wb') as file:
+            file.write(response.content)
+        print(f"Installed {path}")
+    else:
+        print(f"Failed to download {url}")
+
+
+
 def install_dependencies(json_file_path='dependencies.json'):
     # Load the dependency JSON
     with open(json_file_path, 'r') as file:
         dependencies = json.load(file)
 
-    for dep in dependencies:
-        # Extract location and URL
-        location = dep['location']
-        url = dep['url']
 
-        # Convert the location to a Path object and create parent directories if they don't exist
-        path = Path(location)
-        path.parent.mkdir(parents=True, exist_ok=True)
-
-        if path.is_file():
-            print(f"{path} is already installed")
-            continue
-
-        # Download the file
-        response = requests.get(url)
-        if response.status_code == 200:
-            # Write the content to the file in the specified location
-            with open(path, 'wb') as file:
-                file.write(response.content)
-            print(f"Installed {path}")
-        else:
-            print(f"Failed to download {url}")
+    with Pool(5) as pool:
+        pool.starmap(install_dependency, [(dep,) for dep in dependencies])
 
 
 def main():
