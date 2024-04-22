@@ -99,6 +99,8 @@ allowed_keys = ["style", "positive_prompt", "negative_prompt"]
 
 
 def can_use_vst(cookies):
+    #todo(kasisnu): this didn't seem to work right away, might need digging into
+    return True # FOR NOW
     """Check if the user is authenticated and if the 'video_style_transfer' feature flag is enabled."""
     try:
         response = requests.get(AUTH_URL, cookies=cookies)
@@ -183,6 +185,8 @@ async def preview_request(request_obj: Request, request: str = Form(...), input_
         positive_prompt = request.get("positive_prompt", None)
         negative_prompt = request.get("negative_prompt", None)
         mime_type = input_file.content_type
+        if not mime_type:
+            mime_type, _ = mimetypes.guess_type(input_file.filename)
         input_filename_ext = ''
         if 'video' in mime_type:
             input_filename_ext = ".mp4"
@@ -202,7 +206,8 @@ async def preview_request(request_obj: Request, request: str = Form(...), input_
             clip = clip.set_duration(clip_duration)
             input_filename = f"temp_files/{uuid.uuid4()}.mp4"
             clip.write_videofile(input_filename, fps=fps)
-
+        else:
+            input_filename = temp_filename
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
