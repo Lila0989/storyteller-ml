@@ -31,6 +31,10 @@ RUN apt-get update \
         python3.10 \
         python3.10-venv \
         unzip \
+        htop \
+        vim \
+        tmux \
+        rsync \
         wget \
         git \
         --no-install-recommends
@@ -38,6 +42,18 @@ RUN apt-get update \
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel requests argparse
+
+RUN cd /tmp && \
+    curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip && \
+        unzip rclone-current-linux-amd64.zip && \
+        cd rclone-*-linux-amd64 && \
+        cp rclone /usr/bin/ && \
+        chmod 755 /usr/bin/rclone && \
+        rm -rf /tmp/rclone*
+
+RUN mkdir -p /root/.config/pip
+
+COPY ./pip.conf /root/.config/pip/pip.conf
 
 WORKDIR /app
 
@@ -51,12 +67,14 @@ RUN chmod -R 777 /app
 # download & install comfy ui and its dependencies
 RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit eda87043862f743b0a0467735f8531f7c4709b3a
 RUN python3 -m venv ComfyUI/venv
-RUN ComfyUI/venv/bin/python -m pip install -r ComfyUI/requirements.txt
-
+RUN ComfyUI/venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    ComfyUI/venv/bin/python -m pip cache purge
 
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
-RUN ComfyUI/venv/bin/python -m pip install -r required_requirements.txt
-
+RUN ComfyUI/venv/bin/python -m pip install -r required_requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    ComfyUI/venv/bin/python -m pip uninstall onnxruntime onnxruntime-gpu -y && \
+    ComfyUI/venv/bin/python -m pip install onnxruntime-gpu ort-nightly-gpu --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    ComfyUI/venv/bin/python -m pip cache purge
 
 COPY --chown=appuser:appgroup repos.json /app/repos.json
 RUN python3 install.py --repos-json repos.json
