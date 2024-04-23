@@ -114,6 +114,7 @@ RUN python3.6 -m pip install --upgrade pip setuptools \
 
 WORKDIR /
 
+
 #COPY scripts/ ./scripts
 
 # NB(echelon,2022-07-06): The following fix for revoked keys was copied from "storyteller-rust".
