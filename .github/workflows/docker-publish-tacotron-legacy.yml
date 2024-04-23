@@ -18,7 +18,7 @@ jobs:
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
-    runs-on: ubuntu-latest
+    runs-on: github-ubuntu-64core
     if: github.event_name == 'push'
     permissions:
       packages: write
