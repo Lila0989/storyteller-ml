@@ -191,7 +191,7 @@ async def preview_request(request_obj: Request, request: str = Form(...), input_
         if 'video' in mime_type:
             input_filename_ext = ".mp4"
         elif 'image' in mime_type:
-            input_filename_ext = ".jpeg"
+            input_filename_ext = mimetypes.guess_extension(mime_type)
         else:
             raise HTTPException(status_code=400, detail="Unsupported file type")
 
