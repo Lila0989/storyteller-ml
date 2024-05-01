@@ -52,7 +52,6 @@ RUN cd /tmp && \
         rm -rf /tmp/rclone*
 
 RUN mkdir -p /root/.config/pip
-
 COPY ./pip.conf /root/.config/pip/pip.conf
 
 WORKDIR /app

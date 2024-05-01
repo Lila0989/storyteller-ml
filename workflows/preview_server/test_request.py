@@ -21,7 +21,7 @@ style_to_filename = {
     "ink_bw_style": "8_ink_w_and_b_style.json",
     "jojo_style": "9_jojo_style.json",
     "paper_origami": "10_paper_origami.json",
-    # "pixel_art": "11_pixel_art.json",
+    "pixel_art": "11_pixel_art.json",
     "pop_art": "12_pop_art.json",
     "realistic_1": "13_realistic_1.json",
     "realistic_2": "14_realistic_2.json",
@@ -46,12 +46,13 @@ for style in all_styles:
         with open(TEST_INPUT_FILE , 'rb') as input_file:
             # files = {'input_file': ('input_file', input_file, 'image/jpeg')}
             files = {'input_file':  input_file}
+            # write output file suffixed with timestamp
+            timestamp = time.strftime('%Y%m%d%H%M%S')
+            output_file_name = f'outputs/output_image_{style}_{timestamp}.jpeg'
             execution_start_time = time.perf_counter()
             with requests.post(url, data={'request': json.dumps(payload)}, files=files) as response:
                 if response.status_code == 200:
-                    # write output file suffixed with timestamp
-                    timestamp = time.strftime('%Y%m%d%H%M%S')
-                    with open(f'outputs/preview_image_{style}_{timestamp}.jpeg', 'wb') as f:
+                    with open(output_file_name, 'wb') as f:
                         f.write(response.content)
                 else:
                     # Handle request error
@@ -59,4 +60,4 @@ for style in all_styles:
                     print(response.text)
             current_time = time.perf_counter()
             execution_time = current_time - execution_start_time
-            print('{} executed in {:.2f} seconds'.format(style, execution_time))
+            print('{} generated {} in {:.2f} seconds'.format(style, output_file_name, execution_time))
