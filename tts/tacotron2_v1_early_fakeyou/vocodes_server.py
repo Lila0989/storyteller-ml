@@ -18,6 +18,7 @@ import tensorflow as tf
 import subprocess
 import tempfile
 import json
+import time
 
 from falcon_multipart.middleware import MultipartMiddleware
 #from model import CycleGAN
@@ -289,10 +290,25 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8000)
     parser.add_argument('--model-cache-limit', type=int, default=100)
+    parser.add_argument('--model-cache-prewarm-list-file', type=str, default='/model_cache_prewarm_list.txt')
 
     args = parser.parse_args()
 
     pipeline.set_cache_limit(args.model_cache_limit)
+
+    # read prewarm list, _before_ starting the server
+    # this happens before the health check, so we don't risk
+    # starting the server and then mutating the cache state
+    try:
+      if os.path.exists(args.model_cache_prewarm_list_file):
+          with open(args.model_cache_prewarm_list_file, 'r') as f:
+              prewarm_list = f.read().splitlines()
+              for model_path in prewarm_list:
+                  if os.path.exists(model_path):
+                    pipeline.maybe_load_tacotron_model_to_cache(model_path)
+    except Exception as e:
+        LOGGER.error(f"Failed to prewarm model cache: {e}")
+
     api = falcon.API(middleware=[MultipartMiddleware()])
     api.add_route('/', IndexHandler())
     api.add_route('/_status', StatusHandler())

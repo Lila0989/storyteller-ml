@@ -153,3 +153,4 @@ COPY ./container_start_tts_server.sh /
 # TTS model code:
 COPY ./ ./models/tts
 
+COPY popular_weights.txt /model_cache_prewarm_list.txt
