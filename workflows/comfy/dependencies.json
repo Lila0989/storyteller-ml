@@ -238,5 +238,29 @@
   {
     "location": "ComfyUI/models/vae/vae-ft-mse-840000-ema-pruned.ckpt",
     "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/vae-ft-mse-840000-ema-pruned.ckpt"
+  },
+  {
+    "location": "ComfyUI/models/loras/the_matrix_movie_ar_offset.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/the_matrix_movie_ar_offset.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/loras/1947-Paris-SD1.5-5.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/1947-Paris-SD1.5-5.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/loras/80s_offset.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/80s_offset.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/loras/CZ-Retro_Karel-Zeman.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/CZ-Retro_Karel-Zeman.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/loras/EdgeRunners.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/EdgeRunners.safetensors"
+  },
+  {
+    "location": "ComfyUI/models/loras/EvilLoRA.safetensors",
+    "url": "https://storage.googleapis.com/vocodes-public/comfyui-deps/V2VStylesModels/EvilLoRA.safetensors"
   }
 ]
