@@ -92,6 +92,23 @@ style_to_filename = {
     "realistic_2": "14_realistic_2.json",
     "anime_retro_neon": "15_retro_neon_anime_90.json",
     "anime_standard": "16_standard_anime_model.json",
+    "hr_giger": "17_hr_giger.json",
+    "simpsons": "18_simpsons.json",
+    "carnage": "19_carnage.json",
+    "pastel_cute_anime": "20_pastel_cute_anime.json",
+    "bloom_lighting": "21_bloom_lighting.json",
+    "25d_horror": "22_25D_Horror.json",
+    "creepy": "23_creepy.json",
+    "creepy_vhs": "24_creepy_vhs.json",
+    "trail_cam_footage": "25_trail_cam_footage.json",
+    "old_black_white_movie": "26_old_black_white_movie.json",
+    "horror_noir_black_white": "27_horror_noir_black_white.json",
+    "techno_noir_black_white": "28_techno_noir_black_white.json",
+    "black_white_20s": "29_black_white_20s.json",
+    "cyberpunk_anime": "30_cyberpunk_anime.json",
+    "dragonball": "31_dragonball.json",
+    "realistic_matrix": "32_realistic_matrix.json",
+    "realistic_cyberpunk": "33_realistic_cyberpunk.json"
 }
 
 allowed_keys = ["style", "positive_prompt", "negative_prompt"]
