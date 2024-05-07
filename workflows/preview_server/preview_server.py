@@ -375,7 +375,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    comfyui_process = subprocess.Popen(["venv/bin/python", "main.py", "--highvram"], cwd=COMFY_ROOT_DIRECTORY)
+    comfyui_process = subprocess.Popen(["venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
 
 
     # block until comfyUI server is up
