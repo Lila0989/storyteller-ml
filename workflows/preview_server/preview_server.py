@@ -245,6 +245,7 @@ async def process_video(request_style: str, video_path: str, style_filename, pos
     mapping_json = json.load(open(mappings_directory / MAPPING_NAME))
 
     json_mods = style_json["modifications"]
+    json_mods['cn_soft_edge_strength'] = 1.0
     jsonpath_mods = get_jsonpath_mods(json_mods, mapping_json, pos_in=positive_prompt, neg_in=negative_prompt)
     print(*jsonpath_mods.items(), sep="\n")
 
