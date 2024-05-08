@@ -183,6 +183,9 @@ def signal_handler(signum, frame):
     print("ComfyUI server terminated")
     exit(0)
 
+@app.get('/health')
+def health():
+    return "All good"
 
 
 @app.post("/preview/")
