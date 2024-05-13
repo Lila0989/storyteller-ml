@@ -61,6 +61,7 @@ COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_com
 COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
 COPY --chown=appuser:appgroup format_video.py /app/format_video.py
 COPY --chown=appuser:appgroup install.py /app/install.py
+COPY --chown=appuser:appgroup list-repos.sh /app/list-repos.sh
 RUN chmod -R 777 /app
 
 # download & install comfy ui and its dependencies
@@ -79,6 +80,7 @@ COPY --chown=appuser:appgroup repos.json /app/repos.json
 RUN python3 install.py --repos-json repos.json
 
 COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
+COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.txt
 
 # protobuf use python implementation (weird error without)
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python

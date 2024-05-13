@@ -6,11 +6,14 @@ from pathlib import Path
 from urllib.parse import urlparse
 from multiprocessing import Pool
 import argparse
+from functools import partial
+from itertools import repeat
 
 parser = argparse.ArgumentParser(description='Install ComfyUI and its dependencies')
 parser.add_argument('--source', type=str, help='The source directory of the dependencies', required=False)
 parser.add_argument('--dependencies-json', type=str, help='The path to the json file containing the dependencies', required=False)
 parser.add_argument('--repos-json', type=str, help='The path to the json file containing the repositories', required=False)
+parser.add_argument('--repos-checkout-latest', action='store_true', help='Checkout the latest commit of the repositories', default=False)
 
 parser.add_argument('--concurrency', type=int, help='The number of concurrent processes to use', default=8)
 
@@ -44,23 +47,24 @@ def run_command(command):
             print(line, end='')
         print(f"Error executing command: {command}")
 
-def setup_repo(repo_info):
+def setup_repo(repo_info, checkout_latest=False):
     url, commit, folder = repo_info['url'], repo_info['commit'], repo_info['folder']
     # save the current working directory
     original_cwd = os.getcwd()
     try:
         run_command(f"git clone {url} {folder}")
-        os.chdir(folder)
-        run_command(f"git checkout {commit}")
+        if not checkout_latest:
+            os.chdir(folder)
+            run_command(f"git checkout {commit}")
     finally:
         os.chdir(original_cwd)
 
 
-def setup_repos(json_file_path, concurrency=4):
+def setup_repos(json_file_path, concurrency=4, checkout_latest=False):
     with open(json_file_path, 'r') as file:
         repos = json.load(file)
     with Pool(concurrency) as pool:
-        pool.map(setup_repo, repos)
+        pool.starmap(setup_repo, zip(repos, repeat(checkout_latest)))
 
 def setup_comfy_ui(comfyui_info):
     setup_repo(comfyui_info)
@@ -110,7 +114,7 @@ def main():
         setup_comfy_ui(comfyui_info)
 
     if args.repos_json:
-        setup_repos(args.repos_json, args.concurrency)
+        setup_repos(args.repos_json, args.concurrency, args.repos_checkout_latest)
     else:
         print("Skipping repository setup as repos json is not provided")
 

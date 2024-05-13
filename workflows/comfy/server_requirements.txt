@@ -1,0 +1,2 @@
+pydantic~=2.6.4
+jsonpath-ng~=1.6.1
