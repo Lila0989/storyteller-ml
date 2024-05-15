@@ -12,3 +12,4 @@ addict
 yapf
 deepdiff
 pynvml
+pydantic

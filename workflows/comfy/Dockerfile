@@ -57,15 +57,13 @@ COPY ./pip.conf /root/.config/pip/pip.conf
 WORKDIR /app
 
 # Copy files to container
-COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
-COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
-COPY --chown=appuser:appgroup format_video.py /app/format_video.py
+
 COPY --chown=appuser:appgroup install.py /app/install.py
 COPY --chown=appuser:appgroup list-repos.sh /app/list-repos.sh
 RUN chmod -R 777 /app
 
 # download & install comfy ui and its dependencies
-RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit eda87043862f743b0a0467735f8531f7c4709b3a
+RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit ece5acb8e8025d8ca26aa880f604d971d245475d
 RUN python3 -m venv ComfyUI/venv
 RUN ComfyUI/venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
     ComfyUI/venv/bin/python -m pip cache purge
@@ -81,6 +79,10 @@ RUN python3 install.py --repos-json repos.json
 
 COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
 COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.txt
+
+COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
+COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
+COPY --chown=appuser:appgroup format_video.py /app/format_video.py
 
 # protobuf use python implementation (weird error without)
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
