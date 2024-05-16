@@ -92,6 +92,7 @@ def parse_args():
     parser.add_argument('--pause-between-steps', type=int, help='pause between steps', required=False, default=1)
     parser.add_argument('--face-detailer-enabled', help='face detailer enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--upscaler-enabled', help='upscale enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--strength', type=float, help='strength', required=False, default=1.0)
     return parser.parse_args()
 
 args = parse_args()
@@ -231,7 +232,7 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
 
 
 def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], pos_in: Optional[str] = None,
-                      neg_in: Optional[str] = None, pipeline_type = PipelineType.BASE) -> Dict[str, Any]:
+                      neg_in: Optional[str] = None, pipeline_type = PipelineType.BASE, denoise_first_pass=1.0) -> Dict[str, Any]:
     modifications = {}
     new_mod_json = style_mods.copy()
     # Process "loras" differently
@@ -256,6 +257,9 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
     if neg_in:
         new_mod_json["negative_prompt"] = f"{new_mod_json.get('negative_prompt', '')}, {neg_in}"
 
+    if pipeline_type == PipelineType.IPA:
+        new_mod_json["denoise_first_pass"] = denoise_first_pass
+
     for key, value in new_mod_json.items():
         mapping_key = f"$.{key}"
         jsonpath_expr = parse(mapping_key)
@@ -267,6 +271,9 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
             modifications[mapping_value] = value
         else:
             print(f"No mapping found for key '{key}'")
+
+
+
 
     return modifications
 
