@@ -76,6 +76,8 @@ def process_video(input_video, max_resolution, start_ms, end_ms, framerate):
         output_video
     ]
 
+    print(f"Command: {command}", flush=True)
+
     subprocess.run(command, check=True)
     print(f"Video processed successfully. Output saved as {output_video}")
 
