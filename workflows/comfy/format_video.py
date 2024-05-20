@@ -14,6 +14,9 @@ def get_video_resolution(input_video):
         '-of', 'json',
         input_video
     ]
+
+    print(f"Command: {command}", flush=True)
+
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
     video_info = json.loads(result.stdout)
 
