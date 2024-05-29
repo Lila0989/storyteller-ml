@@ -122,9 +122,7 @@ def ensure_server_is_healthy():
 def main():
     ensure_server_is_healthy()
 
-    pipeline_type = PipelineType.BASE
-    if args.face_detailer_enabled or args.upscaler_enabled:
-        pipeline_type = PipelineType.IPA
+    pipeline_type = PipelineType.IPA
 
     output_index = 0
     file_path = args.prompt
