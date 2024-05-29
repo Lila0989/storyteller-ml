@@ -76,6 +76,7 @@ RUN ComfyUI/venv/bin/python -m pip install -r required_requirements.txt --extra-
 
 COPY --chown=appuser:appgroup repos.json /app/repos.json
 RUN python3 install.py --repos-json repos.json
+COPY --chown=appuser:appgroup custom_nodes/Yae_CustomNodes.py /app/ComfyUI/custom_nodes/Yae_CustomNodes.py
 
 COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
 COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.txt

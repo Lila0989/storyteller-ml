@@ -21,6 +21,9 @@ MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "ipa_API_03-05-2024/yae_
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "yae_vid2vid_FaceDetailer_03-05_API.json")
 UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "yae_vid2vid_Upscale_03-05_API.json")
 
+MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_mainAYS_29-05_API.json")
+FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_FaceDetailerlipsCN_22-05_API.json")
+UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_UpscaleAYS_27-05_API.json")
 
 class PipelineType(IntEnum):
     BASE = auto()
