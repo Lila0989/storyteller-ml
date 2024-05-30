@@ -24,13 +24,14 @@ UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "yae_vid2vid_Upscale_03-
 MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_mainAYS_29-05_API.json")
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_FaceDetailerlipsCN_22-05_API.json")
 UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_UpscaleAYS_27-05_API.json")
+CINEMATIC_WORKFLOW = os.environ.get("CINEMATIC_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_better_mainupscaler_29-05_API.json")
 
 class PipelineType(IntEnum):
     BASE = auto()
     IPA = auto()
     FACE_DETAILER = auto()
     UPSCALER = auto()
-
+    CINEMATIC = auto()
 
 
 style_to_filename = {
@@ -98,6 +99,7 @@ def parse_args():
     parser.add_argument('--lipsync-enabled', help='lipsync enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--disable-lcm', help='disable lcm (only applies to main workflow)', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--strength', type=float, help='strength', required=False, default=1.0)
+    parser.add_argument('--enable-cinematic', help='enable cinematic', required=False, default=False, action=argparse.BooleanOptionalAction)
     return parser.parse_args()
 
 args = parse_args()
@@ -138,6 +140,7 @@ def main():
         workflow_filename = None
         enable_lipsync = args.lipsync_enabled
         disable_lcm = args.disable_lcm
+        cinematic_workflow_enabled = args.enable_cinematic
         denoise_first_pass = args.strength
         if pipeline_type == PipelineType.IPA:
             workflow_filename = MAIN_IPA_WORKFLOW
@@ -145,9 +148,13 @@ def main():
             positive_prompt = open(positive_prompt_filename).read()
         if negative_prompt_filename:
             negative_prompt = open(negative_prompt_filename).read()
+        if cinematic_workflow_enabled:
+            pipeline_type = PipelineType.CINEMATIC
+            workflow_filename = CINEMATIC_WORKFLOW
+
+        time_before = time.perf_counter()
+
         validate_style_name(style)
-        print("running pipeline" + str(pipeline_type))
-        # ensure_pipeline_input_present()
         prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, 
                                            denoise_first_pass=denoise_first_pass,
                                            enable_lipsync=enable_lipsync,
@@ -156,19 +163,17 @@ def main():
         output_index = output_index + 1
         left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
         if args.upscaler_enabled:
-            # time.sleep(30)
-            print("running pipeline" + str(pipeline_type))
-            convert_pipline_output_to_input(left)
-            workflow_filename = UPSCALER_WORKFLOW
-            prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.UPSCALER, 
-                                               denoise_first_pass=denoise_first_pass,
-                                               enable_lipsync=enable_lipsync)
-            enqueue_prompt_and_wait(prompt)
-            output_index = output_index + 1
-            left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
-            # time.sleep(30)
+            if pipeline_type is not PipelineType.CINEMATIC:
+                print("running pipeline" + str(pipeline_type))
+                convert_pipline_output_to_input(left)
+                workflow_filename = UPSCALER_WORKFLOW
+                prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.UPSCALER, 
+                                                denoise_first_pass=denoise_first_pass,
+                                                enable_lipsync=enable_lipsync)
+                enqueue_prompt_and_wait(prompt)
+                output_index = output_index + 1
+                left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
         if args.face_detailer_enabled:
-            # time.sleep(30)
             print("running pipeline" + str(pipeline_type))
             convert_pipline_output_to_input(left)
             workflow_filename = FACE_DETAILER_WORKFLOW
@@ -178,8 +183,9 @@ def main():
             enqueue_prompt_and_wait(prompt)
             output_index = output_index + 1
             left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
-            # time.sleep(30)
         restore_last_pipeline_output(left)
+        time_after = time.perf_counter()
+        print(f"Time taken: {time_after - time_before:.2f} seconds")
     else:
         print(f'Loading prompt json from path: {file_path}')
         prompt_workflow = json.load(open(file_path))
