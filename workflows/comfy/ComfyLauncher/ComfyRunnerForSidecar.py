@@ -179,7 +179,7 @@ def main():
             output_index = output_index + 1
             left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
             # time.sleep(30)
-            restore_last_pipeline_output(left)
+        restore_last_pipeline_output(left)
     else:
         print(f'Loading prompt json from path: {file_path}')
         prompt_workflow = json.load(open(file_path))
