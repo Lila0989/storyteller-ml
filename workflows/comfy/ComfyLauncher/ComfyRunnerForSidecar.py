@@ -279,7 +279,7 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
     if neg_in:
         new_mod_json["negative_prompt"] = f"{new_mod_json.get('negative_prompt', '')}, {neg_in}"
 
-    if pipeline_type == PipelineType.IPA:
+    if pipeline_type in [PipelineType.IPA, PipelineType.BASE]:
         new_mod_json["denoise_first_pass"] = denoise_first_pass
 
     if enable_lipsync:
