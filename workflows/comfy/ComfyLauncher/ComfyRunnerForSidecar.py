@@ -96,6 +96,7 @@ def parse_args():
     parser.add_argument('--face-detailer-enabled', help='face detailer enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--upscaler-enabled', help='upscale enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--lipsync-enabled', help='lipsync enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--disable-lcm', help='disable lcm (only applies to main workflow)', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--strength', type=float, help='strength', required=False, default=1.0)
     return parser.parse_args()
 
@@ -136,6 +137,8 @@ def main():
         negative_prompt = None
         workflow_filename = None
         enable_lipsync = args.lipsync_enabled
+        disable_lcm = args.disable_lcm
+        denoise_first_pass = args.strength
         if pipeline_type == PipelineType.IPA:
             workflow_filename = MAIN_IPA_WORKFLOW
         if positive_prompt_filename:
@@ -146,7 +149,9 @@ def main():
         print("running pipeline" + str(pipeline_type))
         # ensure_pipeline_input_present()
         prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, 
-                                           enable_lipsync=enable_lipsync)
+                                           denoise_first_pass=denoise_first_pass,
+                                           enable_lipsync=enable_lipsync,
+                                           disable_lcm=disable_lcm)
         enqueue_prompt_and_wait(prompt)
         output_index = output_index + 1
         left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
@@ -156,6 +161,7 @@ def main():
             convert_pipline_output_to_input(left)
             workflow_filename = UPSCALER_WORKFLOW
             prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.UPSCALER, 
+                                               denoise_first_pass=denoise_first_pass,
                                                enable_lipsync=enable_lipsync)
             enqueue_prompt_and_wait(prompt)
             output_index = output_index + 1
@@ -167,6 +173,7 @@ def main():
             convert_pipline_output_to_input(left)
             workflow_filename = FACE_DETAILER_WORKFLOW
             prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.FACE_DETAILER, 
+                                               denoise_first_pass=denoise_first_pass,
                                                enable_lipsync=enable_lipsync)
             enqueue_prompt_and_wait(prompt)
             output_index = output_index + 1
@@ -211,7 +218,9 @@ def enqueue_prompt_and_wait(prompt):
 
 
 def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, workflow_filename=None, pipeline_type = PipelineType.BASE,
-                              enable_lipsync: bool = False) -> Path:
+                              denoise_first_pass=1.0,
+                              enable_lipsync: bool = False,
+                              disable_lcm: bool = False) -> Path:
     styles_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "styles"
     workflow_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "workflows"
     mappings_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "mappings"
@@ -230,7 +239,9 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
 
     json_mods = style_json["modifications"]
     jsonpath_mods = get_jsonpath_mods(json_mods, mapping_json, pos_in=positive_prompt, neg_in=negative_prompt, pipeline_type=pipeline_type, 
-                                      enable_lipsync=enable_lipsync)
+                                      denoise_first_pass=denoise_first_pass,
+                                      enable_lipsync=enable_lipsync,
+                                      disable_lcm=disable_lcm)
 
     print(*jsonpath_mods.items(), sep="\n")
 
@@ -242,7 +253,8 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
 
 def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], pos_in: Optional[str] = None,
                       neg_in: Optional[str] = None, pipeline_type = PipelineType.BASE, denoise_first_pass=1.0,
-                      enable_lipsync: bool = False) -> Dict[str, Any]:
+                      enable_lipsync: bool = False, 
+                      disable_lcm: bool = False) -> Dict[str, Any]:
     modifications = {}
     new_mod_json = style_mods.copy()
     # Process "loras" differently
@@ -286,6 +298,10 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
             print(f"No mapping found for key '{key}'")
 
 
+    # TODO(bt,2024-05-29): Move this to the mappings so we don't have to maintain the jsonpath
+    # This is only relevant for the main workflow (not face fixer or upscaler)
+    if disable_lcm:
+        modifications["$.536.inputs.boolean_number"] = 0
 
 
     return modifications
