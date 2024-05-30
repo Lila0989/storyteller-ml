@@ -281,9 +281,9 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
 
     # Handling positive and negative prompts
     if pos_in:
-        new_mod_json["positive_prompt"] = f"{new_mod_json.get('positive_prompt', '')}, {pos_in}"
+        new_mod_json["positive_prompt"] = f"{pos_in}, {new_mod_json.get('positive_prompt', '')}"
     if neg_in:
-        new_mod_json["negative_prompt"] = f"{new_mod_json.get('negative_prompt', '')}, {neg_in}"
+        new_mod_json["negative_prompt"] = f"{neg_in}, {new_mod_json.get('negative_prompt', '')}"
 
     if pipeline_type in [PipelineType.IPA, PipelineType.BASE]:
         new_mod_json["denoise_first_pass"] = denoise_first_pass
