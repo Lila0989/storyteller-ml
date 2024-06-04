@@ -28,7 +28,10 @@ import websockets
 #
 # NB(bt,2024-03-30): The *.netlify.app is dangerous.
 CORS_WHITELIST_ORIGINS = [
+    "https://storyteller.ai",
     "https://studio.storyteller.ai",
+    "https://studio-testing.studio.storyteller.ai",
+    "https://studio-staging.studio.storyteller.ai",
     "https://storytellerstudio.netlify.app",
     "https://branch-name--storytellerstudio.netlify.app",
     "https://deploy-preview-123--storytellerstudio.netlify.app",
@@ -36,7 +39,6 @@ CORS_WHITELIST_ORIGINS = [
     "https://branch-whatever--pipeline-gottagofast.netlify.app",
     "https://fakeyou.com",
     "https://*.fakeyou.com",
-    "https://storyteller.ai",
     "https://*.storyteller.ai",
     "https://*.netlify.app",
     "http://*.fakeyou.com:7000",
