@@ -209,13 +209,18 @@ def enqueue_prompt_and_wait(prompt):
     start_time = time.time()
     # check queue endpoint in loop
     while True:
-        response = requests.get(PROMPT_ENDPOINT, timeout=5)
-        queue_json = response.json()
-        if queue_json["exec_info"]["queue_remaining"]:
-            pass
-        else:
-            print("Job is done")
-            break
+        try:
+            response = requests.get(PROMPT_ENDPOINT, timeout=5)
+            queue_json = response.json()
+            if queue_json["exec_info"]["queue_remaining"]:
+                pass
+            else:
+                print("Job is done")
+                break
+        except Exception:
+            print("Error while checking queue")
+            time.sleep(1)
+            continue
         if time.time() - start_time > TIMEOUT_SECONDS:
             print("Timeout reached and job didn't finish!")
             exit(1)
@@ -281,9 +286,9 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
 
     # Handling positive and negative prompts
     if pos_in:
-        new_mod_json["positive_prompt"] = f"{pos_in}, {new_mod_json.get('positive_prompt', '')}"
+        new_mod_json["positive_prompt"] = f"{pos_in}, {new_mod_json.get('positive_prompt', '')},"
     if neg_in:
-        new_mod_json["negative_prompt"] = f"{neg_in}, {new_mod_json.get('negative_prompt', '')}"
+        new_mod_json["negative_prompt"] = f"{neg_in}, {new_mod_json.get('negative_prompt', '')},"
 
     if pipeline_type in [PipelineType.IPA, PipelineType.BASE]:
         new_mod_json["denoise_first_pass"] = denoise_first_pass
