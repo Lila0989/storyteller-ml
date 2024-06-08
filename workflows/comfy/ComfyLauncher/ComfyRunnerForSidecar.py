@@ -8,8 +8,13 @@ from jsonpath_ng import jsonpath, parse
 import shutil
 from pathlib import Path
 from enum import IntEnum, auto
+import os
+import subprocess
+import signal
 
 SERVER_IP = os.environ.get("SERVER_IP", "127.0.0.1:8188")
+SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 60))
+
 TIMEOUT_SECONDS = int(os.environ.get("TIMEOUT_SECONDS", 1000))
 PROMPT_ENDPOINT = f"http://{SERVER_IP}/prompt"
 V2V_WORKFLOWS_DIRECTORY = os.environ.get("V2V_WORKFLOWS_DIRECTORY",
@@ -25,7 +30,6 @@ MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "ipa_API_27-05-2024/yae_
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_FaceDetailerlipsCN_22-05_API.json")
 UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_UpscaleAYS_27-05_API.json")
 CINEMATIC_WORKFLOW = os.environ.get("CINEMATIC_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_better_mainupscaler_29-05_API.json")
-
 class PipelineType(IntEnum):
     BASE = auto()
     IPA = auto()
@@ -104,9 +108,9 @@ def parse_args():
 
 args = parse_args()
 
-def ensure_server_is_healthy():
+def ensure_server_is_healthy(server_address):
     # check the health of the server (5 second timeout)
-    response = requests.get(PROMPT_ENDPOINT, timeout=5)
+    response = requests.get(f"http://{server_address}/queue", timeout=5)
     if response.status_code == 200:
         print("Server is healthy")
     else:
@@ -116,14 +120,19 @@ def ensure_server_is_healthy():
 
     # make sure there are no jobs already
     queue_json = response.json()
-    if queue_json["exec_info"]["queue_remaining"]:
+    if len(queue_json.get("queue_pending", [])) > 0:
         print("There are jobs in the queue already. Exiting...")
         exit(1)
     else:
         print("Queue is empty")
 
+def interrupt_comfy_queue(server_address):
+    requests.post(f"http://{server_address}/interrupt")
+    print("Queue interrupted successfully.")
+
 def main():
-    ensure_server_is_healthy()
+    # interrupt_comfy_queue(SERVER_IP)
+    ensure_server_is_healthy(SERVER_IP)
 
     pipeline_type = PipelineType.IPA
 
@@ -354,4 +363,24 @@ def validate_style_name(style):
         exit(1)
 
 if __name__ == "__main__":
-    main()
+    os.setpgrp()
+    try:
+        comfyui_process = subprocess.Popen(["venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
+        start_time = time.time()
+        started = False
+        while time.time() - start_time < SERVER_START_TIMEOUT:
+            try:
+                response = requests.get(PROMPT_ENDPOINT, timeout=5)
+                if response.status_code == 200:
+                    print("Server is healthy")
+                    started = True
+                    break
+            except requests.exceptions.ConnectionError:
+                print(f"Server is not up yet. Time elapsed: {time.time() - start_time:.2f}")
+            time.sleep(1)
+        if not started:
+            print(f"Server failed to start in {SERVER_START_TIMEOUT} seconds")
+            exit(1)
+        main()
+    finally:
+        os.killpg(0, signal.SIGKILL) # kill all processes in my group
