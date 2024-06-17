@@ -128,5 +128,15 @@
       "folder": "ComfyUI/custom_nodes/ComfyMath",
       "commit": "be9beab9923ccf5c5e4132dc1653bcdfa773ed70",
       "url": "https://github.com/evanspearman/ComfyMath"
+    },
+    {
+      "folder": "ComfyUI/custom_nodes/facerestore_cf",
+      "commit":"67f90bc6be976fb58169866155346b0da13bebee",
+      "url": "https://github.com/mav-rik/facerestore_cf"
+    },
+    {
+      "folder": "ComfyUI/custom_nodes/ComfyUI_wav2lip",
+      "commit": "2c10323b0d78d1e0846fa730ed74794c7860d0ce",
+      "url": "https://github.com/ShmuelRonen/ComfyUI_wav2lip"
     }
 ]
