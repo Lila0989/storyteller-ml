@@ -96,6 +96,7 @@ def parse_args():
     parser.add_argument('--prompt', type=str, help='location of the prompt json', required=False)
     parser.add_argument('--style', type=str, help='style name', required=False)
     parser.add_argument('--global_ipa_image_filename', type=str, help='Global IPA image (optional)', required=False)
+    parser.add_argument('--global_ipa_strength', type=float, help='Global IPA strength (optional)', required=False, default=1.0)
     parser.add_argument('--positive_prompt_filename', type=str, help='positive prompt', required=False)
     parser.add_argument('--negative_prompt_filename', type=str, help='negative prompt', required=False)
     parser.add_argument('--pause-between-steps', type=int, help='pause between steps', required=False, default=1)
@@ -168,8 +169,9 @@ def main():
         prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, 
                                            denoise_first_pass=denoise_first_pass,
                                            enable_lipsync=enable_lipsync,
-                                           disable_lcm=disable_lcm
-                                           global_ipa_image_filename=args.global_ipa_image_filename)
+                                           disable_lcm=disable_lcm,
+                                           global_ipa_image_filename=args.global_ipa_image_filename,
+                                           global_ipa_strength=args.global_ipa_strength)
         enqueue_prompt_and_wait(prompt)
         output_index = output_index + 1
         left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
@@ -181,7 +183,8 @@ def main():
                 prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.UPSCALER, 
                                                 denoise_first_pass=denoise_first_pass,
                                                 enable_lipsync=enable_lipsync,
-                                                global_ipa_image_filename=args.global_ipa_image_filename)
+                                                global_ipa_image_filename=args.global_ipa_image_filename,
+                                                global_ipa_strength=args.global_ipa_strength)
                 enqueue_prompt_and_wait(prompt)
                 output_index = output_index + 1
                 left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
@@ -192,7 +195,8 @@ def main():
             prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.FACE_DETAILER, 
                                                denoise_first_pass=denoise_first_pass,
                                                enable_lipsync=enable_lipsync,
-                                               global_ipa_image_filename=args.global_ipa_image_filename)
+                                               global_ipa_image_filename=args.global_ipa_image_filename,
+                                               global_ipa_strength=args.global_ipa_strength)
             enqueue_prompt_and_wait(prompt)
             output_index = output_index + 1
             left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
@@ -245,7 +249,8 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
                               denoise_first_pass=1.0,
                               enable_lipsync: bool = False,
                               disable_lcm: bool = False,
-                              global_ipa_image_filename: Optional[str] = None) -> Path:
+                              global_ipa_image_filename: Optional[str] = None,
+                              global_ipa_strength: float = 1.0) -> Path:
     styles_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "styles"
     workflow_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "workflows"
     mappings_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "mappings"
@@ -267,7 +272,8 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
                                       denoise_first_pass=denoise_first_pass,
                                       enable_lipsync=enable_lipsync,
                                       disable_lcm=disable_lcm,
-                                      global_ipa_image_filename=global_ipa_image_filename)
+                                      global_ipa_image_filename=global_ipa_image_filename,
+                                      global_ipa_strength=global_ipa_strength)
 
     print(*jsonpath_mods.items(), sep="\n")
 
@@ -281,7 +287,8 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
                       neg_in: Optional[str] = None, pipeline_type = PipelineType.BASE, denoise_first_pass=1.0,
                       enable_lipsync: bool = False, 
                       disable_lcm: bool = False,
-                      global_ipa_image_filename: Optional[str] = None) -> Dict[str, Any]:
+                      global_ipa_image_filename: Optional[str] = None,
+                      global_ipa_strength: float = 1.0) -> Dict[str, Any]:
     modifications = {}
     new_mod_json = style_mods.copy()
     # Process "loras" differently
@@ -334,7 +341,7 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
     # TODO(bt,2024-06-22): Move this to the mappings so we don't have to maintain the jsonpath
     if global_ipa_image_filename:
         modifications["$.3723.inputs.image_path"] = global_ipa_image_filename
-        modifications["$.900.inputs.value"] = 1.0 # TODO: Make this a slider in the UI
+        modifications["$.900.inputs.value"] = global_ipa_strength
 
     return modifications
 
