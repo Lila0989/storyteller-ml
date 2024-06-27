@@ -132,6 +132,17 @@ def interrupt_comfy_queue(server_address):
     requests.post(f"http://{server_address}/interrupt")
     print("Queue interrupted successfully.")
 
+def invoke_facefusion(input_audio, input_video, output_video):
+    # invoke facefusion
+    command = [
+        '/app/facefusion-runner.sh',
+        '--input_audio', input_audio,
+        '--input_video', input_video,
+        '--output', output_video
+    ]
+    subprocess.check_output(command)
+    print("Facefusion completed successfully.")
+
 def main():
     # interrupt_comfy_queue(SERVER_IP)
     ensure_server_is_healthy(SERVER_IP)
@@ -172,6 +183,7 @@ def main():
                                            disable_lcm=disable_lcm,
                                            global_ipa_image_filename=args.global_ipa_image_filename,
                                            global_ipa_strength=args.global_ipa_strength)
+        print("running pipeline" + str(pipeline_type))
         enqueue_prompt_and_wait(prompt)
         output_index = output_index + 1
         left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
@@ -200,6 +212,18 @@ def main():
             enqueue_prompt_and_wait(prompt)
             output_index = output_index + 1
             left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
+        if enable_lipsync:
+            # Ugh
+            input_audio = Path(COMFY_ROOT_DIRECTORY) / "input" / "trimmed.wav"
+            input_video = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
+            output_index = output_index + 1
+            output_video = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
+            invoke_facefusion(input_audio, input_video, output_video)
+            # check if output_video file exists
+            if not output_video.exists():
+                print("Facefusion failed!")
+            else:
+                left = output_video
         restore_last_pipeline_output(left)
         time_after = time.perf_counter()
         print(f"Time taken: {time_after - time_before:.2f} seconds")

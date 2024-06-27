@@ -84,6 +84,7 @@ COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.t
 COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
 COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
 COPY --chown=appuser:appgroup format_video.py /app/format_video.py
+COPY --chown=appuser:appgroup facefusion-runner.sh /app/facefusion-runner.sh
 
 # protobuf use python implementation (weird error without)
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
