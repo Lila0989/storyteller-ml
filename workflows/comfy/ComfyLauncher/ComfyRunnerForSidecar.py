@@ -22,14 +22,12 @@ V2V_WORKFLOWS_DIRECTORY = os.environ.get("V2V_WORKFLOWS_DIRECTORY",
 COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/app/ComfyUI")
 
-MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "ipa_API_03-05-2024/yae_vid2vid_main(+IPA)_03-05_API.json")
-FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "yae_vid2vid_FaceDetailer_03-05_API.json")
-UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "yae_vid2vid_Upscale_03-05_API.json")
 
-MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_mainAYS_29-05_API.json")
-FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_FaceDetailerlipsCN_22-05_API.json")
-UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_UpscaleAYS_27-05_API.json")
+MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "3-06-2024/yae_vid2vid_main_29-06_API.json")
+FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "3-06-2024/yae_vid2vid_FaceDetailer_1-07_API.json")
+UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "3-06-2024/yae_vid2vid_Upscale_28-06_API.json")
 CINEMATIC_WORKFLOW = os.environ.get("CINEMATIC_WORKFLOW", "ipa_API_27-05-2024/yae_vid2vid_better_mainupscaler_29-05_API.json")
+
 class PipelineType(IntEnum):
     BASE = auto()
     IPA = auto()
@@ -87,6 +85,7 @@ def convert_pipline_output_to_input(left):
 
 
 def restore_last_pipeline_output(left):
+    print("Restoring last pipeline output to input from: " + str(left))
     right = Path(COMFY_ROOT_DIRECTORY) / "output" / "vid2vid/SparseUpscaleInterp_00001.mp4"
     shutil.copy(left, right)
 
@@ -218,7 +217,11 @@ def main():
             input_video = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
             output_index = output_index + 1
             output_video = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
-            invoke_facefusion(input_audio, input_video, output_video)
+            try:
+                invoke_facefusion(input_audio, input_video, output_video)
+            except Exception as e:
+                print("Facefusion failed!")
+                print(e)
             # check if output_video file exists
             if not output_video.exists():
                 print("Facefusion failed!")
@@ -291,13 +294,20 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
     workflow_json = json.load(open(workflow_directory / workflow_json_filename))
     mapping_json = json.load(open(mappings_directory / mapping_json_filename))
 
-    json_mods = style_json["modifications"]
-    jsonpath_mods = get_jsonpath_mods(json_mods, mapping_json, pos_in=positive_prompt, neg_in=negative_prompt, pipeline_type=pipeline_type, 
-                                      denoise_first_pass=denoise_first_pass,
-                                      enable_lipsync=enable_lipsync,
-                                      disable_lcm=disable_lcm,
-                                      global_ipa_image_filename=global_ipa_image_filename,
-                                      global_ipa_strength=global_ipa_strength)
+    json_mods = {key: value for key, value in style_json["modifications"].items() if not key.startswith("cn_")}
+
+    jsonpath_mods = get_jsonpath_mods(
+        json_mods,
+        mapping_json,
+        pos_in=positive_prompt,
+        neg_in=negative_prompt,
+        pipeline_type=pipeline_type,
+        denoise_first_pass=denoise_first_pass,
+        enable_lipsync=enable_lipsync,
+        disable_lcm=disable_lcm,
+        global_ipa_image_filename=global_ipa_image_filename,
+        global_ipa_strength=global_ipa_strength
+    )
 
     print(*jsonpath_mods.items(), sep="\n")
 

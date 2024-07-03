@@ -64,15 +64,15 @@ RUN chmod -R 777 /app
 
 # download & install comfy ui and its dependencies
 RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit ece5acb8e8025d8ca26aa880f604d971d245475d
-RUN python3 -m venv ComfyUI/venv
-RUN ComfyUI/venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
-    ComfyUI/venv/bin/python -m pip cache purge
+RUN python3 -m venv venv
+RUN venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    venv/bin/python -m pip cache purge
 
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
-RUN ComfyUI/venv/bin/python -m pip install -r required_requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
-    ComfyUI/venv/bin/python -m pip uninstall onnxruntime onnxruntime-gpu -y && \
-    ComfyUI/venv/bin/python -m pip install onnxruntime-gpu ort-nightly-gpu --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
-    ComfyUI/venv/bin/python -m pip cache purge
+RUN venv/bin/python -m pip install -r required_requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    venv/bin/python -m pip uninstall onnxruntime onnxruntime-gpu -y && \
+    venv/bin/python -m pip install onnxruntime-gpu ort-nightly-gpu --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    venv/bin/python -m pip cache purge
 
 COPY --chown=appuser:appgroup repos.json /app/repos.json
 RUN python3 install.py --repos-json repos.json
