@@ -418,7 +418,7 @@ def validate_style_name(style):
 if __name__ == "__main__":
     os.setpgrp()
     try:
-        comfyui_process = subprocess.Popen(["venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
+        comfyui_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
         start_time = time.time()
         started = False
         while time.time() - start_time < SERVER_START_TIMEOUT:
