@@ -50,4 +50,4 @@ cd /facefusion
 # Set up the environment
 source venv/bin/activate
 venv/bin/python3 -m pip install -r requirements.txt
-venv/bin/python3 run.py -s $input_audio -t $input_video --frame-processors lip_syncer -o $output --headless
+venv/bin/python3 run.py -s $input_audio -t $input_video --frame-processors lip_syncer --frame-processors face_enhancer -o $output --headless
