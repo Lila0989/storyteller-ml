@@ -49,5 +49,11 @@ deactivate || true
 cd /facefusion
 # Set up the environment
 source venv/bin/activate
-# venv/bin/python3 -m pip install -r requirements.txt
-venv/bin/python3 run.py -s $input_audio -t $input_video --frame-processors lip_syncer --frame-processors face_enhancer --execution-provider cuda -o $output --headless
+
+TEMPDIR=$(mktemp -d)
+
+
+venv/bin/python3 run.py -s $input_audio -t $input_video --frame-processors lip_syncer --execution-provider cuda -o $TEMPDIR/1.mp4 --headless
+venv/bin/python3 run.py -s $input_audio -t $TEMPDIR/1.mp4 --frame-processors face_enhancer --execution-provider cuda -o $output --headless
+
+# rm -rf $TEMPDIR
