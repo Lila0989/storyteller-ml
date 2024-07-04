@@ -4,7 +4,8 @@
 #  Nvidia does not provide a CUDA 11.6 with Ubuntu 22.04, which mirrors my own desktop machine. Their CUDA 11.6 + Ubuntu 20.04 image has
 #  a stale Python (3.8), so we have to use the DeadSnakes PPA to install a more modern version.
 #  Gross.
-FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
+# FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
+FROM nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
 
 # See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.title='Storyteller ML: Voice Conversion'
@@ -71,7 +72,7 @@ RUN venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
 RUN venv/bin/python -m pip install -r required_requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
     venv/bin/python -m pip uninstall onnxruntime onnxruntime-gpu -y && \
-    venv/bin/python -m pip install onnxruntime-gpu ort-nightly-gpu --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    venv/bin/python -m pip install onnxruntime-gpu==1.17.1  ort-nightly-gpu --index-url=https://pkgs.dev.azure.com/onnxruntime/onnxruntime/_packaging/onnxruntime-cuda-12/pypi/simple/ --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
     venv/bin/python -m pip cache purge
 
 COPY --chown=appuser:appgroup repos.json /app/repos.json
