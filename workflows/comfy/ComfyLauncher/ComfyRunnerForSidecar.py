@@ -98,12 +98,14 @@ def parse_args():
     parser.add_argument('--global_ipa_strength', type=float, help='Global IPA strength (optional)', required=False, default=1.0)
     parser.add_argument('--positive_prompt_filename', type=str, help='positive prompt', required=False)
     parser.add_argument('--negative_prompt_filename', type=str, help='negative prompt', required=False)
+    parser.add_argument('--travel_prompt_filename', type=str, help='travel prompt', required=False)
     parser.add_argument('--pause-between-steps', type=int, help='pause between steps', required=False, default=1)
     parser.add_argument('--face-detailer-enabled', help='face detailer enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--upscaler-enabled', help='upscale enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--lipsync-enabled', help='lipsync enabled', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--disable-lcm', help='disable lcm (only applies to main workflow)', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--strength', type=float, help='strength', required=False, default=1.0)
+    parser.add_argument('--frame_skip', type=int, help='frame skipping', required=False, default=None)
     parser.add_argument('--enable-cinematic', help='enable cinematic', required=False, default=False, action=argparse.BooleanOptionalAction)
     return parser.parse_args()
 
@@ -156,6 +158,7 @@ def main():
         style = args.style
         positive_prompt_filename = args.positive_prompt_filename
         negative_prompt_filename = args.negative_prompt_filename
+        travel_prompt_filename = args.travel_prompt_filename
         positive_prompt = None
         negative_prompt = None
         workflow_filename = None
@@ -169,6 +172,8 @@ def main():
             positive_prompt = open(positive_prompt_filename).read()
         if negative_prompt_filename:
             negative_prompt = open(negative_prompt_filename).read()
+        if travel_prompt_filename:
+            travel_prompt = open(travel_prompt_filename).read()
         if cinematic_workflow_enabled:
             pipeline_type = PipelineType.CINEMATIC
             workflow_filename = CINEMATIC_WORKFLOW
@@ -176,12 +181,19 @@ def main():
         time_before = time.perf_counter()
 
         validate_style_name(style)
-        prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, 
-                                           denoise_first_pass=denoise_first_pass,
-                                           enable_lipsync=enable_lipsync,
-                                           disable_lcm=disable_lcm,
-                                           global_ipa_image_filename=args.global_ipa_image_filename,
-                                           global_ipa_strength=args.global_ipa_strength)
+        prompt = generate_prompt_for_style(
+            style, 
+            positive_prompt, 
+            negative_prompt, 
+            travel_prompt, 
+            workflow_filename, 
+            denoise_first_pass=denoise_first_pass,
+            enable_lipsync=enable_lipsync,
+            disable_lcm=disable_lcm,
+            global_ipa_image_filename=args.global_ipa_image_filename,
+            global_ipa_strength=args.global_ipa_strength,
+            frame_skip=args.frame_skip
+        )
         print("running pipeline" + str(pipeline_type))
         enqueue_prompt_and_wait(prompt)
         output_index = output_index + 1
@@ -191,11 +203,19 @@ def main():
                 print("running pipeline" + str(pipeline_type))
                 convert_pipline_output_to_input(left)
                 workflow_filename = UPSCALER_WORKFLOW
-                prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.UPSCALER, 
-                                                denoise_first_pass=denoise_first_pass,
-                                                enable_lipsync=enable_lipsync,
-                                                global_ipa_image_filename=args.global_ipa_image_filename,
-                                                global_ipa_strength=args.global_ipa_strength)
+                prompt = generate_prompt_for_style(
+                    style, 
+                    positive_prompt, 
+                    negative_prompt, 
+                    travel_prompt, 
+                    workflow_filename, 
+                    PipelineType.UPSCALER, 
+                    denoise_first_pass=denoise_first_pass,
+                    enable_lipsync=enable_lipsync,
+                    global_ipa_image_filename=args.global_ipa_image_filename,
+                    global_ipa_strength=args.global_ipa_strength,
+                    frame_skip=args.frame_skip
+                )
                 enqueue_prompt_and_wait(prompt)
                 output_index = output_index + 1
                 left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
@@ -203,11 +223,19 @@ def main():
             print("running pipeline" + str(pipeline_type))
             convert_pipline_output_to_input(left)
             workflow_filename = FACE_DETAILER_WORKFLOW
-            prompt = generate_prompt_for_style(style, positive_prompt, negative_prompt, workflow_filename, PipelineType.FACE_DETAILER, 
-                                               denoise_first_pass=denoise_first_pass,
-                                               enable_lipsync=enable_lipsync,
-                                               global_ipa_image_filename=args.global_ipa_image_filename,
-                                               global_ipa_strength=args.global_ipa_strength)
+            prompt = generate_prompt_for_style(
+                style, 
+                positive_prompt, 
+                negative_prompt, 
+                travel_prompt, 
+                workflow_filename, 
+                PipelineType.FACE_DETAILER, 
+                denoise_first_pass=denoise_first_pass,
+                enable_lipsync=enable_lipsync,
+                global_ipa_image_filename=args.global_ipa_image_filename,
+                global_ipa_strength=args.global_ipa_strength,
+                frame_skip=args.frame_skip
+            )
             enqueue_prompt_and_wait(prompt)
             output_index = output_index + 1
             left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
@@ -272,12 +300,19 @@ def enqueue_prompt_and_wait(prompt):
 
 
 
-def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, workflow_filename=None, pipeline_type = PipelineType.BASE,
+def generate_prompt_for_style(style_name, 
+                              positive_prompt, 
+                              negative_prompt, 
+                              travel_prompt, 
+                              workflow_filename=None, 
+                              pipeline_type = PipelineType.BASE,
                               denoise_first_pass=1.0,
                               enable_lipsync: bool = False,
                               disable_lcm: bool = False,
                               global_ipa_image_filename: Optional[str] = None,
-                              global_ipa_strength: float = 1.0) -> Path:
+                              global_ipa_strength: float = 1.0,
+                              frame_skip: Optional[int] = None,
+                            ) -> Path:
     styles_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "styles"
     workflow_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "workflows"
     mappings_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "mappings"
@@ -301,12 +336,14 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
         mapping_json,
         pos_in=positive_prompt,
         neg_in=negative_prompt,
+        travel_in=travel_prompt,
         pipeline_type=pipeline_type,
         denoise_first_pass=denoise_first_pass,
         enable_lipsync=enable_lipsync,
         disable_lcm=disable_lcm,
         global_ipa_image_filename=global_ipa_image_filename,
         global_ipa_strength=global_ipa_strength
+        frame_skip=frame_skip,
     )
 
     print(*jsonpath_mods.items(), sep="\n")
@@ -317,12 +354,19 @@ def generate_prompt_for_style(style_name, positive_prompt, negative_prompt, work
     return p
 
 
-def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], pos_in: Optional[str] = None,
-                      neg_in: Optional[str] = None, pipeline_type = PipelineType.BASE, denoise_first_pass=1.0,
+def get_jsonpath_mods(style_mods: Dict[str, Any],
+                      mapping_json: Dict[str, Any], 
+                      pos_in: Optional[str] = None,
+                      neg_in: Optional[str] = None, 
+                      travel_in: Optional[str] = None, 
+                      pipeline_type = PipelineType.BASE,
+                      denoise_first_pass=1.0,
                       enable_lipsync: bool = False, 
                       disable_lcm: bool = False,
                       global_ipa_image_filename: Optional[str] = None,
-                      global_ipa_strength: float = 1.0) -> Dict[str, Any]:
+                      global_ipa_strength: float = 1.0,
+                      frame_skip: Optional[int] = None,
+                    ) -> Dict[str, Any]:
     modifications = {}
     new_mod_json = style_mods.copy()
     # Process "loras" differently
@@ -353,6 +397,9 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
     if enable_lipsync:
         new_mod_json["cn_lips_strength"] = 1.2
 
+    if frame_skip:
+        new_mod_json["every_nth_frame"] = frame_skip
+
     for key, value in new_mod_json.items():
         mapping_key = f"$.{key}"
         jsonpath_expr = parse(mapping_key)
@@ -365,17 +412,19 @@ def get_jsonpath_mods(style_mods: Dict[str, Any], mapping_json: Dict[str, Any], 
         else:
             print(f"No mapping found for key '{key}'")
 
-
     # TODO(bt,2024-05-29): Move this to the mappings so we don't have to maintain the jsonpath
     # This is only relevant for the main workflow (not face fixer or upscaler)
     if disable_lcm:
         modifications["$.536.inputs.boolean_number"] = 0
 
-
     # TODO(bt,2024-06-22): Move this to the mappings so we don't have to maintain the jsonpath
     if global_ipa_image_filename:
         modifications["$.3723.inputs.image_path"] = global_ipa_image_filename
         modifications["$.900.inputs.value"] = global_ipa_strength
+
+    # TODO(bt,2024-07-06): Move this to the mappings so we don't have to maintain the json path
+    if travel_in:
+        modifications["$.509.inputs.text"] = travel_in
 
     return modifications
 
