@@ -342,7 +342,7 @@ def generate_prompt_for_style(style_name,
         enable_lipsync=enable_lipsync,
         disable_lcm=disable_lcm,
         global_ipa_image_filename=global_ipa_image_filename,
-        global_ipa_strength=global_ipa_strength
+        global_ipa_strength=global_ipa_strength,
         frame_skip=frame_skip,
     )
 
