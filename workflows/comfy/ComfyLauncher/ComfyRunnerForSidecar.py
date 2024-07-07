@@ -161,6 +161,7 @@ def main():
         travel_prompt_filename = args.travel_prompt_filename
         positive_prompt = None
         negative_prompt = None
+        travel_prompt = None
         workflow_filename = None
         enable_lipsync = args.lipsync_enabled
         disable_lcm = args.disable_lcm
@@ -424,7 +425,7 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
 
     # TODO(bt,2024-07-06): Move this to the mappings so we don't have to maintain the json path
     if travel_in:
-        modifications["$.509.inputs.text"] = travel_in
+        modifications["$.509.inputs.text.0"] = travel_in
 
     return modifications
 
