@@ -4,7 +4,7 @@
 #  Nvidia does not provide a CUDA 11.6 with Ubuntu 22.04, which mirrors my own desktop machine. Their CUDA 11.6 + Ubuntu 20.04 image has
 #  a stale Python (3.8), so we have to use the DeadSnakes PPA to install a more modern version.
 #  Gross.
-FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
+FROM nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
 
 # See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.title='Storyteller ML: Voice Conversion'
@@ -57,23 +57,20 @@ COPY ./pip.conf /root/.config/pip/pip.conf
 WORKDIR /app
 
 # Copy files to container
-COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
 COPY --chown=appuser:appgroup install.py /app/install.py
 RUN chmod -R 777 /app
 
 
-
-
-RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit eda87043862f743b0a0467735f8531f7c4709b3a
-RUN python3 -m venv ComfyUI/venv
-RUN ComfyUI/venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
-    ComfyUI/venv/bin/python -m pip cache purge
+RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit faa57430b0ff882275b1afcf6610e8e9f8a5929b
+RUN python3 -m venv venv
+RUN venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    venv/bin/python -m pip cache purge
 
 COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
-RUN ComfyUI/venv/bin/python -m pip install -r required_requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
-    ComfyUI/venv/bin/python -m pip uninstall onnxruntime onnxruntime-gpu -y && \
-    ComfyUI/venv/bin/python -m pip install onnxruntime-gpu ort-nightly-gpu --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
-    ComfyUI/venv/bin/python -m pip cache purge
+RUN venv/bin/python -m pip install -r required_requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    venv/bin/python -m pip uninstall onnxruntime onnxruntime-gpu -y && \
+    venv/bin/python -m pip install onnxruntime-gpu==1.17.1  ort-nightly-gpu --index-url=https://pkgs.dev.azure.com/onnxruntime/onnxruntime/_packaging/onnxruntime-cuda-12/pypi/simple/ --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
+    venv/bin/python -m pip cache purge
 
 COPY --chown=appuser:appgroup repos.json /app/repos.json
 RUN python3 install.py --repos-json repos.json
@@ -81,13 +78,10 @@ RUN python3 install.py --repos-json repos.json
 COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
 COPY --chown=appuser:appgroup preview_server.py /app/preview_server.py
 COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.txt
+COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
+
 ENV COMFY_ROOT_DIRECTORY=/app/ComfyUI
 ENV V2V_WORKFLOWS_DIRECTORY=/workflow_configs
-ENV PREVIEW_WORKFLOW_NAME=workflow_api_instantpreview.json
 
 # protobuf use python implementation (weird error without)
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
-
-# rclone copy --progress --transfers=40 vocodes-s3:kasisnu-test-area-private/comfyui-deps/ vocodes-s3:kasisnu-test-area-private/comfyui-preview-deps/
-
-# rclone copy --progress --transfers=40 . --include 'ComfyUI/models' vocodes-s3:kasisnu-test-area-private/comfyui-preview-deps/

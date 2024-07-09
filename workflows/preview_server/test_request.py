@@ -7,9 +7,9 @@ TEST_INPUT_FILE = 'test_image_10pc.jpg'
 
 # url = 'http://b3104:8005/preview/'
 # url = "http://207.189.112.61:31605/preview"
-# url = 'http://localhost:8000/preview/'
+url = 'http://localhost:8000/preview/'
 
-url = 'https://funnel.tailce84f.ts.net/preview/'
+# url = 'https://funnel.tailce84f.ts.net/preview/'
 style_to_filename = {
     "anime_2_5d": "1_2.5d_anime_model.json",
     "anime_2d_flat": "2_2d_flat_anime_model.json",
@@ -27,6 +27,24 @@ style_to_filename = {
     "realistic_2": "14_realistic_2.json",
     "anime_retro_neon": "15_retro_neon_anime_90.json",
     "anime_standard": "16_standard_anime_model.json",
+    "hr_giger": "17_hr_giger.json",
+    "simpsons": "18_simpsons.json",
+    "carnage": "19_carnage.json",
+    "pastel_cute_anime": "20_pastel_cute_anime.json",
+    "bloom_lighting": "21_bloom_lighting.json",
+    "25d_horror": "22_25D_Horror.json",
+    "creepy": "23_creepy.json",
+    "creepy_vhs": "24_creepy_vhs.json",
+    "trail_cam_footage": "25_trail_cam_footage.json",
+    "old_black_white_movie": "26_old_black_white_movie.json",
+    "horror_noir_black_white": "27_horror_noir_black_white.json",
+    "techno_noir_black_white": "28_techno_noir_black_white.json",
+    "black_white_20s": "29_black_white_20s.json",
+    "cyberpunk_anime": "30_cyberpunk_anime.json",
+    "dragonball": "31_dragonball.json",
+    "realistic_matrix": "32_realistic_matrix.json",
+    "realistic_cyberpunk": "33_realistic_cyberpunk.json",
+    "dreamer": "34_dreamer.json",
 }
 
 all_styles = list(style_to_filename.keys())
@@ -34,13 +52,13 @@ all_styles = list(style_to_filename.keys())
 import random
 random.shuffle(all_styles)
 
-styles = list(all_styles)[:6]
+styles = list(all_styles)[:]
 # random.shuffle(styles)
 
 test_style_list = styles + styles
 # for style, filename in list(style_to_filename.items())[:2]:
 for style in all_styles:
-    for i in range(3):
+    for i in range(1):
         # print(f"Testing style: {style}")
         payload = {"style": style, "positive_prompt": "test pos in", "negative_prompt": "test neg in"}
         with open(TEST_INPUT_FILE , 'rb') as input_file:

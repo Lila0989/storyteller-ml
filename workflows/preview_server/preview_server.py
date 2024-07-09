@@ -69,7 +69,7 @@ COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/home/kasisnu/go/src/github.com/comfyanonymous/ComfyUI")
 SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 60))
 STYLE_LOCK = os.environ.get("STYLE_LOCK", None)
-PREVIEW_WORKFLOW_NAME = os.environ.get("PREVIEW_WORKFLOW_NAME", 'workflow_api_instantpreview.json')
+PREVIEW_WORKFLOW_NAME = os.environ.get("PREVIEW_WORKFLOW_NAME", 'yae_vid2vid_InstantPreview_14-05_API.json')
 MAPPING_NAME = os.environ.get("MAPPING_NAME", "mapping_two.json")
 AUTH_URL = os.environ.get("AUTH_URL", "https://api.fakeyou.com/v1/session")
 
@@ -110,7 +110,8 @@ style_to_filename = {
     "cyberpunk_anime": "30_cyberpunk_anime.json",
     "dragonball": "31_dragonball.json",
     "realistic_matrix": "32_realistic_matrix.json",
-    "realistic_cyberpunk": "33_realistic_cyberpunk.json"
+    "realistic_cyberpunk": "33_realistic_cyberpunk.json",
+    "dreamer": "34_dreamer.json",
 }
 
 allowed_keys = ["style", "positive_prompt", "negative_prompt"]
@@ -398,7 +399,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    comfyui_process = subprocess.Popen(["venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
+    comfyui_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
 
 
     # block until comfyUI server is up

@@ -4,7 +4,6 @@
 #  Nvidia does not provide a CUDA 11.6 with Ubuntu 22.04, which mirrors my own desktop machine. Their CUDA 11.6 + Ubuntu 20.04 image has
 #  a stale Python (3.8), so we have to use the DeadSnakes PPA to install a more modern version.
 #  Gross.
-# FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 FROM nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
 
 # See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -60,7 +59,6 @@ WORKDIR /app
 # Copy files to container
 
 COPY --chown=appuser:appgroup install.py /app/install.py
-COPY --chown=appuser:appgroup list-repos.sh /app/list-repos.sh
 RUN chmod -R 777 /app
 
 # download & install comfy ui and its dependencies
@@ -83,6 +81,7 @@ COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
 COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.txt
 
 COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
+COPY --chown=appuser:appgroup list-repos.sh /app/list-repos.sh
 COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
 COPY --chown=appuser:appgroup format_video.py /app/format_video.py
 COPY --chown=appuser:appgroup facefusion-runner.sh /app/facefusion-runner.sh
