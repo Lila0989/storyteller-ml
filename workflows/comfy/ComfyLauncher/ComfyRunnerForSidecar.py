@@ -23,7 +23,7 @@ COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/app/ComfyUI")
 
 
-MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "3-06-2024/yae_vid2vid_main_29-06_API.json")
+MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "9-07-2024/yae_vid2vid_main_08-07_API.json")
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "3-06-2024/yae_vid2vid_FaceDetailer_1-07_API.json")
 UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "3-06-2024/yae_vid2vid_Upscale_28-06_API.json")
 CINEMATIC_WORKFLOW = os.environ.get("CINEMATIC_WORKFLOW", "3-06-2024/yae_vid2vid_better_main+upscaler_04-07_API.json")
@@ -69,7 +69,8 @@ style_to_filename = {
     "cyberpunk_anime": "30_cyberpunk_anime.json",
     "dragonball": "31_dragonball.json",
     "realistic_matrix": "32_realistic_matrix.json",
-    "realistic_cyberpunk": "33_realistic_cyberpunk.json"
+    "realistic_cyberpunk": "33_realistic_cyberpunk.json",
+    "dreamer": "34_dreamer.json",
 }
 
 
