@@ -85,6 +85,7 @@ def convert_pipline_output_to_input(left):
     shutil.copy(left, right)
 
 
+
 def restore_last_pipeline_output(left):
     print("Restoring last pipeline output to input from: " + str(left))
     right = Path(COMFY_ROOT_DIRECTORY) / "output" / "vid2vid/SparseUpscaleInterp_00001.mp4"
@@ -92,6 +93,7 @@ def restore_last_pipeline_output(left):
 
 
 def parse_args():
+    
     parser = argparse.ArgumentParser(description='Run Comfy')
     parser.add_argument('--prompt', type=str, help='location of the prompt json', required=False)
     parser.add_argument('--style', type=str, help='style name', required=False)
@@ -107,6 +109,11 @@ def parse_args():
     parser.add_argument('--disable-lcm', help='disable lcm (only applies to main workflow)', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--strength', type=float, help='strength', required=False, default=1.0)
     parser.add_argument('--frame_skip', type=int, help='frame skipping', required=False, default=None)
+    
+    parser.add_argument('--depth_video_filename', type=str, help='path of mp4 depth from engine for preprocessing', required=False)
+    parser.add_argument('--outline_video_filename', type=str, help='path of mp4 outline from engine for preprocessing', required=False)
+    parser.add_argument('--normals_video_filename', type=str, help='path of mp4 normals from engine for preprocessing', required=False)
+                                                                
     parser.add_argument('--enable-cinematic', help='enable cinematic', required=False, default=False, action=argparse.BooleanOptionalAction)
     return parser.parse_args()
 
@@ -179,10 +186,16 @@ def main():
         if cinematic_workflow_enabled:
             pipeline_type = PipelineType.CINEMATIC
             workflow_filename = CINEMATIC_WORKFLOW
+            
+        # defaults to none
+        depth_video_filename = args.depth_video_filename
+        outline_video_filename = args.outline_video_filename
+        normals_video_filename = args.normals_video_filename
 
         time_before = time.perf_counter()
 
         validate_style_name(style)
+        
         prompt = generate_prompt_for_style(
             style, 
             positive_prompt, 
@@ -194,8 +207,12 @@ def main():
             disable_lcm=disable_lcm,
             global_ipa_image_filename=args.global_ipa_image_filename,
             global_ipa_strength=args.global_ipa_strength,
-            frame_skip=args.frame_skip
+            frame_skip=args.frame_skip,
+            depth_video_filename=depth_video_filename,
+            outline_video_filename=outline_video_filename,
+            normals_video_filename=normals_video_filename
         )
+        
         print("running pipeline" + str(pipeline_type))
         enqueue_prompt_and_wait(prompt)
         output_index = output_index + 1
@@ -314,6 +331,9 @@ def generate_prompt_for_style(style_name,
                               global_ipa_image_filename: Optional[str] = None,
                               global_ipa_strength: float = 1.0,
                               frame_skip: Optional[int] = None,
+                              depth_video_filename: str = None,
+                              outline_video_filename: str = None,
+                              normals_video_filename: str = None,
                             ) -> Path:
     styles_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "styles"
     workflow_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "workflows"
@@ -346,6 +366,9 @@ def generate_prompt_for_style(style_name,
         global_ipa_image_filename=global_ipa_image_filename,
         global_ipa_strength=global_ipa_strength,
         frame_skip=frame_skip,
+        depth_video_filename=depth_video_filename,
+        outline_video_filename=outline_video_filename,
+        normals_video_filename=normals_video_filename
     )
 
     print(*jsonpath_mods.items(), sep="\n")
@@ -368,7 +391,11 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
                       global_ipa_image_filename: Optional[str] = None,
                       global_ipa_strength: float = 1.0,
                       frame_skip: Optional[int] = None,
-                    ) -> Dict[str, Any]:
+                      depth_video_filename: str = None,
+                      outline_video_filename: str = None,
+                      normals_video_filename: str = None
+                      ) -> Dict[str, Any]:
+    
     modifications = {}
     new_mod_json = style_mods.copy()
     # Process "loras" differently
@@ -401,7 +428,8 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
 
     if frame_skip:
         new_mod_json["every_nth_frame"] = frame_skip
-
+        
+    
     for key, value in new_mod_json.items():
         mapping_key = f"$.{key}"
         jsonpath_expr = parse(mapping_key)
@@ -427,7 +455,13 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
     # TODO(bt,2024-07-06): Move this to the mappings so we don't have to maintain the json path
     if travel_in:
         modifications["$.509.inputs.text"] = travel_in
-
+        
+    # TODO The 3 Mappings for depth outlines and normals apparently uses an array.
+    if depth_video_filename != None and outline_video_filename != None and normals_video_filename !=None:
+        modifications["$.3731.widgets_values"][0] = depth_video_filename 
+        modifications["$.4120.widgets_values"][0] = normals_video_filename 
+        modifications["$.4122.widgets_values"][0] = outline_video_filename
+        
     return modifications
 
 
