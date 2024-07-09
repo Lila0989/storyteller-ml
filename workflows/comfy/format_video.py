@@ -1,3 +1,4 @@
+import argparse
 import os
 import subprocess
 import json
@@ -50,7 +51,7 @@ def format_timestamp(ms):
     seconds, ms = divmod(ms, 1000)
     return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}.{int(ms):03d}"
 
-def process_video(input_video, max_resolution, start_ms, end_ms, framerate):
+def process_video(input_video, max_resolution, start_ms, end_ms, framerate, output_video = None):
     width, height = get_video_resolution(input_video)
     print(f"Original resolution: {width}x{height}")
 
@@ -61,10 +62,10 @@ def process_video(input_video, max_resolution, start_ms, end_ms, framerate):
     duration_ms = end_ms - start_ms
     duration = format_timestamp(duration_ms)
 
-    # get input video directory
-    input_vid_dir = Path(input_video).absolute().parent
-    output_video = input_vid_dir.joinpath(f"input.mp4")
-    # os.makedirs(os.path.dirname(output_video), exist_ok=True)
+    if not output_video:
+        # NB: This is salt's old implicit output video naming
+        input_vid_dir = Path(input_video).absolute().parent
+        output_video = input_vid_dir.joinpath(f"input.mp4")
 
     command = [
         'ffmpeg',
@@ -90,11 +91,29 @@ if __name__ == "__main__":
         print("Usage: python script.py <input_video> <start_ms> <end_ms> <framerate>")
         sys.exit(1)
 
+    # Old Salt Args (replace this mess)
     input_video = sys.argv[1]
+    output_video = None
     # max_resolution = sys.argv[2]
     max_resolution = None
     start_ms = int(sys.argv[2])
     end_ms = int(sys.argv[3])
     framerate = float(sys.argv[4])
 
-    process_video(input_video, max_resolution, start_ms, end_ms, framerate)
+    remaining_args = sys.argv[5:]
+    print('remaining args', remaining_args)
+
+    parser = argparse.ArgumentParser(description='Format Video')
+    # TODO: Output and input are optional for now until we migrate away from salt's arguments. 
+    parser.add_argument('--input', type=str, help='Input Video Filename', required=False)
+    parser.add_argument('--output', type=str, help='Output Video Filename', required=False)
+
+    args = parser.parse_args(remaining_args)
+
+    if args.input:
+        input_video = args.input
+    
+    if args.output:
+        output_video = args.output
+
+    process_video(input_video, max_resolution, start_ms, end_ms, framerate, output_video=output_video)
