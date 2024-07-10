@@ -16,8 +16,9 @@ sys.path.append(comfy_path)
 
 from server import PromptServer
 from execution import PromptQueue
-from main import init_custom_nodes, cuda_malloc_warning, prompt_worker, execute_prestartup_script
+from main import cuda_malloc_warning, prompt_worker, execute_prestartup_script
 import folder_paths
+from nodes import init_extra_nodes
 
 execute_prestartup_script()
 
@@ -27,7 +28,7 @@ async def run():
     server = PromptServer(loop)
     q = PromptQueue(server)
 
-    init_custom_nodes()
+    init_extra_nodes()
 
     cuda_malloc_warning()
 

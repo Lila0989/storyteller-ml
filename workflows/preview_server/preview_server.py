@@ -4,7 +4,6 @@ import time
 
 import shutil
 from pathlib import Path
-import asyncio
 import uuid
 import os
 import json
@@ -15,7 +14,6 @@ import mimetypes
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Request, Response
 import requests
 from jsonpath_ng import jsonpath, parse
-from moviepy.editor import ImageClip
 from fastapi.middleware.cors import CORSMiddleware
 import urllib
 import websockets
@@ -399,7 +397,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    comfyui_process = subprocess.Popen(["venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
+    comfyui_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
 
 
     # block until comfyUI server is up
