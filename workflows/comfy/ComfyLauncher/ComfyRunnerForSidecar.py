@@ -457,12 +457,11 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
         modifications["$.509.inputs.text"] = travel_in
         
     # TODO The 3 Mappings for depth outlines and normals apparently uses an array.
-    if pipeline_type.isin([PipelineType.IPA, PipelineType.BASE]):
+    if pipeline_type in [PipelineType.IPA, PipelineType.BASE]:
         if depth_video_filename != None and outline_video_filename != None and normals_video_filename !=None:
             modifications["$.3731.inputs.text"] = depth_video_filename
             modifications["$.4120.inputs.text"] = normals_video_filename
             modifications["$.4122.inputs.text"] = outline_video_filename
-        
     return modifications
 
 
