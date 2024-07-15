@@ -1,22 +1,17 @@
-
-# NB(bt, 2022-12-12): The version of containerized CUDA must match (or be less than?) that of the host system running this container.
-#  Juggling these dependencies, plus the underlying Ubuntu system (which controls Python versions), is tricky.
-#  Nvidia does not provide a CUDA 11.6 with Ubuntu 22.04, which mirrors my own desktop machine. Their CUDA 11.6 + Ubuntu 20.04 image has
-#  a stale Python (3.8), so we have to use the DeadSnakes PPA to install a more modern version.
-#  Gross.
 FROM nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
 
+ARG COMFY_GIT_URL=https://github.com/comfyanonymous/ComfyUI.git
+ARG COMFY_GIT_SHA=ece5acb8e8025d8ca26aa880f604d971d245475d
+
 # See: https://github.com/opencontainers/image-spec/blob/master/annotations.md
-LABEL org.opencontainers.image.title='Storyteller ML: Voice Conversion'
-LABEL org.opencontainers.image.authors='adrien@storyteller.ai'
+LABEL org.opencontainers.image.title='Storyteller ML: Studio Runners'
+LABEL org.opencontainers.image.authors='kasisnu@storyteller.ai'
 
 # tzdata install hangs without presetting the time zone
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Needed to install "future" release of Python 3.10 under Ubuntu 20.04, which only natively packages Python 3.8.
-# We seem to be stuck on Ubuntu 22.04 because containerizd CUDA 11.6 is the only version we can run on my host machine,
-# and Nvidia does not supply a (CUDA 11.6, Ubuntu 22.04) docker base image.
 RUN apt-get update \
     && apt install software-properties-common -y \
     && add-apt-repository ppa:deadsnakes/ppa

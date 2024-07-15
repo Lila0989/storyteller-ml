@@ -10,7 +10,7 @@ import json
 import random
 from typing import Dict, Any, Optional
 import mimetypes
-
+from moviepy.editor import ImageClip
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Request, Response
 import requests
 from jsonpath_ng import jsonpath, parse
