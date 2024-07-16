@@ -95,6 +95,11 @@
     "url": "https://github.com/kijai/ComfyUI-KJNodes.git"
   },
   {
+    "folder": "ComfyUI/custom_nodes/ComfyUI-LivePortraitKJ",
+    "commit": "2a7bd6116f32e99d3a40057eac222c3666c1dfb1",
+    "url": "https://github.com/kijai/ComfyUI-LivePortraitKJ"
+  },
+  {
     "folder": "ComfyUI/custom_nodes/ComfyUI-Impact-Pack",
     "commit": "a26fe487ef5c46506bd75872c82a3cfb002f7ea1",
     "url": "https://github.com/ltdrdata/ComfyUI-Impact-Pack.git"

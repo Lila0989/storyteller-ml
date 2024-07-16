@@ -13,3 +13,4 @@ yapf
 deepdiff
 pynvml
 pydantic
+insightface==0.7.3

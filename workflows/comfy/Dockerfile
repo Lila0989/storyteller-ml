@@ -25,6 +25,7 @@ RUN apt-get update \
         python3-pip \
         python3.10 \
         python3.10-venv \
+        python3.10-dev \
         unzip \
         htop \
         vim \
@@ -49,37 +50,37 @@ RUN cd /tmp && \
 RUN mkdir -p /root/.config/pip
 COPY ./pip.conf /root/.config/pip/pip.conf
 
-WORKDIR /app
 
 # Copy files to container
-
-COPY --chown=appuser:appgroup install.py /app/install.py
-RUN chmod -R 777 /app
+USER appuser
+WORKDIR /app
+COPY install.py /app/install.py
 
 # download & install comfy ui and its dependencies
-RUN python3 install.py --comfy-ui-url https://github.com/comfyanonymous/ComfyUI.git --comfy-ui-commit ece5acb8e8025d8ca26aa880f604d971d245475d
+RUN python3 install.py --comfy-ui-url ${COMFY_GIT_URL} --comfy-ui-commit ${COMFY_GIT_SHA}
 RUN python3 -m venv venv
 RUN venv/bin/python -m pip install -r ComfyUI/requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
     venv/bin/python -m pip cache purge
 
-COPY --chown=appuser:appgroup required_requirements.txt /app/required_requirements.txt
+COPY required_requirements.txt /app/required_requirements.txt
 RUN venv/bin/python -m pip install -r required_requirements.txt --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
     venv/bin/python -m pip uninstall onnxruntime onnxruntime-gpu -y && \
     venv/bin/python -m pip install onnxruntime-gpu==1.17.1  ort-nightly-gpu --index-url=https://pkgs.dev.azure.com/onnxruntime/onnxruntime/_packaging/onnxruntime-cuda-12/pypi/simple/ --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ && \
     venv/bin/python -m pip cache purge
 
-COPY --chown=appuser:appgroup repos.json /app/repos.json
+COPY repos.json /app/repos.json
 RUN python3 install.py --repos-json repos.json
-COPY --chown=appuser:appgroup custom_nodes/Yae_CustomNodes.py /app/ComfyUI/custom_nodes/Yae_CustomNodes.py
+COPY custom_nodes/Yae_CustomNodes.py /app/ComfyUI/custom_nodes/Yae_CustomNodes.py
 
-COPY --chown=appuser:appgroup dependencies.json /app/dependencies.json
-COPY --chown=appuser:appgroup server_requirements.txt /app/server_requirements.txt
+COPY dependencies.json /app/dependencies.json
+COPY server_requirements.txt /app/server_requirements.txt
 
-COPY --chown=appuser:appgroup initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
-COPY --chown=appuser:appgroup list-repos.sh /app/list-repos.sh
-COPY --chown=appuser:appgroup ComfyLauncher /app/ComfyLauncher
-COPY --chown=appuser:appgroup format_video.py /app/format_video.py
-COPY --chown=appuser:appgroup facefusion-runner.sh /app/facefusion-runner.sh
-
+COPY initialize_comfy_extensions.py /app/initialize_comfy_extensions.py
+COPY list-repos.sh /app/list-repos.sh
+COPY ComfyLauncher /app/ComfyLauncher
+COPY format_video.py /app/format_video.py
+COPY facefusion-runner.sh /app/facefusion-runner.sh
+#TODO(kasisnu, 15/07/2024): remove root user after confirming that it is not needed anymore
+USER root
 # protobuf use python implementation (weird error without)
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
