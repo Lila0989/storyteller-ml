@@ -52,11 +52,6 @@ python fakeyou_infer.py [OPTIONS]
 
 ### Example Commands
 
-#### Using Pretrained Models
-
-```sh
-python fakeyou_infer.py --use_pretrained_gpt --ref_audio data/voice/sponge.wav --ref_text data/voice/ref.txt --target_text data/voice/input.txt --target_language english --how_to_cut Slice once every 4 sentences --output_path output/
-```
 
 #### Using Custom Models with Reference Audio
 
@@ -69,3 +64,10 @@ python fakeyou_infer.py --gpt_model GPT_weights/your_gpt_model.ckpt --sovits_mod
 ```sh
 python fakeyou_infer.py --gpt_model GPT_weights/your_gpt_model.ckpt --sovits_model SoVITS_weights/your_sovits_model.pth --target_text data/voice/input.txt --target_language english --ref_free --how_to_cut "Slice once every 4 sentences" --output_path output/
 ```
+
+#### Using Pretrained Models for using ZeroShot capabilities
+
+```sh
+python fakeyou_infer.py --use_pretrained_gpt --ref_audio data/voice/sponge.wav --ref_text data/voice/ref.txt --target_text data/voice/input.txt --target_language english --how_to_cut Slice once every 4 sentences --output_path output/
+```
+
