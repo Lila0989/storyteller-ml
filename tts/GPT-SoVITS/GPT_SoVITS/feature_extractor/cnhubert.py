@@ -20,15 +20,12 @@ cnhubert_base_path = None
 
 
 class CNHubert(nn.Module):
-    def __init__(self, base_path:str=None):
+    def __init__(self):
         super().__init__()
-        if base_path is None:
-            base_path = cnhubert_base_path
-        self.model = HubertModel.from_pretrained(base_path)
+        self.model = HubertModel.from_pretrained(cnhubert_base_path)
         self.feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(
-            base_path
+            cnhubert_base_path
         )
-
 
     def forward(self, x):
         input_values = self.feature_extractor(

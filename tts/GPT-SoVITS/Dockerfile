@@ -6,13 +6,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 # Create directories for Python installation and model code
-RUN mkdir /python_install
-RUN mkdir -p /model_code/GPT-SoVITS
+RUN mkdir -p /python_install /model_code/GPT-SoVITS/GPT_SoVITS/pretrained_models
 
 # Set the working directory for Python installation
 WORKDIR /python_install
 
-# Install necessary packages
+# Install necessary packages and git-lfs
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     tzdata \
@@ -21,10 +20,17 @@ RUN apt-get update && \
     parallel \
     aria2 \
     git \
-    git-lfs \
     dos2unix \
-    nano && \
+    nano \
+    curl \
+    software-properties-common \
+    espeak-ng \
+    sudo \
+    rsync && \
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get install -y git-lfs && \
     git lfs install && \
+    add-apt-repository ppa:deadsnakes/ppa && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements.txt and install Python dependencies
@@ -34,31 +40,16 @@ RUN python3 -m venv python && \
     python/bin/pip install --upgrade pip wheel setuptools && \
     python/bin/pip install --no-cache-dir -r requirements.txt
 
-# Copy links.txt and links.sha256 to the appropriate directory
-COPY Docker/links.txt /python_install/Docker/links.txt
-COPY Docker/links.sha256 /python_install/Docker/links.sha256
-
-# Download models directly using aria2c
-RUN aria2c --disable-ipv6 --input-file /python_install/Docker/links.txt --dir /python_install --continue
-
-# Verify the downloaded files using checksums
-RUN cat /python_install/Docker/links.sha256 && ls -la /python_install/GPT_SoVITS/pretrained_models && \
-    parallel --will-cite -a /python_install/Docker/links.sha256 "echo -n {} | sha256sum -c"
+# Clone Hugging Face repository and move models
+RUN git clone https://huggingface.co/lj1995/GPT-SoVITS /python_install/GPT-SoVITS && \
+    mkdir -p /model_code/GPT-SoVITS/GPT_SoVITS/pretrained_models && \
+    mv /python_install/GPT-SoVITS/* /model_code/GPT-SoVITS/GPT_SoVITS/pretrained_models/
 
 # Move Docker, GPT_SoVITS, requirements.txt, and tools to /model_code/GPT-SoVITS
-RUN mv /python_install/Docker /model_code/GPT-SoVITS/ && \
-    mv /python_install/GPT_SoVITS /model_code/GPT-SoVITS/ && \
-    mv /python_install/requirements.txt /model_code/GPT-SoVITS/ && \
-    mv /python_install/tools /model_code/GPT-SoVITS/
+RUN mv /python_install/requirements.txt /model_code/GPT-SoVITS/
 
 # Set the working directory for model code
 WORKDIR /model_code/GPT-SoVITS
-
-# Download additional models using modelscope
-RUN /python_install/python/bin/pip install modelscope && \
-    /python_install/python/bin/python -c "from modelscope import snapshot_download; snapshot_download('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch', revision='v2.0.4');" && \
-    /python_install/python/bin/python -c "from modelscope import snapshot_download; snapshot_download('damo/speech_fsmn_vad_zh-cn-16k-common-pytorch', revision='v2.0.4');" && \
-    /python_install/python/bin/python -c "from modelscope import snapshot_download; snapshot_download('damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch', revision='v2.0.4');"
 
 # Copy the remaining contents to the model_code directory
 COPY . /model_code/GPT-SoVITS

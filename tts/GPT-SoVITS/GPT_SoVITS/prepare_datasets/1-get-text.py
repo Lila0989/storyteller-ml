@@ -117,12 +117,9 @@ if os.path.exists(txt_path) == False:
         try:
             wav_name, spk_name, language, text = line.split("|")
             # todo.append([name,text,"zh"])
-            if language in language_v1_to_language_v2.keys():
-                todo.append(
-                    [wav_name, text, language_v1_to_language_v2.get(language, language)]
-                )
-            else:
-                print(f"\033[33m[Waring] The {language = } of {wav_name} is not supported for training.\033[0m")
+            todo.append(
+                [wav_name, text, language_v1_to_language_v2.get(language, language)]
+            )
         except:
             print(line, traceback.format_exc())
 
