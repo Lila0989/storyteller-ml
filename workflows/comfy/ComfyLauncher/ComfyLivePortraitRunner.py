@@ -13,7 +13,7 @@ import subprocess
 import signal
 
 SERVER_IP = os.environ.get("SERVER_IP", "127.0.0.1:8188")
-SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 60))
+SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 180))
 
 TIMEOUT_SECONDS = int(os.environ.get("TIMEOUT_SECONDS", 1000))
 PROMPT_ENDPOINT = f"http://{SERVER_IP}/prompt"
@@ -66,6 +66,7 @@ def parse_args():
     parser.add_argument('--portrait-media-filename', type=str, help='path of mp4 depth from engine for preprocessing', required=True)
     parser.add_argument('--driver-media-filename', type=str, help='path of mp4 outline from engine for preprocessing', required=True)
     parser.add_argument('--input-is-image', action='store_true', help='input is image', required=True)
+    parser.add_argument('--skip-comfy-startup', action='store_true', help='controls if this script tries to start comfy', default=True)
     parser.add_argument('--tmpdir', type=str, help='path of tmpdir for preprocessing', required=False)
     parser.add_argument('--output-filename', type=str, help='path of output filename', required=True)
 
@@ -233,7 +234,8 @@ def apply_jsonpath_mods(jsonpath_mods: Dict[str, Any], workflow_json: Dict[str, 
 if __name__ == "__main__":
     os.setpgrp()
     try:
-        comfyui_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
+        if not args.skip_comfy_startup:
+            comfyui_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
         start_time = time.time()
         started = False
         while time.time() - start_time < SERVER_START_TIMEOUT:
