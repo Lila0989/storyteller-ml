@@ -25,10 +25,10 @@ COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/app/ComfyUI")
 
 
-BASE_LIVE_PORTRAIT_WORKFLOW = os.environ.get("BASE_LIVE_PORTRAIT_WORKFLOW", "16-07-2024/workflow_api_live_portrait-16-07-24.json")
+BASE_LIVE_PORTRAIT_WORKFLOW = os.environ.get("BASE_LIVE_PORTRAIT_WORKFLOW", "17-07-2024/yae_LivingPortrait_17-07_API.json")
 
 # V2V_WORKFLOWS_DIRECTORY = "/app/ComfyUI/exp"
-# BASE_LIVE_PORTRAIT_WORKFLOW = "workflow_api_live_portrait-16-07-24.json"
+# BASE_LIVE_PORTRAIT_WORKFLOW = "yae_LivingPortrait_17-07_API.json"
 
 class PipelineType(IntEnum):
     BASE = auto()
@@ -98,7 +98,6 @@ def ensure_server_is_healthy(server_address):
 def main():
     ensure_server_is_healthy(SERVER_IP)
     pipeline_type = PipelineType.BASE
-    print("Generating prompt json")
     workflow_filename = BASE_LIVE_PORTRAIT_WORKFLOW
     input_media_filename = args.portrait_media_filename
     input_driver_filename = args.driver_media_filename
@@ -118,6 +117,7 @@ def main():
 
 
     time_before = time.perf_counter()
+    print("Generating prompt json using workflow: " + workflow_filename)
 
     prompt = generate_prompt_for_style(
         workflow_filename=workflow_filename,
@@ -191,6 +191,7 @@ def generate_prompt_for_style(
     if input_is_image:
         jsonpath_mods["$.43.inputs.image_path"] = input_media_filename
         jsonpath_mods["$.26.inputs.video"] = input_driver_filename
+        jsonpath_mods["$.46.inputs.boolean"] = 0
     else:
         jsonpath_mods["$.26.inputs.video"] = input_media_filename
         jsonpath_mods["$.46.inputs.boolean"] = 1
