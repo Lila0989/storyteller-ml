@@ -572,10 +572,10 @@ def main():
 
     prompt_text = None
     if args.ref_text and os.path.exists(args.ref_text):
-        with open(args.ref_text, 'r') as f:
+        with open(args.ref_text, 'r', encoding='utf-8') as f:
             prompt_text = f.read().strip()
 
-    with open(args.target_text, 'r') as f:
+    with open(args.target_text, 'r', encoding='utf-8') as f:
         target_text = f.read().strip()
 
     output_path = gptsovits_inference(
