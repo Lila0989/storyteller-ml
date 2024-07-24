@@ -57,9 +57,14 @@ def ensure_pipeline_input_present(source_path, input_name=None):
     shutil.copy(left, right)
 
 
-def ensure_output_present_at(right):
-    left = Path(COMFY_ROOT_DIRECTORY) / "output" / "vid2vid" / "LivePortrait_00001.mp4"
-    shutil.copy(left, right)
+def ensure_output_present_at(new_filename):
+    directory = Path(COMFY_ROOT_DIRECTORY) / "output" / "vid2vid"
+    # Comfy will create a copy of the video that includes audio, but only if the driver video had audio.
+    output = directory / "LivePortrait_00001.mp4"
+    output_with_audio = directory / "LivePortrait_00001-audio.mp4"
+    if os.path.exists(output_with_audio):
+        output = output_with_audio
+    shutil.copy(output, new_filename)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Run Comfy')
