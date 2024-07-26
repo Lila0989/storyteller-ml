@@ -47,6 +47,15 @@ RUN cd /tmp && \
         chmod 755 /usr/bin/rclone && \
         rm -rf /tmp/rclone*
 
+RUN cd /tmp && \
+    wget -O entr.zip https://github.com/eradman/entr/archive/refs/tags/5.6.zip && \
+        unzip entr.zip && \
+        cd entr-5.6 && \
+        ./configure && \
+        make test && \
+        make install \
+        && rm -rf /tmp/entr-5.6
+
 RUN mkdir -p /root/.config/pip
 COPY ./pip.conf /root/.config/pip/pip.conf
 

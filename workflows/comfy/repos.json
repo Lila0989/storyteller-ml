@@ -36,7 +36,7 @@
   },
   {
     "folder": "ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite",
-    "commit": "f94597739f20dac331f9918a245149b6b00a60f2",
+    "commit": "e1c4e939ec942117183233da7fece1be498e61e8",
     "url": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git"
   },
   {
@@ -96,7 +96,7 @@
   },
   {
     "folder": "ComfyUI/custom_nodes/ComfyUI-LivePortraitKJ",
-    "commit": "2a7bd6116f32e99d3a40057eac222c3666c1dfb1",
+    "commit": "2b23af0508f832a3f82ce450cbf436e91be00235",
     "url": "https://github.com/kijai/ComfyUI-LivePortraitKJ"
   },
   {

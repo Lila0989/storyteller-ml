@@ -115,9 +115,20 @@ def parse_args():
     parser.add_argument('--normals_video_filename', type=str, help='path of mp4 normals from engine for preprocessing', required=False)
                                                                 
     parser.add_argument('--enable-cinematic', help='enable cinematic', required=False, default=False, action=argparse.BooleanOptionalAction)
+
+    parser.add_argument('--server-restart-trigger-file', type=str, help='server restart trigger file', required=False)
     return parser.parse_args()
 
 args = parse_args()
+
+def get_queued_jobs_count(server_address):
+    try:
+        response = requests.get(f"http://{server_address}/queue", timeout=5)
+    except requests.exceptions.BaseException:
+        print("Error while checking queue")
+        return None
+    queue_json = response.json()
+    return len(queue_json.get("queue_pending", []))
 
 def ensure_server_is_healthy(server_address):
     # check the health of the server (5 second timeout)
@@ -140,6 +151,25 @@ def ensure_server_is_healthy(server_address):
 def interrupt_comfy_queue(server_address):
     requests.post(f"http://{server_address}/interrupt")
     print("Queue interrupted successfully.")
+
+def wait_for_comfy_startup(server_address, timeout=SERVER_START_TIMEOUT):
+    prompt_endpoint = f"http://{server_address}/prompt"
+    start_time = time.time()
+    started = False
+    request_timeout = 2
+    while time.time() - start_time < timeout:
+        try:
+            response = requests.get(prompt_endpoint, timeout=request_timeout)
+            if response.status_code == 200:
+                print("Server is healthy")
+                started = True
+                break
+        except requests.exceptions.ConnectionError:
+            print(f"Server is not up yet. Time elapsed: {time.time() - start_time:.2f}")
+        time.sleep(1)
+    if not started:
+        print(f"Server failed to start in {SERVER_START_TIMEOUT} seconds")
+        exit(1)
 
 def invoke_facefusion(input_audio, input_video, output_video):
     # invoke facefusion
