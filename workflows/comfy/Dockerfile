@@ -89,6 +89,7 @@ COPY list-repos.sh /app/list-repos.sh
 COPY ComfyLauncher /app/ComfyLauncher
 COPY format_video.py /app/format_video.py
 COPY facefusion-runner.sh /app/facefusion-runner.sh
+COPY live-runner-comfy-server-starter.sh /app/live-runner-comfy-server-starter.sh
 #TODO(kasisnu, 15/07/2024): remove root user after confirming that it is not needed anymore
 USER root
 # protobuf use python implementation (weird error without)
