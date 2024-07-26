@@ -3,7 +3,7 @@
 
 set -ex
 
-cd /app/venv/bin/activate
+source /app/venv/bin/activate
 
 date > /restart.txt
 

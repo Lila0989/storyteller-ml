@@ -162,19 +162,13 @@ def main():
     input_media_filename = args.portrait_media_filename
     input_driver_filename = args.driver_media_filename
     input_is_image = args.input_is_image
-    input_filename = "input.mp4"
-    print("Generating prompt json using workflow: " + workflow_filename)
-    prompt = generate_prompt_for_style(
-        workflow_filename=workflow_filename,
-        input_media_filename="input/" + input_filename,
-        input_driver_filename="input/driver.mp4",
-        input_is_image=input_is_image,
-    )
+
     for _ in range(outer_retries):
         ensure_server_is_healthy(SERVER_IP, restart_trigger_file)
 
         ensure_input_directory_empty()
         ensure_output_directory_empty()
+        input_filename = "input.mp4"
 
         if input_media_filename:
             if input_is_image:
@@ -185,7 +179,13 @@ def main():
 
         if input_driver_filename:
             ensure_pipeline_input_present(input_driver_filename, "driver.mp4")
-
+        print("Generating prompt json using workflow: " + workflow_filename)
+        prompt = generate_prompt_for_style(
+            workflow_filename=workflow_filename,
+            input_media_filename="input/" + input_filename,
+            input_driver_filename="input/driver.mp4",
+            input_is_image=input_is_image,
+        )
         time_before = time.perf_counter()
         print("running pipeline" + str(pipeline_type))
         enqueue_prompt_and_wait(prompt)
@@ -237,7 +237,6 @@ def enqueue_prompt_and_wait(prompt):
             print("Timeout reached and job didn't finish!")
             exit(1)
         time.sleep(1)
-
 
 
 def generate_prompt_for_style(
