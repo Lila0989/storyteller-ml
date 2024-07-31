@@ -307,59 +307,57 @@ if is_half:
 else:
     ssl_model = ssl_model.to(device)
 
-def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut=i18n("不切"), top_k=20, top_p=0.6, temperature=0.6, ref_free=False):
+def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut=i18n("不切"), top_k=20, top_p=0.6, temperature=0.6, ref_free = False):
     t0 = ttime()
     if prompt_text is None or len(prompt_text) == 0:
         ref_free = True
-    prompt_language = dict_language.get(prompt_language, None)
-    if not ref_free and prompt_language is None:
-        raise ValueError(f"Unsupported language: {prompt_language}")
+    prompt_language = dict_language[prompt_language]
     text_language = dict_language[text_language]
-
     if not ref_free:
         prompt_text = prompt_text.strip("\n")
-        if prompt_text[-1] not in splits:
-            prompt_text += "。" if prompt_language != "en" else "."
+        if (prompt_text[-1] not in splits): prompt_text += "。" if prompt_language != "en" else "."
         print(f"Reference text: {prompt_text}")
-        phones1, bert1, norm_text1 = get_phones_and_bert(prompt_text, prompt_language)
+        phones1,bert1,norm_text1=get_phones_and_bert(prompt_text, prompt_language)
     text = text.strip("\n")
-    if text[0] not in splits and len(get_first(text)) < 4:
-        text = "。" + text if text_language != "en" else "." + text
+    if (text[0] not in splits and len(get_first(text)) < 4): text = "。" + text if text_language != "en" else "." + text
 
     print(f"Full text: {text}")
     zero_wav = np.zeros(
         int(hps.data.sampling_rate * 0.3),
-        dtype=np.float16 if is_half else np.float32,
+        dtype=np.float16 if is_half == True else np.float32,
     )
+    with torch.no_grad():
+        wav16k, sr = librosa.load(ref_wav_path, sr=16000)
+        if (wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000):
+            raise OSError("参考音频在3~10秒范围外，请更换！")
+        wav16k = torch.from_numpy(wav16k)
+        zero_wav_torch = torch.from_numpy(zero_wav)
+        if is_half == True:
+            wav16k = wav16k.half().to(device)
+            zero_wav_torch = zero_wav_torch.half().to(device)
+        else:
+            wav16k = wav16k.to(device)
+            zero_wav_torch = zero_wav_torch.to(device)
+        wav16k = torch.cat([wav16k, zero_wav_torch])
+        ssl_content = ssl_model.model(wav16k.unsqueeze(0))[
+            "last_hidden_state"
+        ].transpose(
+            1, 2
+        )  # .float()
+        codes = vq_model.extract_latent(ssl_content)
 
-    if not ref_free:
-        with torch.no_grad():
-            wav16k, sr = librosa.load(ref_wav_path, sr=16000)
-            if wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000:
-                raise OSError("参考音频在3~10秒范围外，请更换！")
-            wav16k = torch.from_numpy(wav16k)
-            zero_wav_torch = torch.from_numpy(zero_wav)
-            if is_half:
-                wav16k = wav16k.half().to(device)
-                zero_wav_torch = zero_wav_torch.half().to(device)
-            else:
-                wav16k = wav16k.to(device)
-                zero_wav_torch = zero_wav_torch.to(device)
-            wav16k = torch.cat([wav16k, zero_wav_torch])
-            ssl_content = ssl_model.model(wav16k.unsqueeze(0))["last_hidden_state"].transpose(1, 2)
-            codes = vq_model.extract_latent(ssl_content)
-            prompt_semantic = codes[0, 0]
+        prompt_semantic = codes[0, 0]
     t1 = ttime()
 
-    if how_to_cut == "Slice once every 4 sentences":
+    if (how_to_cut == "Slice once every 4 sentences"):
         text = cut1(text)
-    elif how_to_cut == "Cut per 50 characters":
+    elif (how_to_cut == "Cut per 50 characters"):
         text = cut2(text)
-    elif how_to_cut == "Slice by Chinese punct":
+    elif (how_to_cut == "Slice by Chinese punct"):
         text = cut3(text)
-    elif how_to_cut == "Slice by English punct":
+    elif (how_to_cut == "Slice by English punct"):
         text = cut4(text)
-    elif how_to_cut == "Slice by every punct":
+    elif (how_to_cut == "Slice by every punct"):
         text = cut5(text)
     while "\n\n" in text:
         text = text.replace("\n\n", "\n")
@@ -367,37 +365,39 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
     texts = text.split("\n")
     texts = merge_short_text_in_array(texts, 5)
     audio_opt = []
-
+    
     t2 = ttime()
     t3, t4, t5 = 0, 0, 0
-
+    
     for text in texts:
+        # 解决输入目标文本的空行导致报错的问题
         t3s = ttime()
-        if len(text.strip()) == 0:
+        if (len(text.strip()) == 0):
             continue
-        if text[-1] not in splits:
-            text += "。" if text_language != "en" else "."
+        if (text[-1] not in splits): text += "。" if text_language != "en" else "."
         print(f"Text being generated: {text}")
-        phones2, bert2, norm_text2 = get_phones_and_bert(text, text_language)
+        phones2,bert2,norm_text2=get_phones_and_bert(text, text_language)
         print(f"Text after frontend processing: {norm_text2}")
         if not ref_free:
             bert = torch.cat([bert1, bert2], 1)
-            all_phoneme_ids = torch.LongTensor(phones1 + phones2).to(device).unsqueeze(0)
+            all_phoneme_ids = torch.LongTensor(phones1+phones2).to(device).unsqueeze(0)
         else:
             bert = bert2
             all_phoneme_ids = torch.LongTensor(phones2).to(device).unsqueeze(0)
 
         bert = bert.to(device).unsqueeze(0)
         all_phoneme_len = torch.tensor([all_phoneme_ids.shape[-1]]).to(device)
-        prompt = None if ref_free else prompt_semantic.unsqueeze(0).to(device)
+        prompt = prompt_semantic.unsqueeze(0).to(device)
         t3e = ttime()
         t3 += t3e - t3s
         with torch.no_grad():
+            # pred_semantic = t2s_model.model.infer(
             pred_semantic, idx = t2s_model.model.infer_panel(
                 all_phoneme_ids,
                 all_phoneme_len,
-                prompt,
+                None if ref_free else prompt,
                 bert,
+                # prompt_phone_len=ph_offset,
                 top_k=top_k,
                 top_p=top_p,
                 temperature=temperature,
@@ -405,13 +405,16 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
             )
         t4e = ttime()
         t4 += t4e - t3e
-        pred_semantic = pred_semantic[:, -idx:].unsqueeze(0)
-        refer = get_spepc(hps, ref_wav_path) if not ref_free else None
-        if refer is not None:
-            if is_half:
-                refer = refer.half().to(device)
-            else:
-                refer = refer.to(device)
+        # print(pred_semantic.shape,idx)
+        pred_semantic = pred_semantic[:, -idx:].unsqueeze(
+            0
+        )  # .unsqueeze(0)#mq要多unsqueeze一次
+        refer = get_spepc(hps, ref_wav_path)  # .to(device)
+        if is_half == True:
+            refer = refer.half().to(device)
+        else:
+            refer = refer.to(device)
+        # audio = vq_model.decode(pred_semantic, all_phoneme_ids, refer).detach().cpu().numpy()[0, 0]
         audio = (
             vq_model.decode(
                 pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refer
@@ -419,16 +422,15 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
                 .detach()
                 .cpu()
                 .numpy()[0, 0]
-        )
-        max_audio = np.abs(audio).max()
-        if max_audio > 1:
-            audio /= max_audio
+        )  ###试试重建不带上prompt部分
+        max_audio=np.abs(audio).max()#简单防止16bit爆音
+        if max_audio>1:audio/=max_audio
         audio_opt.append(audio)
         audio_opt.append(zero_wav)
         t5e = ttime()
         t5 += t5e - t4e
     return (
-        (t1 - t0, t2 - t1, t3, t4, t5),
+        (t1-t0, t2-t1, t3, t4, t5),
         hps.data.sampling_rate,
         (np.concatenate(audio_opt, 0) * 32768).astype(np.int16)
     )
@@ -504,49 +506,53 @@ def cut5(inp):
     opt = "\n".join(mergeitems)
     return opt
 
-def gptsovits_inference(gpt_model, sovits_model, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, output_path="output"):
+def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False):
     global loaded_gpt_path, loaded_sovits_path
-
-    if not ref_free and not os.path.exists(ref_wav_path):
+    if not os.path.exists(ref_wav_path):
         print("You must input a reference audio path!")
         return None
-
-    gpt_path = gpt_model
-    sovits_path = sovits_model
+    gpt_path = gpt_model_path if gpt_model_path else pretrained_gpt_path
+    sovits_path = sovits_model_path if sovits_model_path else pretrained_sovits_path
 
     if loaded_gpt_path != gpt_path:
         change_gpt_weights(gpt_path)
         loaded_gpt_path = gpt_path
-
     if loaded_sovits_path != sovits_path:
         change_sovits_weights(sovits_path)
         loaded_sovits_path = sovits_path
 
-    if not os.path.exists(output_path):
-        os.makedirs(output_path, exist_ok=True)
-
+    opt_root = os.path.join(os.getcwd(), "output")
+    os.makedirs(opt_root, exist_ok=True)
     output_count = 1
+
     while True:
-        opt_filename = f"GPTSoVITS_{output_count}.wav"
-        current_output_path = os.path.join(output_path, opt_filename)
+        opt_filename = f"{output_count}_GPTSoVITS.wav"
+        current_output_path = os.path.join(opt_root, opt_filename)
         if not os.path.exists(current_output_path):
             break
         output_count += 1
 
     times, sr, audio_data = get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_free)
-
-    sf.write(current_output_path, audio_data, sr, format="wav")
+    
+    sf.write(
+        current_output_path,
+        audio_data,
+        sr,
+        format="wav"
+    )
     print("Times:\nref_audio: {:.2f}s text: {:.2f}s phonemes & bert: {:.2f}s gpt: {:.2f}s sovits: {:.2f}s".format(*times))
     return current_output_path
+
 
 # Command-line interface
 def main():
     parser = argparse.ArgumentParser(description="GPT-SoVITS TTS Inference CLI")
     parser.add_argument("--use_pretrained_gpt", action="store_true", help="Use pretrained GPT model")
+    parser.add_argument("--use_pretrained_sovits", action="store_true", help="Use pretrained SoVITS model")
     parser.add_argument("--gpt_model", type=str, help="Path to GPT model checkpoint")
     parser.add_argument("--sovits_model", type=str, help="Path to SoVITS model checkpoint")
     parser.add_argument("--ref_audio", type=str, help="Path to reference wav file")
-    parser.add_argument("--ref_text", type=str, help="Path to reference text file")
+    parser.add_argument("--ref_text", type=str, help="Path to reference text file (optional)")
     parser.add_argument("--target_language", type=str, choices=dict_language.keys(), help="Language of the target text")
     parser.add_argument("--ref_language", type=str, choices=dict_language.keys(), help="Language of the reference text")
     parser.add_argument("--target_text", type=str, help="Path to the target text file")
@@ -554,21 +560,18 @@ def main():
     parser.add_argument("--top_k", type=int, default=20, help="Top K sampling")
     parser.add_argument("--top_p", type=float, default=0.6, help="Top P sampling")
     parser.add_argument("--temperature", type=float, default=0.6, help="Sampling temperature")
-    parser.add_argument("--ref_free", action="store_true", help="Perform reference-free TTS")
     parser.add_argument("--output_path", type=str, default="output", help="Path to save the output wav file")
 
     args = parser.parse_args()
 
-    if args.use_pretrained_gpt:
-        args.gpt_model = pretrained_gpt_path
-        args.sovits_model = pretrained_sovits_path
+    gpt_model_path = args.gpt_model if args.gpt_model else (pretrained_gpt_path if args.use_pretrained_gpt else None)
+    sovits_model_path = args.sovits_model if args.sovits_model else (pretrained_sovits_path if args.use_pretrained_sovits else None)
 
-        # Check required arguments
-        if not args.ref_audio or not args.ref_text or not args.target_text or not args.target_language:
-            parser.error("--ref_audio, --ref_text, --target_text, and --target_language are required when --use_pretrained_gpt is enabled")
+    if not gpt_model_path or not sovits_model_path:
+        parser.error("--gpt_model and --sovits_model are required when not using pretrained models")
 
-    if not args.use_pretrained_gpt and (not args.gpt_model or not args.sovits_model):
-        parser.error("--gpt_model and --sovits_model are required when --use_pretrained_gpt is not enabled")
+    if not args.ref_audio or not args.target_text or not args.target_language:
+        parser.error("--ref_audio, --target_text, and --target_language are required")
 
     prompt_text = None
     if args.ref_text and os.path.exists(args.ref_text):
@@ -578,9 +581,9 @@ def main():
     with open(args.target_text, 'r', encoding='utf-8') as f:
         target_text = f.read().strip()
 
-    output_path = gptsovits_inference(
-        gpt_model=args.gpt_model,
-        sovits_model=args.sovits_model,
+    gptsovits_output_audio_path = gptsovits_inference(
+        gpt_model_path=gpt_model_path,
+        sovits_model_path=sovits_model_path,
         ref_wav_path=args.ref_audio,
         prompt_text=prompt_text,
         prompt_language=args.ref_language,
@@ -590,11 +593,14 @@ def main():
         top_k=args.top_k,
         top_p=args.top_p,
         temperature=args.temperature,
-        ref_free=args.ref_free,
-        output_path=args.output_path
+        ref_free=False
     )
-    if output_path:
-        print(f"Generated audio saved at: {output_path}")
+
+    if gptsovits_output_audio_path:
+        t1 = ttime()
+        print(f"Total time: {t1-t0:.2f}s")
+        print(f"Generated audio saved at \033[1m{gptsovits_output_audio_path}\033[0m")
 
 if __name__ == "__main__":
+    t0 = ttime()
     main()

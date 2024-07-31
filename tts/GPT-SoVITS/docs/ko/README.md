@@ -10,8 +10,9 @@
 [![Open In Colab](https://img.shields.io/badge/Colab-F9AB00?style=for-the-badge&logo=googlecolab&color=525252)](https://colab.research.google.com/github/RVC-Boss/GPT-SoVITS/blob/main/colab_webui.ipynb)
 [![License](https://img.shields.io/badge/LICENSE-MIT-green.svg?style=for-the-badge)](https://github.com/RVC-Boss/GPT-SoVITS/blob/main/LICENSE)
 [![Huggingface](https://img.shields.io/badge/🤗%20-Models%20Repo-yellow.svg?style=for-the-badge)](https://huggingface.co/lj1995/GPT-SoVITS/tree/main)
+[![Discord](https://img.shields.io/discord/1198701940511617164?color=%23738ADB&label=Discord&style=for-the-badge)](https://discord.gg/dnrgs5GHfG)
 
-[**English**](../../README.md) | [**中文简体**](../cn/README.md) | [**日本語**](../ja/README.md) | [**한국어**](./README.md)
+[**English**](../../README.md) | [**中文简体**](../cn/README.md) | [**日本語**](../ja/README.md) | **한국어** | [**Türkçe**](../tr/README.md)
 
 </div>
 
@@ -33,6 +34,8 @@
 
 https://github.com/RVC-Boss/GPT-SoVITS/assets/129054828/05bee1fa-bdd8-4d85-9350-80c060ab47fb
 
+**사용자 설명서: [简体中文](https://www.yuque.com/baicaigongchang1145haoyuangong/ib3g1e) | [English](https://rentry.co/GPT-SoVITS-guide#/)**
+
 ## 설치
 
 ### 테스트 통과 환경
@@ -46,7 +49,7 @@ _참고: numba==0.56.4 는 python<3.11 을 필요로 합니다._
 
 ### Windows
 
-Windows 사용자이며 (win>=10에서 테스트 완료) [미리 패키지된 배포판](https://huggingface.co/lj1995/GPT-SoVITS-windows-package/resolve/main/GPT-SoVITS-beta.7z?download=true)을 직접 다운로드하여 _go-webui.bat_을 더블클릭하면 GPT-SoVITS-WebUI를 시작할 수 있습니다.
+Windows 사용자라면 (win>=10에서 테스트됨), [통합 패키지를 다운로드](https://huggingface.co/lj1995/GPT-SoVITS-windows-package/resolve/main/GPT-SoVITS-beta.7z?download=true)한 후 압축을 풀고 _go-webui.bat_ 파일을 더블 클릭하면 GPT-SoVITS-WebUI를 시작할 수 있습니다.
 
 ### Linux
 
@@ -61,7 +64,7 @@ bash install.sh
 **주의: Mac에서 GPU로 훈련된 모델은 다른 OS에서 훈련된 모델에 비해 품질이 낮습니다. 해당 문제를 해결하기 전까지 MacOS에선 CPU를 사용하여 훈련을 진행합니다.**
 
 1. `xcode-select --install`을 실행하여 Xcode 커맨드라인 도구를 설치하세요.
-2. `brew install ffmpeg` 또는 `conda install ffmpeg`을 실행하여 FFmpeg를 설치하세요.
+2. `brew install ffmpeg` 명령어를 실행하여 FFmpeg를 설치합니다.
 3. 위의 단계를 완료한 후, 다음 명령어를 실행하여 이 프로젝트를 설치하세요.
 
 ```bash
@@ -98,6 +101,11 @@ conda install -c conda-forge 'ffmpeg<7'
 ##### Windows 사용자
 
 [ffmpeg.exe](https://huggingface.co/lj1995/VoiceConversionWebUI/blob/main/ffmpeg.exe)와 [ffprobe.exe](https://huggingface.co/lj1995/VoiceConversionWebUI/blob/main/ffprobe.exe)를 GPT-SoVITS root 디렉토리에 넣습니다.
+
+##### Mac 사용자
+```bash
+brew install ffmpeg
+```
 
 ### Docker에서 사용
 
@@ -178,7 +186,7 @@ D:\GPT-SoVITS\xxx/xxx.wav|xxx|en|I like playing Genshin.
   - [ ] 더 나은 sovits 기본 모델 (향상된 오디오 품질).
   - [ ] 모델 블렌딩.
 
-## (선택 사항) 필요한 경우 여기에서 명령줄 작업 모드를 제공합니다.
+## (추가적인) 명령줄에서 실행하는 방법
 명령줄을 사용하여 UVR5용 WebUI 열기
 ```
 python tools/uvr5/webui.py "<infer_device>" <is_half> <webui_port_uvr5>
@@ -208,24 +216,34 @@ ASR 처리는 Faster_Whisper(중국어를 제외한 ASR 마킹)를 통해 수행
 python ./tools/asr/fasterwhisper_asr.py -i <input> -o <output> -l <language>
 ```
 사용자 정의 목록 저장 경로가 활성화되었습니다.
+
 ## 감사의 말
 
-특별히 다음 프로젝트와 기여자에게 감사드립니다:
+다음 프로젝트와 기여자들에게 특별히 감사드립니다:
 
+### 이론 연구
 - [ar-vits](https://github.com/innnky/ar-vits)
 - [SoundStorm](https://github.com/yangdongchao/SoundStorm/tree/master/soundstorm/s1/AR)
 - [vits](https://github.com/jaywalnut310/vits)
 - [TransferTTS](https://github.com/hcy71o/TransferTTS/blob/master/models.py#L556)
-- [Chinese Speech Pretrain](https://github.com/TencentGameMate/chinese_speech_pretrain)
 - [contentvec](https://github.com/auspicious3000/contentvec/)
 - [hifi-gan](https://github.com/jik876/hifi-gan)
-- [Chinese-Roberta-WWM-Ext-Large](https://huggingface.co/hfl/chinese-roberta-wwm-ext-large)
 - [fish-speech](https://github.com/fishaudio/fish-speech/blob/main/tools/llama/generate.py#L41)
+### 사전 학습 모델
+- [Chinese Speech Pretrain](https://github.com/TencentGameMate/chinese_speech_pretrain)
+- [Chinese-Roberta-WWM-Ext-Large](https://huggingface.co/hfl/chinese-roberta-wwm-ext-large)
+### 추론용 텍스트 프론트엔드
+- [paddlespeech zh_normalization](https://github.com/PaddlePaddle/PaddleSpeech/tree/develop/paddlespeech/t2s/frontend/zh_normalization)
+- [LangSegment](https://github.com/juntaosun/LangSegment)
+### WebUI 도구
 - [ultimatevocalremovergui](https://github.com/Anjok07/ultimatevocalremovergui)
 - [audio-slicer](https://github.com/openvpi/audio-slicer)
 - [SubFix](https://github.com/cronrpc/SubFix)
 - [FFmpeg](https://github.com/FFmpeg/FFmpeg)
 - [gradio](https://github.com/gradio-app/gradio)
+- [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
+- [FunASR](https://github.com/alibaba-damo-academy/FunASR)
+
 
 ## 모든 기여자들에게 감사드립니다 ;)
 

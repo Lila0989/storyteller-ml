@@ -72,6 +72,28 @@ RESP:
 成功: 直接返回 wav 音频流， http code 200
 失败: 返回包含错误信息的 json, http code 400
 
+手动指定当次推理所使用的参考音频，并提供参数:
+GET:
+    `http://127.0.0.1:9880?refer_wav_path=123.wav&prompt_text=一二三。&prompt_language=zh&text=先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。&text_language=zh&top_k=20&top_p=0.6&temperature=0.6&speed=1`
+POST:
+```json
+{
+    "refer_wav_path": "123.wav",
+    "prompt_text": "一二三。",
+    "prompt_language": "zh",
+    "text": "先帝创业未半而中道崩殂，今天下三分，益州疲弊，此诚危急存亡之秋也。",
+    "text_language": "zh",
+    "top_k": 20,
+    "top_p": 0.6,
+    "temperature": 0.6,
+    "speed": 1
+}
+```
+
+RESP:
+成功: 直接返回 wav 音频流， http code 200
+失败: 返回包含错误信息的 json, http code 400
+
 
 ### 更换默认参考音频
 
@@ -143,7 +165,7 @@ from AR.models.t2s_lightning_module import Text2SemanticLightningModule
 from text import cleaned_text_to_sequence
 from text.cleaner import clean_text
 from module.mel_processing import spectrogram_torch
-from my_utils import load_audio
+from tools.my_utils import load_audio
 import config as global_config
 import logging
 import subprocess
@@ -339,8 +361,46 @@ def pack_audio(audio_bytes, data, rate):
 
 
 def pack_ogg(audio_bytes, data, rate):
-    with sf.SoundFile(audio_bytes, mode='w', samplerate=rate, channels=1, format='ogg') as audio_file:
-        audio_file.write(data)
+    # Author: AkagawaTsurunaki
+    # Issue:
+    #   Stack overflow probabilistically occurs
+    #   when the function `sf_writef_short` of `libsndfile_64bit.dll` is called
+    #   using the Python library `soundfile`
+    # Note:
+    #   This is an issue related to `libsndfile`, not this project itself.
+    #   It happens when you generate a large audio tensor (about 499804 frames in my PC)
+    #   and try to convert it to an ogg file.
+    # Related:
+    #   https://github.com/RVC-Boss/GPT-SoVITS/issues/1199
+    #   https://github.com/libsndfile/libsndfile/issues/1023
+    #   https://github.com/bastibe/python-soundfile/issues/396
+    # Suggestion:
+    #   Or split the whole audio data into smaller audio segment to avoid stack overflow?
+
+    def handle_pack_ogg():
+        with sf.SoundFile(audio_bytes, mode='w', samplerate=rate, channels=1, format='ogg') as audio_file:
+            audio_file.write(data)
+
+    import threading
+    # See: https://docs.python.org/3/library/threading.html
+    # The stack size of this thread is at least 32768
+    # If stack overflow error still occurs, just modify the `stack_size`.
+    # stack_size = n * 4096, where n should be a positive integer.
+    # Here we chose n = 4096.
+    stack_size = 4096 * 4096
+    try:
+        threading.stack_size(stack_size)
+        pack_ogg_thread = threading.Thread(target=handle_pack_ogg)
+        pack_ogg_thread.start()
+        pack_ogg_thread.join()
+    except RuntimeError as e:
+        # If changing the thread stack size is unsupported, a RuntimeError is raised.
+        print("RuntimeError: {}".format(e))
+        print("Changing the thread stack size is unsupported.")
+    except ValueError as e:
+        # If the specified stack size is invalid, a ValueError is raised and the stack size is unmodified.
+        print("ValueError: {}".format(e))
+        print("The specified stack size is invalid.")
 
     return audio_bytes
 
@@ -408,7 +468,7 @@ def only_punc(text):
     return not any(t.isalnum() or t.isalpha() for t in text)
 
 
-def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language):
+def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, top_k= 20, top_p = 0.6, temperature = 0.6, speed = 1):
     t0 = ttime()
     prompt_text = prompt_text.strip("\n")
     prompt_language, text = prompt_language, text.strip("\n")
@@ -456,7 +516,9 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language)
                 prompt,
                 bert,
                 # prompt_phone_len=ph_offset,
-                top_k=config['inference']['top_k'],
+                top_k = top_k,
+                top_p = top_p,
+                temperature = temperature,
                 early_stop_num=hz * max_sec)
         t3 = ttime()
         # print(pred_semantic.shape,idx)
@@ -469,7 +531,7 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language)
         # audio = vq_model.decode(pred_semantic, all_phoneme_ids, refer).detach().cpu().numpy()[0, 0]
         audio = \
             vq_model.decode(pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0),
-                            refer).detach().cpu().numpy()[
+                            refer,speed=speed).detach().cpu().numpy()[
                 0, 0]  ###试试重建不带上prompt部分
         audio_opt.append(audio)
         audio_opt.append(zero_wav)
@@ -515,7 +577,7 @@ def handle_change(path, text, language):
     return JSONResponse({"code": 0, "message": "Success"}, status_code=200)
 
 
-def handle(refer_wav_path, prompt_text, prompt_language, text, text_language, cut_punc):
+def handle(refer_wav_path, prompt_text, prompt_language, text, text_language, cut_punc, top_k, top_p, temperature, speed):
     if (
             refer_wav_path == "" or refer_wav_path is None
             or prompt_text == "" or prompt_text is None
@@ -534,7 +596,7 @@ def handle(refer_wav_path, prompt_text, prompt_language, text, text_language, cu
     else:
         text = cut_text(text,cut_punc)
 
-    return StreamingResponse(get_tts_wav(refer_wav_path, prompt_text, prompt_language, text, text_language), media_type="audio/"+media_type)
+    return StreamingResponse(get_tts_wav(refer_wav_path, prompt_text, prompt_language, text, text_language, top_k, top_p, temperature, speed), media_type="audio/"+media_type)
 
 
 
@@ -717,6 +779,10 @@ async def tts_endpoint(request: Request):
         json_post_raw.get("text"),
         json_post_raw.get("text_language"),
         json_post_raw.get("cut_punc"),
+        json_post_raw.get("top_k", 10),
+        json_post_raw.get("top_p", 1.0),
+        json_post_raw.get("temperature", 1.0),
+        json_post_raw.get("speed", 1.0)
     )
 
 
@@ -728,8 +794,12 @@ async def tts_endpoint(
         text: str = None,
         text_language: str = None,
         cut_punc: str = None,
+        top_k: int = 10,
+        top_p: float = 1.0,
+        temperature: float = 1.0,
+        speed: float = 1.0
 ):
-    return handle(refer_wav_path, prompt_text, prompt_language, text, text_language, cut_punc)
+    return handle(refer_wav_path, prompt_text, prompt_language, text, text_language, cut_punc, top_k, top_p, temperature, speed)
 
 
 if __name__ == "__main__":

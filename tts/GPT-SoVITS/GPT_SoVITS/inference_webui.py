@@ -50,6 +50,7 @@ is_share = eval(is_share)
 if "_CUDA_VISIBLE_DEVICES" in os.environ:
     os.environ["CUDA_VISIBLE_DEVICES"] = os.environ["_CUDA_VISIBLE_DEVICES"]
 is_half = eval(os.environ.get("is_half", "True")) and torch.cuda.is_available()
+punctuation = set(['!', '?', '…', ',', '.', '-'," "])
 import gradio as gr
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 import numpy as np
@@ -64,7 +65,7 @@ from text import cleaned_text_to_sequence
 from text.cleaner import clean_text
 from time import time as ttime
 from module.mel_processing import spectrogram_torch
-from my_utils import load_audio
+from tools.my_utils import load_audio
 from tools.i18n.i18n import I18nAuto
 
 i18n = I18nAuto()
@@ -235,7 +236,7 @@ def get_first(text):
     text = re.split(pattern, text)[0].strip()
     return text
 
-
+from text import chinese
 def get_phones_and_bert(text,language):
     if language in {"en","all_zh","all_ja"}:
         language = language.replace("all_","")
@@ -247,10 +248,17 @@ def get_phones_and_bert(text,language):
             formattext = text
         while "  " in formattext:
             formattext = formattext.replace("  ", " ")
-        phones, word2ph, norm_text = clean_text_inf(formattext, language)
         if language == "zh":
+            if re.search(r'[A-Za-z]', formattext):
+                formattext = re.sub(r'[a-z]', lambda x: x.group(0).upper(), formattext)
+                formattext = chinese.text_normalize(formattext)
+                return get_phones_and_bert(formattext,"zh")
+            else:
+                phones, word2ph, norm_text = clean_text_inf(formattext, language)
+
             bert = get_bert_feature(norm_text, word2ph).to(device)
         else:
+            phones, word2ph, norm_text = clean_text_inf(formattext, language)
             bert = torch.zeros(
                 (1024, len(phones)),
                 dtype=torch.float16 if is_half == True else torch.float32,
@@ -311,7 +319,11 @@ def merge_short_text_in_array(texts, threshold):
             result[len(result) - 1] += text
     return result
 
-def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut=i18n("不切"), top_k=20, top_p=0.6, temperature=0.6, ref_free = False):
+##ref_wav_path+prompt_text+prompt_language+text(单个)+text_language+top_k+top_p+temperature
+# cache_tokens={}#暂未实现清理机制
+cache= {}
+def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut=i18n("不切"), top_k=20, top_p=0.6, temperature=0.6, ref_free = False,speed=1,if_freeze=False):
+    global cache
     if prompt_text is None or len(prompt_text) == 0:
         ref_free = True
     t0 = ttime()
@@ -329,27 +341,29 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
         int(hps.data.sampling_rate * 0.3),
         dtype=np.float16 if is_half == True else np.float32,
     )
-    with torch.no_grad():
-        wav16k, sr = librosa.load(ref_wav_path, sr=16000)
-        if (wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000):
-            raise OSError(i18n("参考音频在3~10秒范围外，请更换！"))
-        wav16k = torch.from_numpy(wav16k)
-        zero_wav_torch = torch.from_numpy(zero_wav)
-        if is_half == True:
-            wav16k = wav16k.half().to(device)
-            zero_wav_torch = zero_wav_torch.half().to(device)
-        else:
-            wav16k = wav16k.to(device)
-            zero_wav_torch = zero_wav_torch.to(device)
-        wav16k = torch.cat([wav16k, zero_wav_torch])
-        ssl_content = ssl_model.model(wav16k.unsqueeze(0))[
-            "last_hidden_state"
-        ].transpose(
-            1, 2
-        )  # .float()
-        codes = vq_model.extract_latent(ssl_content)
-   
-        prompt_semantic = codes[0, 0]
+    if not ref_free:
+        with torch.no_grad():
+            wav16k, sr = librosa.load(ref_wav_path, sr=16000)
+            if (wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000):
+                raise OSError(i18n("参考音频在3~10秒范围外，请更换！"))
+            wav16k = torch.from_numpy(wav16k)
+            zero_wav_torch = torch.from_numpy(zero_wav)
+            if is_half == True:
+                wav16k = wav16k.half().to(device)
+                zero_wav_torch = zero_wav_torch.half().to(device)
+            else:
+                wav16k = wav16k.to(device)
+                zero_wav_torch = zero_wav_torch.to(device)
+            wav16k = torch.cat([wav16k, zero_wav_torch])
+            ssl_content = ssl_model.model(wav16k.unsqueeze(0))[
+                "last_hidden_state"
+            ].transpose(
+                1, 2
+            )  # .float()
+            codes = vq_model.extract_latent(ssl_content)
+            prompt_semantic = codes[0, 0]
+            prompt = prompt_semantic.unsqueeze(0).to(device)
+
     t1 = ttime()
 
     if (how_to_cut == i18n("凑四句一切")):
@@ -366,12 +380,13 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
         text = text.replace("\n\n", "\n")
     print(i18n("实际输入的目标文本(切句后):"), text)
     texts = text.split("\n")
+    texts = process_text(texts)
     texts = merge_short_text_in_array(texts, 5)
     audio_opt = []
     if not ref_free:
         phones1,bert1,norm_text1=get_phones_and_bert(prompt_text, prompt_language)
 
-    for text in texts:
+    for i_text,text in enumerate(texts):
         # 解决输入目标文本的空行导致报错的问题
         if (len(text.strip()) == 0):
             continue
@@ -388,40 +403,33 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
 
         bert = bert.to(device).unsqueeze(0)
         all_phoneme_len = torch.tensor([all_phoneme_ids.shape[-1]]).to(device)
-        prompt = prompt_semantic.unsqueeze(0).to(device)
+
         t2 = ttime()
-        with torch.no_grad():
-            # pred_semantic = t2s_model.model.infer(
-            pred_semantic, idx = t2s_model.model.infer_panel(
-                all_phoneme_ids,
-                all_phoneme_len,
-                None if ref_free else prompt,
-                bert,
-                # prompt_phone_len=ph_offset,
-                top_k=top_k,
-                top_p=top_p,
-                temperature=temperature,
-                early_stop_num=hz * max_sec,
-            )
+        # cache_key="%s-%s-%s-%s-%s-%s-%s-%s"%(ref_wav_path,prompt_text,prompt_language,text,text_language,top_k,top_p,temperature)
+        # print(cache.keys(),if_freeze)
+        if(i_text in cache and if_freeze==True):pred_semantic=cache[i_text]
+        else:
+            with torch.no_grad():
+                pred_semantic, idx = t2s_model.model.infer_panel(
+                    all_phoneme_ids,
+                    all_phoneme_len,
+                    None if ref_free else prompt,
+                    bert,
+                    # prompt_phone_len=ph_offset,
+                    top_k=top_k,
+                    top_p=top_p,
+                    temperature=temperature,
+                    early_stop_num=hz * max_sec,
+                )
+                pred_semantic = pred_semantic[:, -idx:].unsqueeze(0)
+                cache[i_text]=pred_semantic
         t3 = ttime()
-        # print(pred_semantic.shape,idx)
-        pred_semantic = pred_semantic[:, -idx:].unsqueeze(
-            0
-        )  # .unsqueeze(0)#mq要多unsqueeze一次
         refer = get_spepc(hps, ref_wav_path)  # .to(device)
         if is_half == True:
             refer = refer.half().to(device)
         else:
             refer = refer.to(device)
-        # audio = vq_model.decode(pred_semantic, all_phoneme_ids, refer).detach().cpu().numpy()[0, 0]
-        audio = (
-            vq_model.decode(
-                pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refer
-            )
-                .detach()
-                .cpu()
-                .numpy()[0, 0]
-        )  ###试试重建不带上prompt部分
+        audio = (vq_model.decode(pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refer,speed=speed).detach().cpu().numpy()[0, 0])
         max_audio=np.abs(audio).max()#简单防止16bit爆音
         if max_audio>1:audio/=max_audio
         audio_opt.append(audio)
@@ -463,6 +471,7 @@ def cut1(inp):
             opts.append("".join(inps[split_idx[idx]: split_idx[idx + 1]]))
     else:
         opts = [inp]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
     return "\n".join(opts)
 
 
@@ -487,32 +496,46 @@ def cut2(inp):
     if len(opts) > 1 and len(opts[-1]) < 50:  ##如果最后一个太短了，和前一个合一起
         opts[-2] = opts[-2] + opts[-1]
         opts = opts[:-1]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
     return "\n".join(opts)
 
 
 def cut3(inp):
     inp = inp.strip("\n")
-    return "\n".join(["%s" % item for item in inp.strip("。").split("。")])
-
+    opts = ["%s" % item for item in inp.strip("。").split("。")]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
+    return  "\n".join(opts)
 
 def cut4(inp):
     inp = inp.strip("\n")
-    return "\n".join(["%s" % item for item in inp.strip(".").split(".")])
+    opts = ["%s" % item for item in inp.strip(".").split(".")]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
+    return "\n".join(opts)
 
 
 # contributed by https://github.com/AI-Hobbyist/GPT-SoVITS/blob/main/GPT_SoVITS/inference_webui.py
 def cut5(inp):
-    # if not re.search(r'[^\w\s]', inp[-1]):
-    # inp += '。'
     inp = inp.strip("\n")
-    punds = r'[,.;?!、，。？！;：…]'
-    items = re.split(f'({punds})', inp)
-    mergeitems = ["".join(group) for group in zip(items[::2], items[1::2])]
-    # 在句子不存在符号或句尾无符号的时候保证文本完整
-    if len(items)%2 == 1:
-        mergeitems.append(items[-1])
-    opt = "\n".join(mergeitems)
-    return opt
+    punds = {',', '.', ';', '?', '!', '、', '，', '。', '？', '！', ';', '：', '…'}
+    mergeitems = []
+    items = []
+
+    for i, char in enumerate(inp):
+        if char in punds:
+            if char == '.' and i > 0 and i < len(inp) - 1 and inp[i - 1].isdigit() and inp[i + 1].isdigit():
+                items.append(char)
+            else:
+                items.append(char)
+                mergeitems.append("".join(items))
+                items = []
+        else:
+            items.append(char)
+
+    if items:
+        mergeitems.append("".join(items))
+
+    opt = [item for item in mergeitems if not set(item).issubset(punds)]
+    return "\n".join(opt)
 
 
 def custom_sort_key(s):
@@ -521,6 +544,17 @@ def custom_sort_key(s):
     # 将数字部分转换为整数，非数字部分保持不变
     parts = [int(part) if part.isdigit() else part for part in parts]
     return parts
+
+def process_text(texts):
+    _text=[]
+    if all(text in [None, " ", "\n",""] for text in texts):
+        raise ValueError(i18n("请输入有效文本"))
+    for text in texts:
+        if text in  [None, " ", ""]:
+            pass
+        else:
+            _text.append(text)
+    return _text
 
 
 def change_choices():
@@ -573,27 +607,36 @@ with gr.Blocks(title="GPT-SoVITS WebUI") as app:
             )
         gr.Markdown(value=i18n("*请填写需要合成的目标文本和语种模式"))
         with gr.Row():
-            text = gr.Textbox(label=i18n("需要合成的文本"), value="")
-            text_language = gr.Dropdown(
-                label=i18n("需要合成的语种"), choices=[i18n("中文"), i18n("英文"), i18n("日文"), i18n("中英混合"), i18n("日英混合"), i18n("多语种混合")], value=i18n("中文")
-            )
-            how_to_cut = gr.Radio(
-                label=i18n("怎么切"),
-                choices=[i18n("不切"), i18n("凑四句一切"), i18n("凑50字一切"), i18n("按中文句号。切"), i18n("按英文句号.切"), i18n("按标点符号切"), ],
-                value=i18n("凑四句一切"),
-                interactive=True,
-            )
-            with gr.Row():
-                gr.Markdown(value=i18n("gpt采样参数(无参考文本时不要太低)："))
-                top_k = gr.Slider(minimum=1,maximum=100,step=1,label=i18n("top_k"),value=5,interactive=True)
+            with gr.Column():
+                text = gr.Textbox(label=i18n("需要合成的文本"), value="")
+                text_language = gr.Dropdown(
+                    label=i18n("需要合成的语种"), choices=[i18n("中文"), i18n("英文"), i18n("日文"), i18n("中英混合"), i18n("日英混合"), i18n("多语种混合")], value=i18n("中文")
+                )
+                how_to_cut = gr.Radio(
+                    label=i18n("怎么切"),
+                    choices=[i18n("不切"), i18n("凑四句一切"), i18n("凑50字一切"), i18n("按中文句号。切"), i18n("按英文句号.切"), i18n("按标点符号切"), ],
+                    value=i18n("凑四句一切"),
+                    interactive=True,
+                )
+            with gr.Column():
+                gr.Markdown(value=i18n("gpt采样参数(无参考文本时不要太低。不懂就用默认)："))
+                top_k = gr.Slider(minimum=1,maximum=100,step=1,label=i18n("top_k"),value=10,interactive=True)
                 top_p = gr.Slider(minimum=0,maximum=1,step=0.05,label=i18n("top_p"),value=1,interactive=True)
                 temperature = gr.Slider(minimum=0,maximum=1,step=0.05,label=i18n("temperature"),value=1,interactive=True)
+            with gr.Column():
+                gr.Markdown(value=i18n("语速调整，高为更快"))
+                if_freeze=gr.Checkbox(label=i18n("是否直接对上次合成结果调整语速。防止随机性。"), value=False, interactive=True, show_label=True)
+                speed = gr.Slider(minimum=0.6,maximum=1.65,step=0.05,label=i18n("语速"),value=1,interactive=True)
+            # with gr.Column():
+            #     gr.Markdown(value=i18n("手工调整音素。当音素框不为空时使用手工音素输入推理，无视目标文本框。"))
+            #     phoneme=gr.Textbox(label=i18n("音素框"), value="")
+            #     get_phoneme_button = gr.Button(i18n("目标文本转音素"), variant="primary")
             inference_button = gr.Button(i18n("合成语音"), variant="primary")
             output = gr.Audio(label=i18n("输出的语音"))
 
         inference_button.click(
             get_tts_wav,
-            [inp_ref, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_text_free],
+            [inp_ref, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_text_free,speed,if_freeze],
             [output],
         )
 
@@ -613,10 +656,11 @@ with gr.Blocks(title="GPT-SoVITS WebUI") as app:
             button5.click(cut5, [text_inp], [text_opt])
         gr.Markdown(value=i18n("后续将支持转音素、手工修改音素、语音合成分步执行。"))
 
-app.queue(concurrency_count=511, max_size=1022).launch(
-    server_name="0.0.0.0",
-    inbrowser=True,
-    share=is_share,
-    server_port=infer_ttswebui,
-    quiet=True,
-)
+if __name__ == '__main__':
+    app.queue(concurrency_count=511, max_size=1022).launch(
+        server_name="0.0.0.0",
+        inbrowser=True,
+        share=is_share,
+        server_port=infer_ttswebui,
+        quiet=True,
+    )

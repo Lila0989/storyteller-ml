@@ -1,62 +1,42 @@
 # Base CUDA image
-
 FROM cnstark/pytorch:2.0.1-py3.9.17-cuda11.8.0-ubuntu20.04
 
-# Set environment variables
+LABEL maintainer="breakstring@hotmail.com"
+LABEL version="dev-20240209"
+LABEL description="Docker image for GPT-SoVITS"
+
+
+# Install 3rd party apps
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
-
-# Create directories for Python installation and model code
-RUN mkdir -p /python_install /model_code/GPT-SoVITS/GPT_SoVITS/pretrained_models
-
-# Set the working directory for Python installation
-WORKDIR /python_install
-
-# Install necessary packages and git-lfs
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    tzdata \
-    ffmpeg \
-    libsox-dev \
-    parallel \
-    aria2 \
-    git \
-    dos2unix \
-    nano \
-    curl \
-    software-properties-common \
-    espeak-ng \
-    sudo \
-    rsync && \
-    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-    apt-get install -y git-lfs && \
+    apt-get install -y --no-install-recommends tzdata ffmpeg libsox-dev parallel aria2 git git-lfs && \
     git lfs install && \
-    add-apt-repository ppa:deadsnakes/ppa && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements.txt and install Python dependencies
-COPY requirements.txt /python_install/
-RUN python3 -m venv python && \
-    . /python_install/python/bin/activate && \
-    python/bin/pip install --upgrade pip wheel setuptools && \
-    python/bin/pip install --no-cache-dir -r requirements.txt
+# Copy only requirements.txt initially to leverage Docker cache
+WORKDIR /workspace
+COPY requirements.txt /workspace/
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Clone Hugging Face repository and move models
-RUN git clone https://huggingface.co/lj1995/GPT-SoVITS /python_install/GPT-SoVITS && \
-    mkdir -p /model_code/GPT-SoVITS/GPT_SoVITS/pretrained_models && \
-    mv /python_install/GPT-SoVITS/* /model_code/GPT-SoVITS/GPT_SoVITS/pretrained_models/
+# Define a build-time argument for image type
+ARG IMAGE_TYPE=full
 
-# Move Docker, GPT_SoVITS, requirements.txt, and tools to /model_code/GPT-SoVITS
-RUN mv /python_install/requirements.txt /model_code/GPT-SoVITS/
+# Conditional logic based on the IMAGE_TYPE argument
+# Always copy the Docker directory, but only use it if IMAGE_TYPE is not "elite"
+COPY ./Docker /workspace/Docker 
+# elite 类型的镜像里面不包含额外的模型
+RUN if [ "$IMAGE_TYPE" != "elite" ]; then \
+        chmod +x /workspace/Docker/download.sh && \
+        /workspace/Docker/download.sh && \
+        python /workspace/Docker/download.py && \
+        python -m nltk.downloader averaged_perceptron_tagger cmudict; \
+    fi
 
-# Set the working directory for model code
-WORKDIR /model_code/GPT-SoVITS
 
-# Copy the remaining contents to the model_code directory
-COPY . /model_code/GPT-SoVITS
+# Copy the rest of the application
+COPY . /workspace
 
-# Change working directory to the project folder
-WORKDIR /model_code/GPT-SoVITS
+EXPOSE 9871 9872 9873 9874 9880
 
-# Run an interactive shell by default and activate the virtual environment
-CMD ["bash", "-c", ". /python_install/python/bin/activate && exec bash"]
+CMD ["python", "webui.py"]
