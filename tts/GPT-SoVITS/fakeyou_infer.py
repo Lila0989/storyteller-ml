@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import re
 import logging
@@ -26,9 +26,9 @@ from tools.i18n.i18n import I18nAuto
 # Additional Imports and GPU Info
 import pdb
 
+# Display environment variables and GPU info
 print("Env vars:")
 print(os.environ)
-
 
 def print_gpu_info():
     print('========================================')
@@ -59,6 +59,9 @@ dict_language = {
     "japanese+english": "ja",
     "automatic": "auto",
 }
+
+# Define punctuation set
+punctuation = set(['!', '?', '…', ',', '.', '-'," "])
 
 # Define default paths for pretrained models
 pretrained_gpt_path = "GPT_SoVITS/pretrained_models/s1bert25hz-2kh-longer-epoch=68e-step=50232.ckpt"
@@ -91,7 +94,7 @@ cnhubert.cnhubert_base_path = cnhubert_base_path
 loaded_gpt_path = None
 loaded_sovits_path = None
 
-# Example: Get BERT feature
+# Function to get BERT feature
 def get_bert_feature(text, word2ph):
     global tokenizer, bert_model
     if not "tokenizer" in globals() or not "bert_model" in globals():
@@ -115,6 +118,7 @@ def get_bert_feature(text, word2ph):
     phone_level_feature = torch.cat(phone_level_feature, dim=0)
     return phone_level_feature.T
 
+# Class to convert dictionary to attributes recursively
 class DictToAttrRecursive(dict):
     def __init__(self, input_dict):
         super().__init__(input_dict)
@@ -142,6 +146,7 @@ class DictToAttrRecursive(dict):
         except KeyError:
             raise AttributeError(f"Attribute {item} not found")
 
+# Function to change SoVITS weights
 def change_sovits_weights(sovits_path):
     global vq_model, hps
     dict_s2 = torch.load(sovits_path, map_location="cpu")
@@ -165,6 +170,7 @@ def change_sovits_weights(sovits_path):
     with open("./sweight.txt", "w", encoding="utf-8") as f:
         f.write(sovits_path)
 
+# Function to change GPT weights
 def change_gpt_weights(gpt_path):
     global hz, max_sec, t2s_model, config
     hz = 50
@@ -182,11 +188,11 @@ def change_gpt_weights(gpt_path):
     with open("./gweight.txt", "w", encoding="utf-8") as f:
         f.write(gpt_path)
 
+# Function to get spectrogram
 def get_spepc(hps, filename):
     audio = load_audio(filename, int(hps.data.sampling_rate))
     audio = torch.FloatTensor(audio)
-    audio_norm = audio
-    audio_norm = audio_norm.unsqueeze(0)
+    audio_norm = audio.unsqueeze(0)
     spec = spectrogram_torch(
         audio_norm,
         hps.data.filter_length,
@@ -197,14 +203,15 @@ def get_spepc(hps, filename):
     )
     return spec
 
+# Function to clean text
 def clean_text_inf(text, language):
     phones, word2ph, norm_text = clean_text(text, language)
-    print(f'Phonemes for "{text}":\n{phones}')
     phones = cleaned_text_to_sequence(phones)
     return phones, word2ph, norm_text
 
 dtype = torch.float16 if is_half else torch.float32
 
+# Function to get BERT inference
 def get_bert_inf(phones, word2ph, norm_text, language):
     language = language.replace("all_", "")
     if language == "zh":
@@ -214,20 +221,20 @@ def get_bert_inf(phones, word2ph, norm_text, language):
             (1024, len(phones)),
             dtype=torch.float16 if is_half else torch.float32,
         ).to(device)
+
     return bert
 
-splits = {"，", "。", "？", "！", ",", ".", "?", "!", "~", ":", "：", "—", "…", }
+# Splitting functions for text slicing
+splits = {"，", "。", "？", "！", ",", ".", "?", "!", "~", ":", "：", "—", "…"}
 
+# Function to get the first segment of text before punctuation
 def get_first(text):
     pattern = "[" + "".join(re.escape(sep) for sep in splits) + "]"
     text = re.split(pattern, text)[0].strip()
     return text
 
+# Function to get phones and BERT embeddings
 def get_phones_and_bert(text, language):
-    phones = None
-    bert = None
-    norm_text = None
-    
     if language in {"en", "all_zh", "all_ja"}:
         language = language.replace("all_", "")
         if language == "en":
@@ -237,10 +244,17 @@ def get_phones_and_bert(text, language):
             formattext = text
         while "  " in formattext:
             formattext = formattext.replace("  ", " ")
-        phones, word2ph, norm_text = clean_text_inf(formattext, language)
         if language == "zh":
+            if re.search(r'[A-Za-z]', formattext):
+                formattext = re.sub(r'[a-z]', lambda x: x.group(0).upper(), formattext)
+                formattext = chinese.text_normalize(formattext)
+                return get_phones_and_bert(formattext, "zh")
+            else:
+                phones, word2ph, norm_text = clean_text_inf(formattext, language)
+
             bert = get_bert_feature(norm_text, word2ph).to(device)
         else:
+            phones, word2ph, norm_text = clean_text_inf(formattext, language)
             bert = torch.zeros(
                 (1024, len(phones)),
                 dtype=torch.float16 if is_half else torch.float32,
@@ -279,11 +293,10 @@ def get_phones_and_bert(text, language):
         bert = torch.cat(bert_list, dim=1)
         phones = sum(phones_list, [])
         norm_text = ''.join(norm_text_list)
-    else:
-        raise ValueError(f"Unsupported language: {language}")
-    
+
     return phones, bert.to(dtype), norm_text
 
+# Function to merge short texts
 def merge_short_text_in_array(texts, threshold):
     if len(texts) < 2:
         return texts
@@ -307,134 +320,135 @@ if is_half:
 else:
     ssl_model = ssl_model.to(device)
 
-def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut=i18n("不切"), top_k=20, top_p=0.6, temperature=0.6, ref_free = False):
-    t0 = ttime()
+cache = {}
+
+# Main function for TTS synthesis
+def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0, if_freeze=False):
+    global cache
     if prompt_text is None or len(prompt_text) == 0:
         ref_free = True
+
+    t0 = ttime()
     prompt_language = dict_language[prompt_language]
     text_language = dict_language[text_language]
+
     if not ref_free:
         prompt_text = prompt_text.strip("\n")
-        if (prompt_text[-1] not in splits): prompt_text += "。" if prompt_language != "en" else "."
-        print(f"Reference text: {prompt_text}")
-        phones1,bert1,norm_text1=get_phones_and_bert(prompt_text, prompt_language)
+        if prompt_text[-1] not in splits:
+            prompt_text += "。" if prompt_language != "en" else "."
+        print("Actual reference text:", prompt_text)
+
     text = text.strip("\n")
-    if (text[0] not in splits and len(get_first(text)) < 4): text = "。" + text if text_language != "en" else "." + text
+    if text[0] not in splits and len(get_first(text)) < 4:
+        text = "。" + text if text_language != "en" else "." + text
 
-    print(f"Full text: {text}")
-    zero_wav = np.zeros(
-        int(hps.data.sampling_rate * 0.3),
-        dtype=np.float16 if is_half == True else np.float32,
-    )
-    with torch.no_grad():
-        wav16k, sr = librosa.load(ref_wav_path, sr=16000)
-        if (wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000):
-            raise OSError("参考音频在3~10秒范围外，请更换！")
-        wav16k = torch.from_numpy(wav16k)
-        zero_wav_torch = torch.from_numpy(zero_wav)
-        if is_half == True:
-            wav16k = wav16k.half().to(device)
-            zero_wav_torch = zero_wav_torch.half().to(device)
-        else:
-            wav16k = wav16k.to(device)
-            zero_wav_torch = zero_wav_torch.to(device)
-        wav16k = torch.cat([wav16k, zero_wav_torch])
-        ssl_content = ssl_model.model(wav16k.unsqueeze(0))[
-            "last_hidden_state"
-        ].transpose(
-            1, 2
-        )  # .float()
-        codes = vq_model.extract_latent(ssl_content)
+    print("Actual target text:", text)
+    zero_wav = np.zeros(int(hps.data.sampling_rate * 0.3), dtype=np.float16 if is_half else np.float32)
 
-        prompt_semantic = codes[0, 0]
     t1 = ttime()
 
-    if (how_to_cut == "Slice once every 4 sentences"):
+    if not ref_free:
+        with torch.no_grad():
+            wav16k, sr = librosa.load(ref_wav_path, sr=16000)
+            if wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000:
+                raise OSError("Reference audio must be within 3~10 seconds.")
+            wav16k = torch.from_numpy(wav16k)
+            zero_wav_torch = torch.from_numpy(zero_wav)
+            wav16k = wav16k.half().to(device) if is_half else wav16k.to(device)
+            zero_wav_torch = zero_wav_torch.half().to(device) if is_half else zero_wav_torch.to(device)
+            wav16k = torch.cat([wav16k, zero_wav_torch])
+            ssl_content = ssl_model.model(wav16k.unsqueeze(0))["last_hidden_state"].transpose(1, 2)
+            codes = vq_model.extract_latent(ssl_content)
+            prompt_semantic = codes[0, 0]
+            prompt = prompt_semantic.unsqueeze(0).to(device)
+
+    t2 = ttime()
+
+    # Slice the text based on the provided method
+    if how_to_cut == "Slice once every 4 sentences":
         text = cut1(text)
-    elif (how_to_cut == "Cut per 50 characters"):
+    elif how_to_cut == "Cut per 50 characters":
         text = cut2(text)
-    elif (how_to_cut == "Slice by Chinese punct"):
+    elif how_to_cut == "Slice by Chinese punct":
         text = cut3(text)
-    elif (how_to_cut == "Slice by English punct"):
+    elif how_to_cut == "Slice by English punct":
         text = cut4(text)
-    elif (how_to_cut == "Slice by every punct"):
+    elif how_to_cut == "Slice by every punct":
         text = cut5(text)
+
     while "\n\n" in text:
         text = text.replace("\n\n", "\n")
-    print(f"Text after slicing:\n{text}")
+
+    print("Actual target text (after slicing):", text)
     texts = text.split("\n")
+    texts = process_text(texts)  # Filter out invalid text entries
     texts = merge_short_text_in_array(texts, 5)
     audio_opt = []
-    
-    t2 = ttime()
-    t3, t4, t5 = 0, 0, 0
-    
-    for text in texts:
-        # 解决输入目标文本的空行导致报错的问题
-        t3s = ttime()
-        if (len(text.strip()) == 0):
+
+    if not ref_free:
+        phones1, bert1, norm_text1 = get_phones_and_bert(prompt_text, prompt_language)
+
+    t3_start = ttime()
+
+    for i_text, text in enumerate(texts):
+        if len(text.strip()) == 0:
             continue
-        if (text[-1] not in splits): text += "。" if text_language != "en" else "."
-        print(f"Text being generated: {text}")
-        phones2,bert2,norm_text2=get_phones_and_bert(text, text_language)
-        print(f"Text after frontend processing: {norm_text2}")
+        if text[-1] not in splits:
+            text += "。" if text_language != "en" else "."
+        print("Actual target text (per sentence):", text)
+        phones2, bert2, norm_text2 = get_phones_and_bert(text, text_language)
+        print("Processed text (per sentence):", norm_text2)
+
         if not ref_free:
             bert = torch.cat([bert1, bert2], 1)
-            all_phoneme_ids = torch.LongTensor(phones1+phones2).to(device).unsqueeze(0)
+            all_phoneme_ids = torch.LongTensor(phones1 + phones2).to(device).unsqueeze(0)
         else:
             bert = bert2
             all_phoneme_ids = torch.LongTensor(phones2).to(device).unsqueeze(0)
 
         bert = bert.to(device).unsqueeze(0)
         all_phoneme_len = torch.tensor([all_phoneme_ids.shape[-1]]).to(device)
-        prompt = prompt_semantic.unsqueeze(0).to(device)
-        t3e = ttime()
-        t3 += t3e - t3s
-        with torch.no_grad():
-            # pred_semantic = t2s_model.model.infer(
-            pred_semantic, idx = t2s_model.model.infer_panel(
-                all_phoneme_ids,
-                all_phoneme_len,
-                None if ref_free else prompt,
-                bert,
-                # prompt_phone_len=ph_offset,
-                top_k=top_k,
-                top_p=top_p,
-                temperature=temperature,
-                early_stop_num=hz * max_sec,
-            )
-        t4e = ttime()
-        t4 += t4e - t3e
-        # print(pred_semantic.shape,idx)
-        pred_semantic = pred_semantic[:, -idx:].unsqueeze(
-            0
-        )  # .unsqueeze(0)#mq要多unsqueeze一次
-        refer = get_spepc(hps, ref_wav_path)  # .to(device)
-        if is_half == True:
-            refer = refer.half().to(device)
+
+        if i_text in cache and if_freeze:
+            pred_semantic = cache[i_text]
         else:
-            refer = refer.to(device)
-        # audio = vq_model.decode(pred_semantic, all_phoneme_ids, refer).detach().cpu().numpy()[0, 0]
-        audio = (
-            vq_model.decode(
-                pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refer
-            )
-                .detach()
-                .cpu()
-                .numpy()[0, 0]
-        )  ###试试重建不带上prompt部分
-        max_audio=np.abs(audio).max()#简单防止16bit爆音
-        if max_audio>1:audio/=max_audio
+            with torch.no_grad():
+                pred_semantic, idx = t2s_model.model.infer_panel(
+                    all_phoneme_ids,
+                    all_phoneme_len,
+                    None if ref_free else prompt,
+                    bert,
+                    top_k=top_k,
+                    top_p=top_p,
+                    temperature=temperature,
+                    early_stop_num=hz * max_sec,
+                )
+                pred_semantic = pred_semantic[:, -idx:].unsqueeze(0)
+                cache[i_text] = pred_semantic
+
+        refer = get_spepc(hps, ref_wav_path).to(device)
+        if is_half:
+            refer = refer.half().to(device)
+        audio = vq_model.decode(pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refer, speed=speed).detach().cpu().numpy()[0, 0]
+        max_audio = np.abs(audio).max()
+        if max_audio > 1:
+            audio /= max_audio
         audio_opt.append(audio)
         audio_opt.append(zero_wav)
-        t5e = ttime()
-        t5 += t5e - t4e
-    return (
-        (t1-t0, t2-t1, t3, t4, t5),
-        hps.data.sampling_rate,
-        (np.concatenate(audio_opt, 0) * 32768).astype(np.int16)
-    )
 
+    t3_end = ttime()
+
+    t4_start = ttime()
+
+    # Concatenate audio options
+    concatenated_audio = np.concatenate(audio_opt, 0) * 32768
+
+    t4_end = ttime()
+
+    print("%.3f\t%.3f\t%.3f\t%.3f" % (t1 - t0, t2 - t1, t3_end - t3_start, t4_end - t4_start))
+    return (t1 - t0, t2 - t1, t3_end - t3_start, t4_end - t4_start, t4_end - t4_start), hps.data.sampling_rate, concatenated_audio.astype(np.int16)
+
+# Function to split text based on punctuation
 def split(todo_text):
     todo_text = todo_text.replace("……", "。").replace("——", "，")
     if todo_text[-1] not in splits:
@@ -444,7 +458,7 @@ def split(todo_text):
     todo_texts = []
     while 1:
         if i_split_head >= len_text:
-            break
+            break  # There will always be punctuation at the end, so just exit, the last segment was already added last time
         if todo_text[i_split_head] in splits:
             i_split_head += 1
             todo_texts.append(todo_text[i_split_tail:i_split_head])
@@ -453,6 +467,7 @@ def split(todo_text):
             i_split_head += 1
     return todo_texts
 
+# Functions to cut text in various ways
 def cut1(inp):
     inp = inp.strip("\n")
     inps = split(inp)
@@ -464,6 +479,7 @@ def cut1(inp):
             opts.append("".join(inps[split_idx[idx]: split_idx[idx + 1]]))
     else:
         opts = [inp]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
     return "\n".join(opts)
 
 def cut2(inp):
@@ -486,27 +502,57 @@ def cut2(inp):
     if len(opts) > 1 and len(opts[-1]) < 50:
         opts[-2] = opts[-2] + opts[-1]
         opts = opts[:-1]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
     return "\n".join(opts)
 
 def cut3(inp):
     inp = inp.strip("\n")
-    return "\n".join(["%s" % item for item in inp.strip("。").split("。")])
+    opts = ["%s" % item for item in inp.strip("。").split("。")]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
+    return "\n".join(opts)
 
 def cut4(inp):
     inp = inp.strip("\n")
-    return "\n".join(["%s" % item for item in inp.strip(".").split(".")])
+    opts = ["%s" % item for item in inp.strip(".").split(".")]
+    opts = [item for item in opts if not set(item).issubset(punctuation)]
+    return "\n".join(opts)
 
+# Contributed by https://github.com/AI-Hobbyist/GPT-SoVITS/blob/main/GPT_SoVITS/inference_webui.py
 def cut5(inp):
     inp = inp.strip("\n")
-    punds = r'[,.;?!、，。？！;：…]'
-    items = re.split(f'({punds})', inp)
-    mergeitems = ["".join(group) for group in zip(items[::2], items[1::2])]
-    if len(items) % 2 == 1:
-        mergeitems.append(items[-1])
-    opt = "\n".join(mergeitems)
-    return opt
+    punds = {',', '.', ';', '?', '!', '、', '，', '。', '？', '！', ';', '：', '…'}
+    mergeitems = []
+    items = []
 
-def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False):
+    for i, char in enumerate(inp):
+        if char in punds:
+            if char == '.' and i > 0 and i < len(inp) - 1 and inp[i - 1].isdigit() and inp[i + 1].isdigit():
+                items.append(char)
+            else:
+                items.append(char)
+                mergeitems.append("".join(items))
+                items = []
+        else:
+            items.append(char)
+
+    if items:
+        mergeitems.append("".join(items))
+
+    opt = [item for item in mergeitems if not set(item).issubset(punds)]
+    return "\n".join(opt)
+
+# Function to process and filter text entries
+def process_text(texts):
+    _text = []
+    if all(text in [None, " ", "\n", ""] for text in texts):
+        raise ValueError(i18n("Please enter valid text"))
+    for text in texts:
+        if text not in [None, " ", "", "\n"]:
+            _text.append(text)
+    return _text
+
+# Main function for inference
+def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0):
     global loaded_gpt_path, loaded_sovits_path
     if not os.path.exists(ref_wav_path):
         print("You must input a reference audio path!")
@@ -532,17 +578,11 @@ def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_
             break
         output_count += 1
 
-    times, sr, audio_data = get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_free)
+    times, sr, audio_data = get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_free, speed)
     
-    sf.write(
-        current_output_path,
-        audio_data,
-        sr,
-        format="wav"
-    )
+    sf.write(current_output_path, audio_data, sr, format="wav")
     print("Times:\nref_audio: {:.2f}s text: {:.2f}s phonemes & bert: {:.2f}s gpt: {:.2f}s sovits: {:.2f}s".format(*times))
     return current_output_path
-
 
 # Command-line interface
 def main():
@@ -560,6 +600,7 @@ def main():
     parser.add_argument("--top_k", type=int, default=20, help="Top K sampling")
     parser.add_argument("--top_p", type=float, default=0.6, help="Top P sampling")
     parser.add_argument("--temperature", type=float, default=0.6, help="Sampling temperature")
+    parser.add_argument("--speed", type=float, default=1.0, help="Speed of the synthesized speech")
     parser.add_argument("--output_path", type=str, default="output", help="Path to save the output wav file")
 
     args = parser.parse_args()
@@ -593,7 +634,8 @@ def main():
         top_k=args.top_k,
         top_p=args.top_p,
         temperature=args.temperature,
-        ref_free=False
+        ref_free=False,
+        speed=args.speed
     )
 
     if gptsovits_output_audio_path:
