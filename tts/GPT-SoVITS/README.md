@@ -40,7 +40,7 @@ python fakeyou_infer.py [OPTIONS]
 - `--gpt_model`: Path to GPT model checkpoint. Required if `--use_pretrained_gpt` is not enabled.
 - `--sovits_model`: Path to SoVITS model checkpoint. Required if `--use_pretrained_sovits` is not enabled.
 - `--ref_audio`: Path to reference wav file. Required.
-- `--ref_text`: Path to reference text file (optional). If left blank `""` or not passed, it will disable the reference text and use the reference audio.
+- `--ref_text`: Path to reference text file (optional). If left blank \`""\` or not passed, it will disable the reference text and use the reference audio.
 - `--target_language`: Language of the target text. Choices: `chinese`, `english`, `japanese`, `chinese+english`, `japanese+english`, `automatic`.
 - `--ref_language`: Language of the reference text. Choices: `chinese`, `english`, `japanese`, `chinese+english`, `japanese+english`, `automatic`.
 - `--target_text`: Path to the target text file. Required.
@@ -48,6 +48,7 @@ python fakeyou_infer.py [OPTIONS]
 - `--top_k`: Top K sampling. Default: 20.
 - `--top_p`: Top P sampling. Default: 0.6.
 - `--temperature`: Sampling temperature. Default: 0.6.
+- `--speed`: Speed of the synthesized speech. Default: 1.0.
 - `--output_path`: Path to save the output wav file. Default: `output`.
 
 ### Example Commands
@@ -55,17 +56,17 @@ python fakeyou_infer.py [OPTIONS]
 #### Using Custom Models with Reference Audio
 
 ```sh
-python fakeyou_infer.py --gpt_model GPT_weights/your_gpt_model.ckpt --sovits_model SoVITS_weights/your_sovits_model.pth --ref_audio data/voice/sponge.wav --ref_text data/voice/ref.txt --target_text data/voice/input.txt --target_language english --ref_language english --how_to_cut "Slice once every 4 sentences" --output_path output/
+python fakeyou_infer.py --gpt_model GPT_weights/your_gpt_model.ckpt --sovits_model SoVITS_weights/your_sovits_model.pth --ref_audio data/voice/sponge.wav --ref_text data/voice/ref.txt --target_text data/voice/input.txt --target_language english --ref_language english --how_to_cut "Slice once every 4 sentences" --speed 1.0 --output_path output/
 ```
 
 #### Using Custom Models Without Reference Text
 
 ```sh
-python fakeyou_infer.py --gpt_model GPT_weights/your_gpt_model.ckpt --sovits_model SoVITS_weights/your_sovits_model.pth --ref_audio data/voice/sponge.wav --target_text data/voice/input.txt --target_language english --ref_language english --how_to_cut "Slice once every 4 sentences" --output_path output/
+python fakeyou_infer.py --gpt_model GPT_weights/your_gpt_model.ckpt --sovits_model SoVITS_weights/your_sovits_model.pth --ref_audio data/voice/sponge.wav --target_text data/voice/input.txt --target_language english --ref_language english --how_to_cut "Slice once every 4 sentences" --speed 1.0 --output_path output/
 ```
 
 #### Using Pretrained Models
 
 ```sh
-python fakeyou_infer.py --use_pretrained_gpt --use_pretrained_sovits --ref_audio data/voice/sponge.wav --ref_text data/voice/ref.txt --target_text data/voice/input.txt --target_language english --ref_language english --how_to_cut "Slice once every 4 sentences" --output_path output/
+python fakeyou_infer.py --use_pretrained_gpt --use_pretrained_sovits --ref_audio data/voice/sponge.wav --ref_text data/voice/ref.txt --target_text data/voice/input.txt --target_language english --ref_language english --how_to_cut "Slice once every 4 sentences" --speed 1.0 --output_path output/
 ```
