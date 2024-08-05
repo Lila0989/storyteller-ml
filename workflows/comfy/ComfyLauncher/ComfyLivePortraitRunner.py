@@ -11,11 +11,16 @@ from enum import IntEnum, auto
 import os
 import subprocess
 import signal
+import urllib
+import websockets
+import asyncio
+import uuid
+client_id = str(uuid.uuid4())
 
 SERVER_IP = os.environ.get("SERVER_IP", "127.0.0.1:8188")
 SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 120))
 
-TIMEOUT_SECONDS = int(os.environ.get("TIMEOUT_SECONDS", 1000))
+TIMEOUT_SECONDS = int(os.environ.get("TIMEOUT_SECONDS", 180))
 PROMPT_ENDPOINT = f"http://{SERVER_IP}/prompt"
 V2V_WORKFLOWS_DIRECTORY = os.environ.get("V2V_WORKFLOWS_DIRECTORY",
                                          "/workflow_configs")
@@ -120,6 +125,7 @@ def ensure_server_is_healthy(server_address, restart_trigger_file=None, retries=
 
     for _ in range(retries):
         trigger_comfy_restart(restart_trigger_file)
+        time.sleep(10)
         wait_for_comfy_startup(server_address)
         number_of_queued_jobs = get_queued_jobs_count(server_address)
         if queued_count_is_zero(server_address):
@@ -153,7 +159,7 @@ def wait_for_comfy_startup(server_address, timeout=SERVER_START_TIMEOUT):
         exit(1)
 
 
-def main():
+async def main():
     outer_retries = 2
     restart_trigger_file = args.server_restart_trigger_file
 
@@ -163,7 +169,7 @@ def main():
     input_driver_filename = args.driver_media_filename
     input_is_image = args.input_is_image
 
-    for _ in range(outer_retries):
+    for attempt_idx in range(outer_retries):
         ensure_server_is_healthy(SERVER_IP, restart_trigger_file)
 
         ensure_input_directory_empty()
@@ -188,7 +194,7 @@ def main():
         )
         time_before = time.perf_counter()
         print("running pipeline" + str(pipeline_type))
-        enqueue_prompt_and_wait(prompt)
+        await enqueue_prompt_and_wait(prompt)
         time_after = time.perf_counter()
         primary_output_name = "LivePortrait_00001.mp4"
         if expected_primary_output_name(primary_output_name).exists():
@@ -200,11 +206,34 @@ def main():
             if restart_trigger_file is None:
                 print("No restart trigger file provided. Exiting.")
                 exit(1)
-            trigger_comfy_restart(restart_trigger_file)
+            if attempt_idx < outer_retries - 1:
+                trigger_comfy_restart(restart_trigger_file)
+                time.sleep(10)
     # If we're here, we've failed to run the pipeline twice. We've tried a server restart, and we're out of retries. Maybe this was a bad input, or maybe the server is down. Either way, it's okay to give up now. We meant well.
     exit(1)
 
-def enqueue_prompt_and_wait(prompt):
+def classify_error_message(message_data):
+    if message_data['node_type'] == 'LivePortraitCropper':
+        print("Error in LivePortraitCropper")
+
+async def smart_wait(ws, prompt_id):
+    while True:
+        out = await ws.recv()
+        if isinstance(out, str):
+            message = json.loads(out)
+            if message['type'] != 'progress':
+                print(message)
+            if message['type'] == 'execution_error':
+                classify_error_message(message['data'])
+            if message['type'] == 'executing':
+                data = message['data']
+                if data['node'] is None and data['prompt_id'] == prompt_id:
+                    break #Execution is done
+        else:
+            continue #previews are binary data
+
+
+async def enqueue_prompt_and_wait(prompt):
     data = json.dumps(prompt).encode('utf-8')
     # Send HTTP post request
     response = requests.post(PROMPT_ENDPOINT, data=data)
@@ -215,29 +244,20 @@ def enqueue_prompt_and_wait(prompt):
         print(f"Status code: {response.status_code}")
         print(f"Response: {response.text}")
         exit(1)
-
+    prompt_id = response.json()["prompt_id"]
     # Wait for the job to finish
     print(f"Waiting for job to finish (timeout: {TIMEOUT_SECONDS} seconds)")
-    start_time = time.time()
-    # check queue endpoint in loop
-    while True:
-        try:
-            response = requests.get(PROMPT_ENDPOINT, timeout=5)
-            queue_json = response.json()
-            if queue_json["exec_info"]["queue_remaining"]:
-                pass
-            else:
-                print("Job is done")
-                break
-        except Exception:
-            print("Error while checking queue")
-            time.sleep(1)
-            continue
-        if time.time() - start_time > TIMEOUT_SECONDS:
-            print("Timeout reached and job didn't finish!")
-            exit(1)
-        time.sleep(1)
+    execution_start_time = time.perf_counter()
 
+    async with websockets.connect("ws://{}/ws?clientId={}".format(SERVER_IP, client_id)) as ws:
+        await smart_wait(ws, prompt_id)
+        current_time = time.perf_counter()
+        execution_time = current_time - execution_start_time
+        print('request executed in {:.2f} seconds'.format(execution_time))
+
+def get_history(prompt_id):
+    with urllib.request.urlopen("http://{}/history/{}".format(SERVER_IP, prompt_id)) as response:
+        return json.loads(response.read())
 
 def generate_prompt_for_style(
                               workflow_filename: str,
@@ -270,7 +290,7 @@ def generate_prompt_for_style(
 
     json_prompt = apply_jsonpath_mods(jsonpath_mods, workflow_json)
 
-    p = {"prompt": json_prompt}
+    p = {"prompt": json_prompt, "client_id": client_id}
     return p
 
 def apply_jsonpath_mods(jsonpath_mods: Dict[str, Any], workflow_json: Dict[str, Any]) -> Dict[str, Any]:
@@ -307,7 +327,7 @@ if __name__ == "__main__":
     try:
         if not args.skip_comfy_startup:
             comfyui_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
-        main()
+        asyncio.run(main())
     finally:
         if not args.skip_comfy_startup:
             os.killpg(0, signal.SIGKILL) # kill all processes in my group

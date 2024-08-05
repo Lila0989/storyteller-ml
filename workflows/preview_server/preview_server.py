@@ -360,6 +360,10 @@ def get_history(prompt_id):
     with urllib.request.urlopen("http://{}/history/{}".format(SERVER_IP, prompt_id)) as response:
         return json.loads(response.read())
 
+def get_queue(server_ip):
+    with urllib.request.urlopen("http://{}/queue".format(server_ip)) as response:
+        return json.loads(response.read())
+
 async def get_images(ws, prompt_id, filter_node_id=None):
     output_images = {}
     while True:
