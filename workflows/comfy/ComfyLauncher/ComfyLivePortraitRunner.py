@@ -221,9 +221,8 @@ async def smart_wait(ws, prompt_id):
         out = await ws.recv()
         if isinstance(out, str):
             message = json.loads(out)
-            if message['type'] != 'progress':
-                print(message)
             if message['type'] == 'execution_error':
+                print(message)
                 classify_error_message(message['data'])
             if message['type'] == 'executing':
                 data = message['data']

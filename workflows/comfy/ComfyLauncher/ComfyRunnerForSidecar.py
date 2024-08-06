@@ -10,6 +10,7 @@ from pathlib import Path
 from enum import IntEnum, auto
 import os
 import subprocess
+import concurrent.futures
 import signal
 import websockets
 import httpx
@@ -31,7 +32,7 @@ V2V_WORKFLOWS_DIRECTORY = os.environ.get("V2V_WORKFLOWS_DIRECTORY",
 COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/app/ComfyUI")
 
-
+PREVIEW_IPA_WORKFLOW = os.environ.get("PREVIEW_IPA_WORKFLOW", "previews/yae_vid2vid_FirstPassPreview(FrameSaveFlag+DepthOff)_30_07_API(1).json")
 MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "9-07-2024/yae_vid2vid_main_08-07_API.json")
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "3-06-2024/yae_vid2vid_FaceDetailer_1-07_API.json")
 UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "3-06-2024/yae_vid2vid_Upscale_28-06_API.json")
@@ -113,16 +114,16 @@ def generated_frames_count(frames_dir):
 async def extract_frames(input_video, output_directory):
     if not output_directory.exists():
         output_directory.mkdir(parents=True)
-    for idx, frame in enumerate(iio.imiter(input_video)):
-        frame_idx = idx + 1
-        iio.imwrite(f"{output_directory}/Frame_{frame_idx:05d}.jpg", frame)
-    # command = [
-    #     'ffmpeg',
-    #     '-i', str(input_video),
-    #     '-qscale:v', '2',
-    #     str(f'{output_directory}/Frame_%03d.jpg')
-    # ]
-    # await cmd_runner(" ".join(command))
+    # for idx, frame in enumerate(iio.imiter(input_video)):
+    #     frame_idx = idx + 1
+    #     iio.imwrite(f"{output_directory}/Frame_{frame_idx:05d}.jpg", frame)
+    command = [
+        'ffmpeg',
+        '-i', str(input_video),
+        '-qscale:v', '2',
+        str(f'{output_directory}/Frame_%05d.jpg')
+    ]
+    await cmd_runner(" ".join(command))
     print("Frames extracted successfully.")
 
 def pad_frames(frames_dir, expected_count):
@@ -257,11 +258,17 @@ def invoke_facefusion(input_audio, input_video, output_video):
     subprocess.check_output(command)
     print("Facefusion completed successfully.")
 
+
 async def main():
     if not args.skip_comfy_startup:
         print("Starting comfy server")
         try:
-            comfy_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY)
+            await asyncio.create_subprocess_exec(
+                "../venv/bin/python", "main.py", "--highvram", "--disable-metadata", cwd=COMFY_ROOT_DIRECTORY,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE
+            )
         except Exception as e:
             print("Error while starting comfy server")
             print(e)
@@ -492,17 +499,21 @@ def confirm_prompt_running_or_pending(prompt_id):
     return prompt_possibly_queued 
 
 
-async def smart_wait(ws, prompt_id, max_wait_time=10):
+async def smart_wait(ws, prompt_id, max_wait_time=10, prompt_execution_timeout=TIMEOUT_SECONDS):
+    execution_start_time = time.monotonic_ns()
     last_prompt_update_time = time.monotonic_ns()
     while True:
         try:
             out = await ws.recv()
             last_msg_time = time.monotonic_ns()
+            if last_msg_time - execution_start_time > prompt_execution_timeout * 1e9:
+                print(f"Prompt {prompt_id} - execution time exceeded {prompt_execution_timeout} seconds")
+                break
             if isinstance(out, str):
                 message = json.loads(out)
                 if message.get('data', None) and message['data'].get('prompt_id', None) == prompt_id:
                     last_prompt_update_time = time.monotonic_ns()
-                    # print(f"Prompt {prompt_id} updated at {last_prompt_update_time}")
+                    print(f"Prompt {prompt_id} updated at {last_prompt_update_time}")
                 if (last_msg_time - last_prompt_update_time > max_wait_time * 1e9) and not confirm_prompt_running_or_pending(prompt_id):
                     print(f"Prompt {prompt_id} might be stuck")
                     break
@@ -610,7 +621,8 @@ async def cmd_runner(cmd: str):
     proc = await asyncio.create_subprocess_shell(
         cmd,
         stderr=asyncio.subprocess.PIPE,
-        stdout=asyncio.subprocess.PIPE
+        stdout=asyncio.subprocess.PIPE,
+        stdin=asyncio.subprocess.PIPE
     )
 
     stdout, stderr = await proc.communicate()
@@ -751,5 +763,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        if not args.skip_comfy_startup:
-            os.killpg(0, signal.SIGKILL) # kill all processes in my group
+        os.killpg(0, signal.SIGKILL) # kill all processes in my group
