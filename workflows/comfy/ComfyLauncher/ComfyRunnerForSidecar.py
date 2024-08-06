@@ -32,10 +32,10 @@ V2V_WORKFLOWS_DIRECTORY = os.environ.get("V2V_WORKFLOWS_DIRECTORY",
 COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/app/ComfyUI")
 
-PREVIEW_IPA_WORKFLOW = os.environ.get("PREVIEW_IPA_WORKFLOW", "previews/yae_vid2vid_FirstPassPreview(FrameSaveFlag+DepthOff)_30_07_API(1).json")
+PREVIEW_IPA_WORKFLOW = os.environ.get("PREVIEW_IPA_WORKFLOW", "06-08-2024/yae_vid2vid_FirstPassPreview_30_07_API.json")
 MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "9-07-2024/yae_vid2vid_main_08-07_API.json")
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "3-06-2024/yae_vid2vid_FaceDetailer_1-07_API.json")
-UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "3-06-2024/yae_vid2vid_Upscale_28-06_API.json")
+UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "06-08-2024/yae_vid2vid_Upscale_25-07_API.json")
 CINEMATIC_WORKFLOW = os.environ.get("CINEMATIC_WORKFLOW", "3-06-2024/yae_vid2vid_better_main+upscaler_04-07_API.json")
 
 class PipelineType(IntEnum):
@@ -513,7 +513,7 @@ async def smart_wait(ws, prompt_id, max_wait_time=10, prompt_execution_timeout=T
                 message = json.loads(out)
                 if message.get('data', None) and message['data'].get('prompt_id', None) == prompt_id:
                     last_prompt_update_time = time.monotonic_ns()
-                    print(f"Prompt {prompt_id} updated at {last_prompt_update_time}")
+                    # print(f"Prompt {prompt_id} updated at {last_prompt_update_time}")
                 if (last_msg_time - last_prompt_update_time > max_wait_time * 1e9) and not confirm_prompt_running_or_pending(prompt_id):
                     print(f"Prompt {prompt_id} might be stuck")
                     break
