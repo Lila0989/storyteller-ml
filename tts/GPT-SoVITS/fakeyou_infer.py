@@ -325,6 +325,7 @@ cache = {}
 # Main function for TTS synthesis
 def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0, if_freeze=False):
     global cache
+
     if prompt_text is None or len(prompt_text) == 0:
         ref_free = True
 
@@ -552,7 +553,7 @@ def process_text(texts):
     return _text
 
 # Main function for inference
-def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0):
+def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0, output_file_path=None):
     global loaded_gpt_path, loaded_sovits_path
     if not os.path.exists(ref_wav_path):
         print("You must input a reference audio path!")
@@ -567,21 +568,25 @@ def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_
         change_sovits_weights(sovits_path)
         loaded_sovits_path = sovits_path
 
-    opt_root = os.path.join(os.getcwd(), "output")
-    os.makedirs(opt_root, exist_ok=True)
-    output_count = 1
+    current_output_path = output_file_path
 
-    while True:
-        opt_filename = f"{output_count}_GPTSoVITS.wav"
-        current_output_path = os.path.join(opt_root, opt_filename)
-        if not os.path.exists(current_output_path):
-            break
-        output_count += 1
+    if not current_output_path:
+        opt_root = os.path.join(os.getcwd(), "output")
+        os.makedirs(opt_root, exist_ok=True)
+        output_count = 1
+
+        while True:
+            opt_filename = f"{output_count}_GPTSoVITS.wav"
+            current_output_path = os.path.join(opt_root, opt_filename)
+            if not os.path.exists(current_output_path):
+                break
+            output_count += 1
 
     times, sr, audio_data = get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_free, speed)
     
     sf.write(current_output_path, audio_data, sr, format="wav")
     print("Times:\nref_audio: {:.2f}s text: {:.2f}s phonemes & bert: {:.2f}s gpt: {:.2f}s sovits: {:.2f}s".format(*times))
+
     return current_output_path
 
 # Command-line interface
@@ -635,7 +640,8 @@ def main():
         top_p=args.top_p,
         temperature=args.temperature,
         ref_free=False,
-        speed=args.speed
+        speed=args.speed,
+        output_file_path=args.output_path,
     )
 
     if gptsovits_output_audio_path:
