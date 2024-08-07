@@ -33,7 +33,7 @@ COMFY_ROOT_DIRECTORY = os.environ.get("COMFY_ROOT_DIRECTORY",
                                       "/app/ComfyUI")
 
 PREVIEW_IPA_WORKFLOW = os.environ.get("PREVIEW_IPA_WORKFLOW", "06-08-2024/yae_vid2vid_FirstPassPreview_30_07_API.json")
-MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "9-07-2024/yae_vid2vid_main_08-07_API.json")
+MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "06-08-2024/yae_vid2vid_main_29-07_API.json")
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "3-06-2024/yae_vid2vid_FaceDetailer_1-07_API.json")
 UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "06-08-2024/yae_vid2vid_Upscale_25-07_API.json")
 CINEMATIC_WORKFLOW = os.environ.get("CINEMATIC_WORKFLOW", "3-06-2024/yae_vid2vid_better_main+upscaler_04-07_API.json")
@@ -346,9 +346,9 @@ async def main():
         ensure_output_directory_empty()
         if pipeline_type == PipelineType.IPA:
             workflow_filename = MAIN_IPA_WORKFLOW
-        if cinematic_workflow_enabled:
-            pipeline_type = PipelineType.CINEMATIC
-            workflow_filename = CINEMATIC_WORKFLOW
+        # if cinematic_workflow_enabled:
+        #     pipeline_type = PipelineType.CINEMATIC
+        #     workflow_filename = CINEMATIC_WORKFLOW
 
         time_before = time.perf_counter()
 
