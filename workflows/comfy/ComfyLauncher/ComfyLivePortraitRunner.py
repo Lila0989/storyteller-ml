@@ -78,7 +78,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Run Comfy')
     parser.add_argument('--portrait-media-filename', type=str, help='path of mp4 depth from engine for preprocessing', required=True)
     parser.add_argument('--driver-media-filename', type=str, help='path of mp4 outline from engine for preprocessing', required=True)
-    parser.add_argument('--input-is-image', action='store_true', help='input is image', required=True)
+    parser.add_argument('--input-is-image', action='store_true', help='input is image', default=False)
     parser.add_argument('--skip-comfy-startup', action='store_true', help='controls if this script tries to start comfy', default=True)
     parser.add_argument('--tmpdir', type=str, help='path of tmpdir for preprocessing', required=False)
     parser.add_argument('--output-filename', type=str, help='path of output filename', required=True)
@@ -248,7 +248,7 @@ async def enqueue_prompt_and_wait(prompt):
     print(f"Waiting for job to finish (timeout: {TIMEOUT_SECONDS} seconds)")
     execution_start_time = time.perf_counter()
 
-    async with websockets.connect("ws://{}/ws?clientId={}".format(SERVER_IP, client_id)) as ws:
+    async with websockets.connect("ws://{}/ws?clientId={}".format(SERVER_IP, client_id), max_size=1048576 * 10) as ws:
         await smart_wait(ws, prompt_id)
         current_time = time.perf_counter()
         execution_time = current_time - execution_start_time
