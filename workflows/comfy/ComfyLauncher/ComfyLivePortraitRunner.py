@@ -18,7 +18,7 @@ import uuid
 client_id = str(uuid.uuid4())
 
 SERVER_IP = os.environ.get("SERVER_IP", "127.0.0.1:8188")
-SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 120))
+SERVER_START_TIMEOUT = int(os.environ.get("SERVER_START_TIMEOUT", 60))
 
 TIMEOUT_SECONDS = int(os.environ.get("TIMEOUT_SECONDS", 180))
 PROMPT_ENDPOINT = f"http://{SERVER_IP}/prompt"
@@ -114,7 +114,7 @@ def trigger_comfy_restart(restart_trigger_file):
     print("Restart triggered")
 
 # KS: we're making the retries configurable but we should not increase the retries for all workflows without confirming we'd still meet slas. Some jobs are better to just fail. Retries compound over inference-job attempt_counts, comfy startup times, and actual inference times.
-def ensure_server_is_healthy(server_address, restart_trigger_file=None, retries=1):
+def ensure_server_is_healthy(server_address, restart_trigger_file=None, retries=2):
     wait_for_comfy_startup(server_address)
     if queued_count_is_zero(server_address):
         print("Server is healthy")
@@ -134,12 +134,14 @@ def ensure_server_is_healthy(server_address, restart_trigger_file=None, retries=
         print(f"Server is not healthy. Number of queued jobs: {number_of_queued_jobs}")
         print("Server is not healthy after restart. Retrying restart")
 
+    wait_for_comfy_startup(server_address, timeout=5, terminate_on_failure=True)
+
 
 def interrupt_comfy_queue(server_address):
     requests.post(f"http://{server_address}/interrupt")
     print("Queue interrupted successfully.")
 
-def wait_for_comfy_startup(server_address, timeout=SERVER_START_TIMEOUT):
+def wait_for_comfy_startup(server_address, timeout=SERVER_START_TIMEOUT, terminate_on_failure=False):
     prompt_endpoint = f"http://{server_address}/prompt"
     start_time = time.time()
     started = False
@@ -156,7 +158,9 @@ def wait_for_comfy_startup(server_address, timeout=SERVER_START_TIMEOUT):
         time.sleep(1)
     if not started:
         print(f"Server failed to start in {SERVER_START_TIMEOUT} seconds")
-        exit(1)
+        if terminate_on_failure:
+            print("Exiting.")
+            exit(1)
 
 
 async def main():
