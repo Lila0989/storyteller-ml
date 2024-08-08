@@ -4,8 +4,6 @@ import sys
 
 import pyopenjtalk
 
-
-from text import symbols
 from text.symbols import punctuation
 # Regular expression matching Japanese without punctuation marks:
 _japanese_characters = re.compile(
@@ -57,12 +55,13 @@ def post_replace_ph(ph):
         "、": ",",
         "...": "…",
     }
+
     if ph in rep_map.keys():
         ph = rep_map[ph]
-    if ph in symbols:
-        return ph
-    if ph not in symbols:
-        ph = "UNK"
+    # if ph in symbols:
+    #     return ph
+    # if ph not in symbols:
+    #     ph = "UNK"
     return ph
 
 
@@ -190,7 +189,7 @@ def _numeric_feature_by_regex(regex, s):
         return -50
     return int(match.group(1))
 
-def g2p(norm_text, with_prosody=False):
+def g2p(norm_text, with_prosody=True):
     phones = preprocess_jap(norm_text, with_prosody)
     phones = [post_replace_ph(i) for i in phones]
     # todo: implement tones and word2ph

@@ -6,7 +6,7 @@ from g2p_en import G2p
 
 from text.symbols import punctuation
 
-from text import symbols
+from text.symbols2 import symbols
 
 import unicodedata
 from builtins import str as unicode
