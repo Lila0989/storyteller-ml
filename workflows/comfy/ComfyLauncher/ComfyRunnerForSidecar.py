@@ -263,12 +263,13 @@ async def main():
     if not args.skip_comfy_startup:
         print("Starting comfy server")
         try:
-            await asyncio.create_subprocess_exec(
-                "../venv/bin/python", "main.py", "--highvram", "--disable-metadata", cwd=COMFY_ROOT_DIRECTORY,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                stdin=subprocess.PIPE
-            )
+            comfyui_process = subprocess.Popen(["../venv/bin/python", "main.py", "--highvram", "--disable-metadata"], cwd=COMFY_ROOT_DIRECTORY, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)
+            # await asyncio.create_subprocess_exec(
+            #     "../venv/bin/python", "main.py", "--highvram", "--disable-metadata", cwd=COMFY_ROOT_DIRECTORY,
+            #     stdout=subprocess.STDOUT,
+            #     stderr=subprocess.STDOUT,
+            #     stdin=subprocess.PIPE
+            # )
         except Exception as e:
             print("Error while starting comfy server")
             print(e)

@@ -164,7 +164,7 @@ def wait_for_comfy_startup(server_address, timeout=SERVER_START_TIMEOUT, termina
 
 
 async def main():
-    outer_retries = 2
+    outer_retries = 1
     restart_trigger_file = args.server_restart_trigger_file
 
     pipeline_type = PipelineType.BASE
