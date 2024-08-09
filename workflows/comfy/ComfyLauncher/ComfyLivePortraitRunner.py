@@ -92,7 +92,7 @@ args = parse_args()
 def get_queued_jobs_count(server_address):
     try:
         response = requests.get(f"http://{server_address}/queue", timeout=5)
-    except requests.exceptions.BaseException:
+    except requests.exceptions.RequestException:
         print("Error while checking queue")
         return None
     queue_json = response.json()
