@@ -22,6 +22,7 @@ from text.cleaner import clean_text
 from module.mel_processing import spectrogram_torch
 from my_utils import load_audio
 from tools.i18n.i18n import I18nAuto
+from text import chinese
 
 # Additional Imports and GPU Info
 import pdb
@@ -258,8 +259,7 @@ def get_bert_inf(phones, word2ph, norm_text, language):
 
     return bert
 
-# Splitting functions for text slicing
-splits = {"，", "。", "？", "！", ",", ".", "?", "!", "~", ":", "：", "—", "…"}
+splits = {"，", "。", "？", "！", ",", ".", "?", "!", "~", ":", "：", "—", "…", }
 
 # Function to get the first segment of text before punctuation
 def get_first(text):
@@ -268,13 +268,14 @@ def get_first(text):
     return text
 
 # Function to get phones and BERT embeddings
-def get_phones_and_bert(text, language, version):
+def get_phones_and_bert(text,language,version,final=False):
     if language in {"en", "all_zh", "all_ja", "all_ko", "all_yue"}:
-        language = language.replace("all_", "")
+        language = language.replace("all_","")
         if language == "en":
             LangSegment.setfilters(["en"])
             formattext = " ".join(tmp["text"] for tmp in LangSegment.getTexts(text))
         else:
+            # Since Chinese, Japanese and Korean characters cannot be distinguished, the user input shall prevail.
             formattext = text
         while "  " in formattext:
             formattext = formattext.replace("  ", " ")
@@ -282,24 +283,24 @@ def get_phones_and_bert(text, language, version):
             if re.search(r'[A-Za-z]', formattext):
                 formattext = re.sub(r'[a-z]', lambda x: x.group(0).upper(), formattext)
                 formattext = chinese.mix_text_normalize(formattext)
-                return get_phones_and_bert(formattext, "zh", version)
+                return get_phones_and_bert(formattext,"zh",version)
             else:
                 phones, word2ph, norm_text = clean_text_inf(formattext, language, version)
                 bert = get_bert_feature(norm_text, word2ph).to(device)
         elif language == "yue" and re.search(r'[A-Za-z]', formattext):
-            formattext = re.sub(r'[a-z]', lambda x: x.group(0).upper(), formattext)
-            formattext = chinese.mix_text_normalize(formattext)
-            return get_phones_and_bert(formattext, "yue", version)
+                formattext = re.sub(r'[a-z]', lambda x: x.group(0).upper(), formattext)
+                formattext = chinese.mix_text_normalize(formattext)
+                return get_phones_and_bert(formattext,"yue",version)
         else:
             phones, word2ph, norm_text = clean_text_inf(formattext, language, version)
             bert = torch.zeros(
                 (1024, len(phones)),
-                dtype=torch.float16 if is_half else torch.float32,
+                dtype=torch.float16 if is_half == True else torch.float32,
             ).to(device)
     elif language in {"zh", "ja", "ko", "yue", "auto", "auto_yue"}:
-        textlist = []
-        langlist = []
-        LangSegment.setfilters(["zh", "ja", "en", "ko"])
+        textlist=[]
+        langlist=[]
+        LangSegment.setfilters(["zh","ja","en","ko"])
         if language == "auto":
             for tmp in LangSegment.getTexts(text):
                 langlist.append(tmp["lang"])
@@ -315,6 +316,7 @@ def get_phones_and_bert(text, language, version):
                 if tmp["lang"] == "en":
                     langlist.append(tmp["lang"])
                 else:
+                    # 因无法区别中日韩文汉字,以用户输入为准
                     langlist.append(language)
                 textlist.append(tmp["text"])
         print(textlist)
@@ -333,7 +335,10 @@ def get_phones_and_bert(text, language, version):
         phones = sum(phones_list, [])
         norm_text = ''.join(norm_text_list)
 
-    return phones, bert.to(dtype), norm_text
+    if not final and len(phones) < 6:
+        return get_phones_and_bert("." + text,language,version,final=True)
+
+    return phones,bert.to(dtype),norm_text
 
 # Function to merge short texts
 def merge_short_text_in_array(texts, threshold):
@@ -362,7 +367,7 @@ else:
 cache = {}
 
 # Main function for TTS synthesis
-def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0, if_freeze=False):
+def get_tts_wav(ref_wav_paths, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0, if_freeze=False):
     global cache
 
     if prompt_text is None or len(prompt_text) == 0:
@@ -388,19 +393,23 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
     t1 = ttime()
 
     if not ref_free:
+        refers = []
         with torch.no_grad():
-            wav16k, sr = librosa.load(ref_wav_path, sr=16000)
-            if wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000:
-                raise OSError("Reference audio must be within 3~10 seconds.")
-            wav16k = torch.from_numpy(wav16k)
-            zero_wav_torch = torch.from_numpy(zero_wav)
-            wav16k = wav16k.half().to(device) if is_half else wav16k.to(device)
-            zero_wav_torch = zero_wav_torch.half().to(device) if is_half else zero_wav_torch.to(device)
-            wav16k = torch.cat([wav16k, zero_wav_torch])
-            ssl_content = ssl_model.model(wav16k.unsqueeze(0))["last_hidden_state"].transpose(1, 2)
-            codes = vq_model.extract_latent(ssl_content)
-            prompt_semantic = codes[0, 0]
-            prompt = prompt_semantic.unsqueeze(0).to(device)
+            for ref_wav_path in ref_wav_paths:
+                wav16k, sr = librosa.load(ref_wav_path, sr=16000)
+                if wav16k.shape[0] > 160000 or wav16k.shape[0] < 48000:
+                    raise OSError("Each reference audio must be within 3~10 seconds.")
+                wav16k = torch.from_numpy(wav16k)
+                zero_wav_torch = torch.from_numpy(zero_wav)
+                wav16k = wav16k.half().to(device) if is_half else wav16k.to(device)
+                zero_wav_torch = zero_wav_torch.half().to(device) if is_half else zero_wav_torch.to(device)
+                wav16k = torch.cat([wav16k, zero_wav_torch])
+                ssl_content = ssl_model.model(wav16k.unsqueeze(0))["last_hidden_state"].transpose(1, 2)
+                codes = vq_model.extract_latent(ssl_content)
+                prompt_semantic = codes[0, 0]
+                refers.append(prompt_semantic.unsqueeze(0).to(device))
+
+        prompt = torch.mean(torch.stack(refers), dim=0)
 
     t2 = ttime()
 
@@ -466,10 +475,8 @@ def get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language,
                 pred_semantic = pred_semantic[:, -idx:].unsqueeze(0)
                 cache[i_text] = pred_semantic
 
-        refer = get_spepc(hps, ref_wav_path).to(device)
-        if is_half:
-            refer = refer.half().to(device)
-        audio = vq_model.decode(pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refer, speed=speed).detach().cpu().numpy()[0, 0]
+        refer_spectrograms = [get_spepc(hps, ref_wav_path).to(dtype).to(device) for ref_wav_path in ref_wav_paths]
+        audio = vq_model.decode(pred_semantic, torch.LongTensor(phones2).to(device).unsqueeze(0), refer_spectrograms, speed=speed).detach().cpu().numpy()[0, 0]
         max_audio = np.abs(audio).max()
         if max_audio > 1:
             audio /= max_audio
@@ -592,10 +599,10 @@ def process_text(texts):
     return _text
 
 # Main function for inference
-def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0, output_file_path=None):
+def gptsovits_inference(gpt_model_path, sovits_model_path, ref_audio_paths, prompt_text, prompt_language, text, text_language, how_to_cut="No slice", top_k=20, top_p=0.6, temperature=0.6, ref_free=False, speed=1.0, output_file_path=None):
     global loaded_gpt_path, loaded_sovits_path
-    if not os.path.exists(ref_wav_path):
-        print("You must input a reference audio path!")
+    if not ref_audio_paths:
+        print("You must input at least one reference audio path!")
         return None
     gpt_path = gpt_model_path if gpt_model_path else pretrained_gpt_name[0]
     sovits_path = sovits_model_path if sovits_model_path else pretrained_sovits_name[0]
@@ -621,7 +628,7 @@ def gptsovits_inference(gpt_model_path, sovits_model_path, ref_wav_path, prompt_
                 break
             output_count += 1
 
-    times, sr, audio_data = get_tts_wav(ref_wav_path, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_free, speed)
+    times, sr, audio_data = get_tts_wav(ref_audio_paths, prompt_text, prompt_language, text, text_language, how_to_cut, top_k, top_p, temperature, ref_free, speed)
     
     sf.write(current_output_path, audio_data, sr, format="wav")
     print("Times:\nref_audio: {:.2f}s text: {:.2f}s phonemes & bert: {:.2f}s gpt: {:.2f}s sovits: {:.2f}s".format(*times))
@@ -635,7 +642,7 @@ def main():
     parser.add_argument("--use_pretrained_sovits", action="store_true", help="Use pretrained SoVITS model")
     parser.add_argument("--gpt_model", type=str, help="Path to GPT model checkpoint")
     parser.add_argument("--sovits_model", type=str, help="Path to SoVITS model checkpoint")
-    parser.add_argument("--ref_audio", type=str, help="Path to reference wav file")
+    parser.add_argument("--ref_audio", type=str, nargs='+', help="Paths to reference wav files (multiple files allowed)")
     parser.add_argument("--ref_text", type=str, help="Path to reference text file (optional)")
     parser.add_argument("--target_language", type=str, choices=dict_language_v1.keys() | dict_language_v2.keys(), help="Language of the target text")
     parser.add_argument("--ref_language", type=str, choices=dict_language_v1.keys() | dict_language_v2.keys(), help="Language of the reference text")
@@ -669,7 +676,7 @@ def main():
     gptsovits_output_audio_path = gptsovits_inference(
         gpt_model_path=gpt_model_path,
         sovits_model_path=sovits_model_path,
-        ref_wav_path=args.ref_audio,
+        ref_audio_paths=args.ref_audio,
         prompt_text=prompt_text,
         prompt_language=args.ref_language,
         text=target_text,
