@@ -200,7 +200,7 @@ args = parse_args()
 def get_queued_jobs_count(server_address):
     try:
         response = requests.get(f"http://{server_address}/queue", timeout=5)
-    except requests.exceptions.BaseException:
+    except requests.exceptions.RequestException:
         print("Error while checking queue")
         return None
     queue_json = response.json()
@@ -347,9 +347,6 @@ async def main():
         ensure_output_directory_empty()
         if pipeline_type == PipelineType.IPA:
             workflow_filename = MAIN_IPA_WORKFLOW
-        # if cinematic_workflow_enabled:
-        #     pipeline_type = PipelineType.CINEMATIC
-        #     workflow_filename = CINEMATIC_WORKFLOW
 
         time_before = time.perf_counter()
 
@@ -363,6 +360,7 @@ async def main():
             workflow_filename, 
             denoise_first_pass=denoise_first_pass,
             enable_lipsync=enable_lipsync,
+            enable_cinematic=cinematic_workflow_enabled,
             disable_lcm=disable_lcm,
             global_ipa_image_filename=args.global_ipa_image_filename,
             global_ipa_strength=args.global_ipa_strength,
@@ -381,43 +379,43 @@ async def main():
         else:
             print("Pipeline failed to produce output")
             exit(1)
-        if args.upscaler_enabled:
-            if pipeline_type is not PipelineType.CINEMATIC:
-                pipeline_type = PipelineType.UPSCALER
-                print("running pipeline" + str(pipeline_type))
-                convert_pipline_output_to_input(left)
-                workflow_filename = UPSCALER_WORKFLOW
-                prompt = generate_prompt_for_style(
-                    style, 
-                    positive_prompt, 
-                    negative_prompt, 
-                    travel_prompt, 
-                    workflow_filename, 
-                    pipeline_type,
-                    denoise_first_pass=denoise_first_pass,
-                    enable_lipsync=enable_lipsync,
-                    global_ipa_image_filename=args.global_ipa_image_filename,
-                    global_ipa_strength=args.global_ipa_strength,
-                    frame_skip=args.frame_skip
-                )
-                if args.generate_previews:
-                    previews_directory = args.preview_frames_directory
-                    if not previews_directory:
-                        print("Previews directory not set")
-                        exit(1)
-                    if not (Path(previews_directory) / "second_pass" ).exists():
-                        (Path(previews_directory) / "second_pass").mkdir(parents=True)
-                    ensure_frames_dir_empty("SecondPass")
-                await enqueue_prompt_and_wait(prompt)
-                if args.generate_previews:
-                    copy_frames_to_directory("SecondPass", Path(previews_directory) / "second_pass")
-                output_index = output_index + 1
-                left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
-                if left.exists():
-                    print("Pipeline completed successfully to output file: " + str(left))
-                else:
-                    print("Pipeline failed to produce output")
+        if args.upscaler_enabled or args.enable_cinematic:
+            pipeline_type = PipelineType.UPSCALER
+            print("running pipeline" + str(pipeline_type))
+            convert_pipline_output_to_input(left)
+            workflow_filename = UPSCALER_WORKFLOW
+            prompt = generate_prompt_for_style(
+                style,
+                positive_prompt,
+                negative_prompt,
+                travel_prompt,
+                workflow_filename,
+                pipeline_type,
+                denoise_first_pass=denoise_first_pass,
+                enable_lipsync=enable_lipsync,
+                enable_cinematic=cinematic_workflow_enabled,
+                global_ipa_image_filename=args.global_ipa_image_filename,
+                global_ipa_strength=args.global_ipa_strength,
+                frame_skip=args.frame_skip
+            )
+            if args.generate_previews:
+                previews_directory = args.preview_frames_directory
+                if not previews_directory:
+                    print("Previews directory not set")
                     exit(1)
+                if not (Path(previews_directory) / "second_pass" ).exists():
+                    (Path(previews_directory) / "second_pass").mkdir(parents=True)
+                ensure_frames_dir_empty("SecondPass")
+            await enqueue_prompt_and_wait(prompt)
+            if args.generate_previews:
+                copy_frames_to_directory("SecondPass", Path(previews_directory) / "second_pass")
+            output_index = output_index + 1
+            left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/SparseUpscaleInterp_0000{output_index}.mp4"
+            if left.exists():
+                print("Pipeline completed successfully to output file: " + str(left))
+            else:
+                print("Pipeline failed to produce output")
+                exit(1)
         if args.face_detailer_enabled:
             pipeline_type = PipelineType.FACE_DETAILER
             print("running pipeline" + str(pipeline_type))
@@ -567,6 +565,7 @@ def generate_prompt_for_style(style_name,
                               pipeline_type = PipelineType.BASE,
                               denoise_first_pass=1.0,
                               enable_lipsync: bool = False,
+                              enable_cinematic: bool = False,
                               disable_lcm: bool = False,
                               global_ipa_image_filename: Optional[str] = None,
                               global_ipa_strength: float = 1.0,
@@ -602,6 +601,7 @@ def generate_prompt_for_style(style_name,
         pipeline_type=pipeline_type,
         denoise_first_pass=denoise_first_pass,
         enable_lipsync=enable_lipsync,
+        enable_cinematic=enable_cinematic,
         disable_lcm=disable_lcm,
         global_ipa_image_filename=global_ipa_image_filename,
         global_ipa_strength=global_ipa_strength,
@@ -643,7 +643,8 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
                       travel_in: Optional[str] = None, 
                       pipeline_type = PipelineType.BASE,
                       denoise_first_pass=1.0,
-                      enable_lipsync: bool = False, 
+                      enable_lipsync: bool = False,
+                      enable_cinematic: bool = False,
                       disable_lcm: bool = False,
                       global_ipa_image_filename: Optional[str] = None,
                       global_ipa_strength: float = 1.0,
@@ -712,7 +713,11 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
     # TODO(bt,2024-07-06): Move this to the mappings so we don't have to maintain the json path
     if travel_in:
         modifications["$.509.inputs.text"] = travel_in
-        
+
+    if enable_cinematic:
+        modifications["$.2047.inputs.value"] = 576
+        modifications["$.2048.inputs.value"] = 1024
+
     # TODO The 3 Mappings for depth outlines and normals apparently uses an array.
     if pipeline_type in [PipelineType.IPA, PipelineType.BASE, PipelineType.PREVIEW]:
         if depth_video_filename != None and outline_video_filename != None and normals_video_filename !=None:
