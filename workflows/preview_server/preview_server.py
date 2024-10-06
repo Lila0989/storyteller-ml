@@ -19,7 +19,7 @@ import urllib
 import websockets
 
 # CORS header for which websites can import this content in a frame.
-# This *technically* shouldn't be required, but the XHR requests are 
+# This *technically* shouldn't be required, but the XHR requests are
 # being made from a controlled frame.
 #
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors
@@ -27,6 +27,7 @@ import websockets
 # NB(bt,2024-03-30): The *.netlify.app is dangerous.
 CORS_WHITELIST_ORIGINS = [
     "https://storyteller.ai",
+    "https://render.storyteller.ai",
     "https://studio.storyteller.ai",
     "https://studio-testing.studio.storyteller.ai",
     "https://studio-staging.studio.storyteller.ai",
