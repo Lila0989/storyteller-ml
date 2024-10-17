@@ -29,7 +29,8 @@ RUN git clone https://github.com/fudan-generative-vision/hallo.git && \
 # Install the dependencies for hallo
 WORKDIR /hallo
 RUN source /venv/bin/activate && \
-    pip3 install -r requirements.txt && \
+    pip3 install -r requirements.txt \
+    --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ --extra-index-url https://download.pytorch.org/whl/cu121/ && \
     pip3 install . && \
     pip3 install huggingface_hub && \
     deactivate

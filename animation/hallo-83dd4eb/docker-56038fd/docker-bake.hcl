@@ -17,12 +17,9 @@ variable "CU_VERSION" {
     default = "121"
 }
 
-variable "BASE_IMAGE_REPOSITORY" {
-    default = "ashleykza/runpod-base"
-}
 
-variable "BASE_IMAGE_VERSION" {
-    default = "1.7.0"
+variable "BASE_IMAGE" {
+    default = "12.2.2-cudnn8-devel-ubuntu22.04"
 }
 
 variable "CUDA_VERSION" {
