@@ -42,12 +42,15 @@ WORKDIR /model_code/F5-TTS
 COPY . /model_code/F5-TTS
 
 # /model_code/F5-TTS/pretrained_models
-ARG HF_DATASETS_CACHE="./pretrained_models"
 
-# FIXME: this might not work without HF_TOKEN!!!
-ENV HF_DATASETS_CACHE=$HF_DATASETS_CACHE
 
 # initializes the model - downloads checkpoints
-RUN  ["/bin/bash", "-c", "HF_DATASETS_CACHE=$HF_DATASETS_CACHE DOWNLOAD_ONLY=TRUE /python_install/python/bin/python inference-cli.py"]
+# FIXME: is isn't working
+ARG HF_DATASETS_CACHE="./pretrained_models"
+# ENV HF_DATASETS_CACHE=$HF_DATASETS_CACHE
+# RUN  ["/bin/bash", "-c", "HF_DATASETS_CACHE=$HF_DATASETS_CACHE DOWNLOAD_ONLY=TRUE /python_install/python/bin/python inference-cli.py"]
+
+# checkpoints at the default location ~/.cache/huggingface/hub
+RUN  ["/bin/bash", "-c", "DOWNLOAD_ONLY=TRUE /python_install/python/bin/python inference-cli.py"]
 
 ENTRYPOINT ["/bin/bash", "-c", ". /python_install/python/bin/activate && exec /bin/bash"]
