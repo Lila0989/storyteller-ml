@@ -34,12 +34,13 @@ jobs:
       - name: Build image
         run: |
           echo "check available disk space"
-          du -hs
+          df -h
           cd tts/F5-TTS && docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Push image to GitHub Container Registry
         run: |
-
+          # testing
+          exit 0
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
 
           # Change all uppercase to lowercase
