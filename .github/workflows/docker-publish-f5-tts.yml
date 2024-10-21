@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "check available disk space"
           df -h
-          cd tts/F5-TTS && docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          cd tts/F5-TTS && ls -alt && docker build . --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Push image to GitHub Container Registry
         run: |
