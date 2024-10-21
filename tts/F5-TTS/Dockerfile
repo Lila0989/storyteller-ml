@@ -1,5 +1,5 @@
 # Base CUDA image
-FROM cnstark/pytorch:2.3.1-py3.10.15-cuda12.1.0-devel-ubuntu22.04
+FROM pytorch/pytorch:2.5.0-cuda12.1-cudnn9-runtime
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
