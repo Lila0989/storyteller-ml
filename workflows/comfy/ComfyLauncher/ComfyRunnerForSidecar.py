@@ -4,13 +4,12 @@ import os
 import json
 import time
 from typing import Dict, Any, Optional
-from jsonpath_ng import jsonpath, parse
+from jsonpath_ng import parse
 import shutil
 from pathlib import Path
 from enum import IntEnum, auto
 import os
 import subprocess
-import concurrent.futures
 import signal
 import websockets
 import httpx
@@ -18,7 +17,6 @@ import asyncio
 import urllib
 import uuid
 import re
-import imageio.v3 as iio
 
 client_id = str(uuid.uuid4())
 
@@ -37,6 +35,7 @@ MAIN_IPA_WORKFLOW = os.environ.get("MAIN_IPA_WORKFLOW", "06-08-2024/yae_vid2vid_
 FACE_DETAILER_WORKFLOW = os.environ.get("FACE_DETAILER_WORKFLOW", "3-06-2024/yae_vid2vid_FaceDetailer_1-07_API.json")
 UPSCALER_WORKFLOW = os.environ.get("UPSCALER_WORKFLOW", "06-08-2024/yae_vid2vid_Upscale_25-07_API.json")
 CINEMATIC_WORKFLOW = os.environ.get("CINEMATIC_WORKFLOW", "3-06-2024/yae_vid2vid_better_main+upscaler_04-07_API.json")
+COG_V1_WORKFLOW = os.environ.get("COG_V1_WORKFLOW", "14-11-2024/yae_15-10_COG_API.json")
 
 class PipelineType(IntEnum):
     BASE = auto()
@@ -45,6 +44,7 @@ class PipelineType(IntEnum):
     UPSCALER = auto()
     CINEMATIC = auto()
     PREVIEW = auto()
+    COG_V1 = auto()
 
 
 style_to_filename = {
@@ -114,9 +114,6 @@ def generated_frames_count(frames_dir):
 async def extract_frames(input_video, output_directory):
     if not output_directory.exists():
         output_directory.mkdir(parents=True)
-    # for idx, frame in enumerate(iio.imiter(input_video)):
-    #     frame_idx = idx + 1
-    #     iio.imwrite(f"{output_directory}/Frame_{frame_idx:05d}.jpg", frame)
     command = [
         'ffmpeg',
         '-i', str(input_video),
@@ -168,7 +165,6 @@ def ensure_output_directory_empty():
     (Path(COMFY_ROOT_DIRECTORY) / "output").mkdir(parents=True)
 
 def parse_args():
-    
     parser = argparse.ArgumentParser(description='Run Comfy')
     parser.add_argument('--prompt', type=str, help='location of the prompt json', required=False)
     parser.add_argument('--style', type=str, help='style name', required=False)
@@ -191,6 +187,8 @@ def parse_args():
     parser.add_argument('--generate-previews', help='generate previews', required=False, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--preview-frames-directory', type=str, help='previews directory', required=False)
     parser.add_argument('--enable-cinematic', help='enable cinematic', required=False, default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--enable-cogvideo', help='enable cog video', required=False, default=False, action=argparse.BooleanOptionalAction)
+
     parser.add_argument('--skip-comfy-startup', action='store_true', help='controls if this script tries to start comfy', default=False)
     parser.add_argument('--server-restart-trigger-file', type=str, help='server restart trigger file', required=False)
     return parser.parse_args()
@@ -258,7 +256,6 @@ def invoke_facefusion(input_audio, input_video, output_video):
     subprocess.check_output(command)
     print("Facefusion completed successfully.")
 
-
 async def main():
     if not args.skip_comfy_startup:
         print("Starting comfy server")
@@ -280,11 +277,49 @@ async def main():
     # interrupt_comfy_queue(SERVER_IP)
     wait_for_comfy_startup(SERVER_IP)
 
+    # print our process id, parent group id, comfyui process id, comfyui process group id, comfyui process group leader id, comfyui process group leader parent id
+    # print(f"Process ID: {os.getpid()}")
+    # print(f"Parent Group ID: {os.getpgrp()}")
+    # print(f"ComfyUI Process ID: {comfyui_process.pid}")
+    # print(f"ComfyUI Process Group ID: {os.getpgid(comfyui_process.pid)}")
+    # print(f"ComfyUI Process Group Leader ID: {os.getpgid(comfyui_process.pid)}")
+    # print(f"ComfyUI Process Group Leader Parent ID: {os.getppid()}")
     pipeline_type = PipelineType.IPA
 
     output_index = 0
     file_path = args.prompt
     prompt = None
+    if args.enable_cogvideo:
+        print("Generating prompt json for COG V1")
+        workflow_filename = COG_V1_WORKFLOW
+        positive_prompt_filename = args.positive_prompt_filename
+        step_count = 25
+        strength = 1.4
+        if args.strength != 1.0:
+            # Could we even make better spaghetti?
+            strength = args.strength
+        positive_prompt = ''
+        if positive_prompt_filename:
+            positive_prompt = open(positive_prompt_filename).read()
+        ensure_output_directory_empty()
+        prompt = generate_prompt_for_cog_v1(
+            workflow_filename,
+            positive_prompt,
+            step_count,
+            strength
+        )
+        print("running pipeline" + str(pipeline_type))
+        await enqueue_prompt_and_wait(prompt)
+        left = Path(COMFY_ROOT_DIRECTORY) / "output" / f"vid2vid/CogVideoX-I2V_00001.mp4"
+        if left.exists():
+            print("Pipeline completed successfully to output file: " + str(left))
+        else:
+            print("Pipeline failed to produce output")
+            exit(1)
+        restore_last_pipeline_output(left)
+        return
+
+
     if args.style is not None:
         print("Generating prompt json")
         style = args.style
@@ -351,7 +386,7 @@ async def main():
         time_before = time.perf_counter()
 
         validate_style_name(style)
-        
+
         prompt = generate_prompt_for_style(
             style, 
             positive_prompt, 
@@ -369,7 +404,7 @@ async def main():
             outline_video_filename=outline_video_filename,
             normals_video_filename=normals_video_filename
         )
-        
+
         print("running pipeline" + str(pipeline_type))
         await enqueue_prompt_and_wait(prompt)
         output_index = output_index + 1
@@ -547,14 +582,27 @@ async def enqueue_prompt_and_wait(prompt):
         # Wait for the job to finish
         print(f"Waiting for job to finish (timeout: {TIMEOUT_SECONDS} seconds)")
         execution_start_time = time.perf_counter()
-        # import ipdb; ipdb.set_trace()
-        # max_size = 1048576 * 10 allows us to receive a really large payload from comfy
         async with websockets.connect("ws://{}/ws?clientId={}".format(SERVER_IP, client_id), max_size=1048576 * 10) as ws:
             await smart_wait(ws, prompt_id)
             current_time = time.perf_counter()
             execution_time = current_time - execution_start_time
             print('request executed in {:.2f} seconds'.format(execution_time))
 
+
+
+def generate_prompt_for_cog_v1(workflow_filename, positive_prompt, step_count, strength=1.4):
+        workflow_directory = Path(V2V_WORKFLOWS_DIRECTORY) / "workflows"
+        workflow_json = json.load(open(workflow_directory / workflow_filename))
+
+        modifications = {
+            "$.320.inputs.text": positive_prompt,
+            "$.464.inputs.value": step_count,
+            "$.465.inputs.value": strength,
+        }
+        json_prompt = apply_jsonpath_mods(modifications, workflow_json)
+
+        p = {"prompt": json_prompt, "client_id": client_id}
+        return p
 
 
 def generate_prompt_for_style(style_name, 
@@ -653,7 +701,7 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
                       outline_video_filename: str = None,
                       normals_video_filename: str = None
                       ) -> Dict[str, Any]:
-    
+
     modifications = {}
     new_mod_json = style_mods.copy()
     # Process "loras" differently
@@ -686,8 +734,8 @@ def get_jsonpath_mods(style_mods: Dict[str, Any],
 
     if frame_skip:
         new_mod_json["every_nth_frame"] = frame_skip
-        
-    
+
+
     for key, value in new_mod_json.items():
         mapping_key = f"$.{key}"
         jsonpath_expr = parse(mapping_key)
