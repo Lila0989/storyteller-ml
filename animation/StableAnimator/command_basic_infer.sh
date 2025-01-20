@@ -5,16 +5,16 @@ OUTPUT_DIR="inference/output_1/final_output"
 POSE_FRAME_DIR="inference/output_1/poses"
 STARTING_IMAGE="inference/output_1/frames/frame_0.png"
 
-mkdir -p OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
 
 #CUDA_VISIBLE_DEVICES=0 
 python inference_basic.py \
- --pretrained_model_name_or_path="checkpoints/SVD/stable-video-diffusion-img2vid-xt" \
+ --pretrained_model_name_or_path="checkpoints/stable-video-diffusion-img2vid-xt" \
  --output_dir="${OUTPUT_DIR}" \
  --validation_control_folder="${POSE_FRAME_DIR}" \
  --validation_image="${STARTING_IMAGE}" \
- --width=576 \
- --height=1024 \
+ --width=1024 \
+ --height=576 \
  --guidance_scale=3.0 \
  --num_inference_steps=25 \
  --posenet_model_name_or_path="checkpoints/Animation/pose_net.pth" \
