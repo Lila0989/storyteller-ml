@@ -1,3 +1,4 @@
 checkpoints/
 inference/
 venv/
+__pycache__/

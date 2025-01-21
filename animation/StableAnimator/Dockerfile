@@ -1,16 +1,23 @@
 # syntax=docker/dockerfile:1
 
 FROM nvidia/cuda:12.0.1-runtime-ubuntu22.04
+#FROM nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
 #FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# NB: SadTalker obviously requires ffmpeg
+# tzdata install hangs without presetting the time zone
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# NB: SadTalker requires ffmpeg
 # NB: rsync to monitor time it takes for files to sync in k8s initContainer.
-# NB(bt,2023-05-04): Installing lsof, htop, ripgrep, and other debugging tools
 # NB: I had to remove `nvidia-driver-515` because it broke CUDA / nvidia-smi
 # NB(bt,2025-01-20): StableAnimator uses git, git-lfs
-RUN apt-get update && apt-get install -y \
+# NB(bt,2025-01-20): unzip for web installs
+# NB(bt,2025-01-20): debug / utility tools: lsof, htop, ripgrep, tmux, etc.
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y \
     build-essential \
     curl \
     ffmpeg \
@@ -25,10 +32,31 @@ RUN apt-get update && apt-get install -y \
     python3.10-venv \
     ripgrep \
     rsync \
+    tmux \
+    unzip \
     vim \
     wget \
     --no-install-recommends \
     && apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+# Install rclone
+RUN cd /tmp && \
+    curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip && \
+        unzip rclone-current-linux-amd64.zip && \
+        cd rclone-*-linux-amd64 && \
+        cp rclone /usr/bin/ && \
+        chmod 755 /usr/bin/rclone && \
+        rm -rf /tmp/rclone*
+
+# Install entr
+RUN cd /tmp && \
+    wget -O entr.zip https://github.com/eradman/entr/archive/refs/tags/5.6.zip && \
+        unzip entr.zip && \
+        cd entr-5.6 && \
+        ./configure && \
+        make test && \
+        make install \
+        && rm -rf /tmp/entr-5.6
 
 RUN mkdir /python_install
 
