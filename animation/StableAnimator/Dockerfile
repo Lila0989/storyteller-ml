@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1
 
-# NB: Does this not work???
 FROM nvidia/cuda:12.0.1-runtime-ubuntu22.04
 #FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
@@ -10,10 +9,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # NB: rsync to monitor time it takes for files to sync in k8s initContainer.
 # NB(bt,2023-05-04): Installing lsof, htop, ripgrep, and other debugging tools
 # NB: I had to remove `nvidia-driver-515` because it broke CUDA / nvidia-smi
+# NB(bt,2025-01-20): StableAnimator uses git, git-lfs
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     ffmpeg \
+    git \
+    git-lfs \
     htop \
     libsndfile1 \
     lsof \
@@ -42,12 +44,6 @@ RUN python3 -m venv python \
   && pip install torch==2.5.1+cu124 xformers --index-url https://download.pytorch.org/whl/cu124 \
   && pip install -r requirements.txt
 
-# Non-stable animator dockerfile
-#RUN python3 -m venv python \
-#  && . python/bin/activate \
-#  && pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113 \
-#  && pip install -r requirements.txt
-
 # Model code is kept separate from the venv
 RUN mkdir /model_code
 
@@ -55,11 +51,6 @@ WORKDIR /model_code
 
 COPY . .
 
-RUN apt-get install -y git git-lfs
-
-RUN pwd
-RUN ls -lA
-
-#RUN cd StableAnimator
-RUN git lfs install
-RUN git clone https://huggingface.co/FrancisRing/StableAnimator checkpoints
+# NB(bt,2025-01-20): Let's do this outside of the image.
+#RUN git lfs install
+#RUN git clone https://huggingface.co/FrancisRing/StableAnimator checkpoints
