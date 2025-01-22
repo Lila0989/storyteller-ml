@@ -150,7 +150,7 @@ def parse_args():
 
     # TODO FIX
     parser.add_argument(
-        "--output_dir",
+        "--frame_output_dir",
         type=str,
         default=None,
         required=True
@@ -438,7 +438,7 @@ if __name__ == "__main__":
         face_encoder=face_encoder,
     ).to(device='cuda', dtype=weight_dtype)
 
-    os.makedirs(args.output_dir, exist_ok=True)
+    os.makedirs(args.frame_output_dir, exist_ok=True)
 
     pose_images = prepare_pose_frames(args)
     num_frames = len(pose_images)
@@ -492,14 +492,14 @@ if __name__ == "__main__":
     ).frames[0]
 
     out_file = os.path.join(
-        args.output_dir,
+        args.frame_output_dir,
         f"animation_video.mp4",
     )
     for i in range(num_frames):
         img = video_frames[i]
         video_frames[i] = np.array(img)
 
-    png_out_file = os.path.join(args.output_dir, "animated_images")
+    png_out_file = os.path.join(args.frame_output_dir, "animated_images")
     os.makedirs(png_out_file, exist_ok=True)
     export_to_gif(video_frames, out_file, 8)
     save_frames_as_png(video_frames, png_out_file)
