@@ -10,8 +10,8 @@ STARTING_IMAGE="inference/output_1/frames/frame_0.png"
 #CUDA_VISIBLE_DEVICES=0 
 python inference_advanced.py \
  --start_image_path="${STARTING_IMAGE}" \
- --output_dir="${OUTPUT_DIR}" \
- --pose_images_folder="/tmp/pose" \
+ --frame_output_dir="${OUTPUT_DIR}" \
+ --pose_images_dir="/tmp/pose" \
  --pre_pose_video_path="inference/zeihan_trimmed.mp4" \
  --width=1024 \
  --height=576 \

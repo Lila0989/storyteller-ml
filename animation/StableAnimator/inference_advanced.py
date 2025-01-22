@@ -117,13 +117,13 @@ def parse_args():
 
     # ===================
     # Pose Input
-    #   Supply either `pose_images_folder`, `pose_video_path`, or `pre_pose_video_path`.
-    #    - pose_images_folder has inputs already fully processed
+    #   Supply either `pose_images_dir`, `pose_video_path`, or `pre_pose_video_path`.
+    #    - pose_images_dir has inputs already fully processed
     #    - pose_video_path just needs to be converted to frames
     #    - pre_pose_video_path has not been converted to pose data frames
     # ===================
     parser.add_argument(
-        "--pose_images_folder",
+        "--pose_images_dir",
         type=str,
         default=None,
         help=(
@@ -286,10 +286,10 @@ def split_video_to_frames(video_path, output_path):
     #video_info = json.loads(result.stdout)
 
 def prepare_pose_frames(args):
-    pose_images_dir = args.pose_images_folder
+    pose_images_dir = args.pose_images_dir
 
     if not pose_images_dir:
-        raise Exception('pose_images_folder must be set, even when using other arguments')
+        raise Exception('pose_images_dir must be set, even when using other arguments')
     
     Path(pose_images_dir).mkdir(parents=True, exist_ok=True)
 
