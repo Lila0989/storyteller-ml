@@ -147,10 +147,15 @@ def parse_args():
         ),
     )
 
-
-    # TODO FIX
     parser.add_argument(
         "--frame_output_dir",
+        type=str,
+        default=None,
+        required=True
+    )
+
+    parser.add_argument(
+        "--video_output_path",
         type=str,
         default=None,
         required=True
@@ -284,6 +289,23 @@ def split_video_to_frames(video_path, output_path):
     print(f"Command: {command}", flush=True)
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
     #video_info = json.loads(result.stdout)
+
+def merge_frames_to_mp4(frames_dir, output_path, framerate=30):
+    filename_format = f"{frames_dir}/frame_%d.png"
+    command = [
+        'ffmpeg',
+        '-start_number', '0',
+        '-framerate', framerate,
+        '-i', filename_format,
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv420p',
+        output_path,
+        '-y',
+    ]
+    print(f"Command: {command}", flush=True)
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+    #video_info = json.loads(result.stdout)
+                                                              
 
 def prepare_pose_frames(args):
     pose_images_dir = args.pose_images_dir
@@ -491,18 +513,14 @@ if __name__ == "__main__":
         validation_image_id_ante_embedding=start_image_id_ante_embedding,
     ).frames[0]
 
-    out_file = os.path.join(
-        args.frame_output_dir,
-        f"animation_video.mp4",
-    )
     for i in range(num_frames):
         img = video_frames[i]
         video_frames[i] = np.array(img)
 
-    png_out_file = os.path.join(args.frame_output_dir, "animated_images")
-    os.makedirs(png_out_file, exist_ok=True)
-    export_to_gif(video_frames, out_file, 8)
-    save_frames_as_png(video_frames, png_out_file)
+    os.makedirs(args.frame_output_dir, exist_ok=True)
+    save_frames_as_png(video_frames, args.frame_output_dir)
+
+    merge_frames_to_mp4(args.frame_output_dir, args.video_output_path)
 
 
 # bash command_basic_infer.sh
