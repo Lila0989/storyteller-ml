@@ -295,7 +295,7 @@ def merge_frames_to_mp4(frames_dir, output_path, framerate=30):
     command = [
         'ffmpeg',
         '-start_number', '0',
-        '-framerate', framerate,
+        '-framerate', str(framerate),
         '-i', filename_format,
         '-c:v', 'libx264',
         '-pix_fmt', 'yuv420p',
