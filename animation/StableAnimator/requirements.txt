@@ -1,5 +1,5 @@
 diffusers
-transformers==4.35.2
+transformers==4.48.0
 accelerate==0.25.0
 timm==0.4.12
 decord
