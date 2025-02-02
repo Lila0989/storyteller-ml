@@ -273,6 +273,14 @@ def parse_args():
         required=False
     )
 
+    # Input and output video FPS (these may require separation later)
+    parser.add_argument(
+        "--fps",
+        type=int,
+        default=30,
+        required=False
+    )
+
     args = parser.parse_args()
     return args
 
@@ -520,7 +528,7 @@ if __name__ == "__main__":
     os.makedirs(args.frame_output_dir, exist_ok=True)
     save_frames_as_png(video_frames, args.frame_output_dir)
 
-    merge_frames_to_mp4(args.frame_output_dir, args.video_output_path)
+    merge_frames_to_mp4(args.frame_output_dir, args.video_output_path, framerate=args.fps)
 
 
 # bash command_basic_infer.sh
