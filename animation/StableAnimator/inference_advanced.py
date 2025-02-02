@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import cv2
 import numpy as np
 from PIL import Image
@@ -348,6 +349,62 @@ def prepare_pose_frames(args):
     pose_images = load_images_from_folder(pose_images_dir, width=args.width, height=args.height)
     return pose_images
 
+def prepare_pose_frames_hack_static_frame(args):
+    """
+    This version is meant to copy the starting frame n-many times.
+    """
+    pose_images_dir = args.pose_images_dir
+
+    if not pose_images_dir:
+        raise Exception('pose_images_dir must be set, even when using other arguments')
+    
+    Path(pose_images_dir).mkdir(parents=True, exist_ok=True)
+
+    args.start_image_path
+
+    if args.pre_pose_video_path:
+        print("Preparing pose frames from pre-pose video.")
+        pre_pose_frame_dir = Path(f"{pose_images_dir}/frames")
+        pre_pose_frame_dir.mkdir(parents=True, exist_ok=True)
+        split_video_to_frames(args.pre_pose_video_path, pre_pose_frame_dir)
+
+        #dir_files = sorted(os.listdir(pre_pose_frame_dir))
+        filenames = []
+        for entry in os.scandir(pre_pose_frame_dir):
+            if entry.is_file():
+                filenames.append(entry.path)
+
+        filenames.sort()
+        print(filenames)
+
+        for i, filename in enumerate(filenames):
+            print(i)
+            if i > 1:
+                break
+            shutil.copyfile(args.start_image_path, filename)
+
+        #reference_image_path = pre_pose_frame_dir / "frame_0.png"
+        reference_image_path = args.start_image_path
+        command = [
+            "python", "DWPose/skeleton_extraction.py",
+            "--target_image_folder_path", pre_pose_frame_dir,
+            "--ref_image_path", reference_image_path,
+            "--poses_folder_path", pose_images_dir,
+        ]
+        print(f"Command: {command}", flush=True)
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+
+    elif args.pose_video_path:
+        print("Preparing pose frames from pose video.")
+        split_video_to_frames(args.pose_video_path, pose_images_dir)
+    else:
+        print("Pose frames assumed to already exist.")
+
+    # TODO: autodetect resolution
+    pose_images = load_images_from_folder(pose_images_dir, width=args.width, height=args.height)
+    return pose_images
+
+
 if __name__ == "__main__":
     args = parse_args()
 
@@ -470,7 +527,9 @@ if __name__ == "__main__":
 
     os.makedirs(args.frame_output_dir, exist_ok=True)
 
-    pose_images = prepare_pose_frames(args)
+    #pose_images = prepare_pose_frames(args)
+    pose_images = prepare_pose_frames_hack_static_frame(args)
+    
     num_frames = len(pose_images)
 
     start_image_path = args.start_image_path
