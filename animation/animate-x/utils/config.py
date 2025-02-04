@@ -43,12 +43,17 @@ class Config(object):
             default=False, 
             help='Into debug information'
         )
-        parser.add_argument(
-            "opts",
-            help="other configurations",
-            default=None,
-            nargs=argparse.REMAINDER)
-        return parser.parse_args()
+
+        # NB(bt,2025-02-04): We're parsing other arguments downstream of this.
+        #   parser.add_argument(
+        #       "opts",
+        #       help="other configurations",
+        #       default=None,
+        #       nargs=argparse.REMAINDER)
+        #   return parser.parse_args()
+        args, _unknown = parser.parse_known_args()
+        args.opts = []
+        return args
 
     def _path_join(self, path_list):
         path = ""
