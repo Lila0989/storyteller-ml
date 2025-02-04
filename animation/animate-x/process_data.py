@@ -217,11 +217,20 @@ def video2img(video_path, img_dir):
 
 def mp_main(args):
     os.makedirs(args.saved_pose_dir, exist_ok = True)
+
+    # NB(bt,2025-02-04): This repo is set up around batch video processing. If we only process one video, we should have more 
+    # predictable and imperative pathing that doesn't take from video base names.
+    is_single_video = False
+
     if args.source_video_paths.endswith('mp4'):
         video_paths = [args.source_video_paths]
+        is_single_video = True
     else:
         # video list
         video_paths = [os.path.join(args.source_video_paths, frame_name) for frame_name in os.listdir(args.source_video_paths)]
+
+    if len(video_paths) == 1 and video_paths[0].endswith('.mp4'):
+        is_single_video = True
 
     logger.info("There are {} videos for extracting poses".format(len(video_paths)))
 
@@ -231,18 +240,25 @@ def mp_main(args):
     results_vis = []
     for i, file_path in enumerate(video_paths):
         try:
-
-
-
             logger.info(f"{i}/{len(video_paths)}, {file_path}")
 
-            save_frame_dir = os.path.join(args.saved_frame_dir, os.path.basename(file_path)[:-4]) 
+            save_frame_dir = args.saved_frame_dir # NB: New pathing
+
+            if not is_single_video:
+                save_frame_dir = os.path.join(args.saved_frame_dir, os.path.basename(file_path)[:-4]) # NB: Existing pathing behavior
+
             os.makedirs(save_frame_dir, exist_ok = True)
             video2img(file_path, save_frame_dir)
 
             videoCapture = cv2.VideoCapture(file_path)
-            cur_output_dir =  os.path.join(args.saved_pose, os.path.basename(file_path)[:-4]) 
+
+            cur_output_dir = args.saved_pose # NB: New pathing
+
+            if not is_single_video:
+                cur_output_dir = os.path.join(args.saved_pose, os.path.basename(file_path)[:-4]) # NB: Existing pathing behavior
+
             os.makedirs(cur_output_dir, exist_ok = True)
+
             fps = int(videoCapture.get(cv2.CAP_PROP_FPS))
             bodies = []
             body_indices = []
@@ -294,7 +310,11 @@ def mp_main(args):
             new_dict['fps'] = fps
 
             
-            save_pkl_path = os.path.join(args.saved_pose_dir, os.path.basename(file_path)[:-4]+'.pkl') 
+            save_pkl_path = os.path.join(args.saved_pose_dir, 'pose.pkl') # NB: New pathing
+
+            if not is_single_video:
+                save_pkl_path = os.path.join(args.saved_pose_dir, os.path.basename(file_path)[:-4]+'.pkl')  # NB: New pathing
+
             print(save_pkl_path)
             with open(save_pkl_path, 'wb') as file:
                 # 使用 pickle.dump() 方法将字典写入文件
