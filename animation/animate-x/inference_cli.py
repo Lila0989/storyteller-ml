@@ -30,6 +30,12 @@ def parse_args():
         required=True
     )
     parser.add_argument(
+        "--model_checkpoints_directory",
+        type=str,
+        default=None,
+        required=False
+    )
+    parser.add_argument(
         "--pickle_data_file",
         type=str,
         default=None,
@@ -59,8 +65,16 @@ def parse_args():
         default=14,
         required=False
     )
+    parser.add_argument(
+        "--round",
+        type=int,
+        default=1,
+        required=False
+    )
 
-    # TODO(bt): Means to load model files
+    # TODO(bt): Means to control output filename
+
+    # TODO(bt): Don't emit side-by-side comparison video
 
     #parser.add_argument(
     #    "--pretrained_model_name_or_path",
@@ -91,7 +105,7 @@ def main():
         raise Exception(f"Pickle data file does not exist: #{args.pickle_data_file}")
 
     cfg_update.cfg_dict['test_list_path'] = [[
-        4, # ???
+        4, # (???) Not sure what this parameter is!
         args.image_file, 
         args.pose_directory,
         args.frame_directory,
@@ -99,11 +113,21 @@ def main():
         args.seed,
     ]]
 
+    # NB(bt): I think this controls extra inference rounds.
+    cfg_update.cfg_dict['round'] = args.round
+
     if args.max_frames:
         cfg_update.cfg_dict['max_frames'] = args.max_frames
 
     if args.width and args.height:
         cfg_update.cfg_dict['resolution'] = [args.width, args.height]
+
+    model_dir = 'checkpoints/' if not args.model_checkpoints_directory else args.model_checkpoints_directory
+
+    cfg_update.cfg_dict['test_model'] = os.path.join(model_dir, 'animate-x_ckpt.pth')
+    cfg_update.cfg_dict['embedder']['pretrained'] = os.path.join(model_dir, 'open_clip_pytorch_model.bin')
+    cfg_update.cfg_dict['auto_encoder']['pretrained'] = os.path.join(model_dir, 'v2-1_512-ema-pruned.ckpt')
+
 
     print("Configurations:\n\n", cfg_update.cfg_dict, "\n\n")
 
