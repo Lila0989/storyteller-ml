@@ -59,6 +59,9 @@ def parse_args():
         default=14,
         required=False
     )
+
+    # TODO(bt): Means to load model files
+
     #parser.add_argument(
     #    "--pretrained_model_name_or_path",
     #    type=str,
