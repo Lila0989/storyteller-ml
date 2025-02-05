@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 
@@ -6,12 +7,15 @@ from dwpose.onnxdet import inference_detector
 from dwpose.onnxpose import inference_pose
 
 class Wholebody:
-    def __init__(self):
+    def __init__(self, model_directory=None):
         device = 'cuda' # 'cpu' #
         providers = ['CPUExecutionProvider'
                   ] if device == 'cpu' else ['CUDAExecutionProvider']
-        onnx_det =  'checkpoints/yolox_l.onnx' 
-        onnx_pose = 'checkpoints/dw-ll_ucoco_384.onnx'
+        
+        if not model_directory:
+            model_directory = 'checkpoints'
+        onnx_det =  os.path.join(model_directory, 'yolox_l.onnx')
+        onnx_pose = os.path.join(model_directory, 'dw-ll_ucoco_384.onnx')
 
         self.session_det = ort.InferenceSession(path_or_bytes=onnx_det, providers=providers)
         self.session_pose = ort.InferenceSession(path_or_bytes=onnx_pose, providers=providers)

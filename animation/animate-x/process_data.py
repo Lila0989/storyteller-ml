@@ -89,9 +89,9 @@ def get_logger(name="essmc2"):
     return logger
 
 class DWposeDetector:
-    def __init__(self):
+    def __init__(self, model_directory=None):
 
-        self.pose_estimation = Wholebody()
+        self.pose_estimation = Wholebody(model_directory=model_directory)
 
     def __call__(self, oriImg):
         oriImg = oriImg.copy()
@@ -235,7 +235,7 @@ def mp_main(args):
     logger.info("There are {} videos for extracting poses".format(len(video_paths)))
 
     logger.info('LOAD: DW Pose Model')
-    dwpose_model = DWposeDetector()  
+    dwpose_model = DWposeDetector(model_directory=args.model_directory)  
 
     results_vis = []
     for i, file_path in enumerate(video_paths):
@@ -336,6 +336,7 @@ if __name__=='__main__':
         parser.add_argument("--saved_pose_dir", type=str, default="data/saved_pkl",)
         parser.add_argument("--saved_pose", type=str, default="data/saved_pose",)
         parser.add_argument("--saved_frame_dir", type=str, default="data/saved_frames",)
+        parser.add_argument("--model_directory", type=str, default="checkpoints",)
         args = parser.parse_args()
 
         return args
