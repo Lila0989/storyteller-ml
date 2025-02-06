@@ -606,6 +606,7 @@ def worker(gpu, cfg, cfg_update):
                 file_name = f'{cap_name}_{pose_name}_{name}_rank_{cfg.world_size:02d}_{cfg.rank:02d}_{idx:02d}_{cfg.resolution[1]}x{cfg.resolution[0]}.mp4'
                 local_path = os.path.join(cfg.log_dir, f'{file_name}')
                 local_path_1col = os.path.join(cfg.log_dir, f'{file_name[:-4]}_results_1col.mp4')
+
                 os.makedirs(os.path.dirname(local_path), exist_ok=True)
                 captions = "human"
                 del model_kwargs_one_vis[0][list(model_kwargs_one_vis[0].keys())[0]]
@@ -614,14 +615,20 @@ def worker(gpu, cfg, cfg_update):
                 del model_kwargs_one_vis[0]["pose_embeddings"]
                 del model_kwargs_one_vis[1]["pose_embeddings"]
 
+                result_filename = local_path_1col
+
+                if cfg.result_filename:
+                    result_filename = cfg.result_filename
                 
-
-                save_video_multiple_conditions_not_gif_horizontal_3col(local_path, video_data.cpu(), model_kwargs_one_vis, misc_backups, 
-                                                cfg.mean, cfg.std, nrow=1, save_fps=cfg.save_fps)
-
-                save_video_multiple_conditions_not_gif_horizontal_1col(local_path_1col, video_data.cpu(), model_kwargs_one_vis, misc_backups, 
+                save_video_multiple_conditions_not_gif_horizontal_1col(result_filename, video_data.cpu(), model_kwargs_one_vis, misc_backups, 
                                                 cfg.mean, cfg.std, nrow=1, save_fps=cfg.save_fps)      
-                logging.info(f'video saved in {local_path}!')
+
+                if cfg.generate_comparison_video:
+                    save_video_multiple_conditions_not_gif_horizontal_3col(local_path, video_data.cpu(), model_kwargs_one_vis, misc_backups, 
+                                                    cfg.mean, cfg.std, nrow=1, save_fps=cfg.save_fps)
+
+
+                logging.info(f'video saved in {result_filename}!')
 
     
     logging.info('Congratulations! The inference is completed!')

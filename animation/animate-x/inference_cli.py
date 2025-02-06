@@ -42,6 +42,12 @@ def parse_args():
         required=True
     )
     parser.add_argument(
+        "--result_filename",
+        type=str,
+        default=None,
+        required=False
+    )
+    parser.add_argument(
         "--max_frames",
         type=int,
         default=None,
@@ -69,6 +75,12 @@ def parse_args():
         "--round",
         type=int,
         default=1,
+        required=False
+    )
+    parser.add_argument(
+        "--generate_comparison_video",
+        default=False,
+        action='store_true',
         required=False
     )
 
@@ -113,6 +125,9 @@ def main():
         args.seed,
     ]]
 
+    if args.result_filename:
+        cfg_update.cfg_dict['result_filename'] = args.result_filename
+
     # NB(bt): I think this controls extra inference rounds.
     cfg_update.cfg_dict['round'] = args.round
 
@@ -128,6 +143,7 @@ def main():
     cfg_update.cfg_dict['embedder']['pretrained'] = os.path.join(model_dir, 'open_clip_pytorch_model.bin')
     cfg_update.cfg_dict['auto_encoder']['pretrained'] = os.path.join(model_dir, 'v2-1_512-ema-pruned.ckpt')
 
+    cfg_update.cfg_dict['generate_comparison_video'] = args.generate_comparison_video
 
     print("Configurations:\n\n", cfg_update.cfg_dict, "\n\n")
 
